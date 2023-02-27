@@ -16,7 +16,9 @@ class Main : KtxGame<KtxScreen>() {
         val batch : Batch = SpriteBatch()
         Gdx.app.logLevel = LOG_DEBUG
         logger.debug { "HybridSim started" }
-        addScreen(SimScreen(batch))
+        val screen = SimScreen(batch)
+        addScreen(screen)
         setScreen<SimScreen>()
+        Gdx.input.inputProcessor = InputHandler(screen)
     }
 }

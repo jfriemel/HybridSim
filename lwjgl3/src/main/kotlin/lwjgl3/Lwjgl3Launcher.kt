@@ -10,7 +10,7 @@ fun main() {
         setTitle("HybridSim")
         useVsync(true)
         setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate)
-        setWindowedMode(640, 480)
+        setWindowedMode(1024, 768)
         setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png")
     })
 }
