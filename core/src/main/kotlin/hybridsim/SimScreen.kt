@@ -10,9 +10,11 @@ import ktx.app.KtxScreen
 import ktx.graphics.use
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sqrt
 
 class SimScreen(private val batch: Batch) : KtxScreen {
-    private val camera = OrthographicCamera();
+    private val camera = OrthographicCamera()
     private val viewport = ScreenViewport(camera).apply {
         unitsPerPixel = 16f  // Reasonable initial zoom level
     }
@@ -21,6 +23,8 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     }
     private val bkgSprite = Sprite(bkgTexture)
 
+    private val PIXEL_UNIT_DIST = bkgTexture.width / 2
+
     private var xPos = 0f
     private var yPos = 0f
 
@@ -28,7 +32,7 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     var yMomentum = 0
 
     override fun render(delta: Float) {
-        move(xMomentum, yMomentum)
+        move(xMomentum, yMomentum)  // Movement speed depends on FPS, is that an issue?
         batch.use(viewport.camera.combined) {
             bkgSprite.draw(it)
         }
@@ -44,20 +48,42 @@ class SimScreen(private val batch: Batch) : KtxScreen {
         bkgTexture.dispose()
     }
 
-    fun zoom(amount: Float, mouseX: Int = 0, mouseY: Int = 0) {
+    /**
+     * Zoom in (amount < 0) or out (amount > 0) towards the centre or the mouse if mouse coordinates are given.
+     *
+     * @param amount Zoom factor. Negative: Zoom in. Positive: Zoom out.
+     * @param mouseX X position of the mouse. Default: Horizontal centre of the screen.
+     * @param mouseY Y position of the mouse. Default: Vertical centre of the screen.
+     */
+    fun zoom(amount: Float, mouseX: Int = Gdx.graphics.width / 2, mouseY: Int = Gdx.graphics.height / 2) {
         val previousUPP = viewport.unitsPerPixel
-        viewport.unitsPerPixel = max(previousUPP + amount, 1f)
+        viewport.unitsPerPixel = min(max(previousUPP + amount, 1f), 80f)
         val zoomFactor = previousUPP/viewport.unitsPerPixel - 1f
         move((mouseX * zoomFactor).toInt(), (mouseY * zoomFactor).toInt())
     }
 
-    private fun move(xDir: Int, yDir: Int) {
+    /**
+     * Move the scene in specified direction.
+     *
+     * @param xDir X direction.
+     * @param yDir Y direction.
+     */
+    fun move(xDir: Int, yDir: Int) {
         val factor = viewport.unitsPerPixel
         xPos += factor * xDir
         yPos += factor * yDir
         moveBackground()
     }
 
+    fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Pair<Float, Float> {
+        TODO("Find out how to do this")
+        // println((screenY - yPos) / (PIXEL_UNIT_DIST * sqrt(3f) / 2))
+        // return Pair(0f, 0f)
+    }
+
+    /**
+     * Moves the background (i.e. the background texture) to correspond to the current x and y position of the scene.
+     */
     private fun moveBackground() {
         val factor = viewport.unitsPerPixel
         val width = ceil(factor * Gdx.graphics.width)
