@@ -8,4 +8,5 @@ dependencies {
   api "io.github.libktx:ktx-log:$ktxVersion"
   api "io.github.libktx:ktx-graphics:$ktxVersion"
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
 }

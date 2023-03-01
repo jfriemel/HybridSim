@@ -46,7 +46,13 @@ class InputHandler(private val screen: SimScreen) : InputProcessor {
                 mouseY = screenY
                 mousePressed = true
             }
-            Input.Buttons.RIGHT -> screen.screenCoordsToNodeCoords(screenX, screenY)
+            Input.Buttons.RIGHT -> {  // Only for testing, will be removed later
+                println("($screenX, $screenY)")
+                val pair = screen.screenCoordsToNodeCoords(screenX, screenY)
+                println(pair)
+                println(screen.nodeCoordsToScreenCoords(pair.first, pair.second))
+                print("\n")
+            }
         }
         return true
     }

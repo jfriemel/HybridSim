@@ -8,10 +8,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import ktx.app.KtxScreen
 import ktx.graphics.use
-import kotlin.math.ceil
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sqrt
+import kotlin.math.*
 
 class SimScreen(private val batch: Batch) : KtxScreen {
     private val camera = OrthographicCamera()
@@ -24,7 +21,7 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     private val bkgSprite = Sprite(bkgTexture)
 
     // Number of pixels corresponding to one horizontal unit in the triangular lattice
-    private val pixelUnitDistance = bkgTexture.width / 2
+    private val pixelUnitDistance = bkgTexture.width
 
     // The initial configuration is centred around (0,0)
     private var xPos = - viewport.unitsPerPixel * Gdx.graphics.width / 2f
@@ -78,13 +75,16 @@ class SimScreen(private val batch: Batch) : KtxScreen {
         moveBackground()
     }
 
-    fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Pair<Float, Float> {
-        //TODO("Find out how to do this")
-        var x = ((viewport.unitsPerPixel * screenY + yPos) / (pixelUnitDistance * sqrt(3f) / 2) + (viewport.unitsPerPixel * screenX + xPos) / pixelUnitDistance) / 2
-        val y = (viewport.unitsPerPixel * screenY + yPos) / pixelUnitDistance
-        x = (viewport.unitsPerPixel * screenX + xPos) / pixelUnitDistance - y / sqrt(3f)
-        println("$x  $y")
-        return Pair(x, y)
+    fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Pair<Int, Int> {
+        val y = round((viewport.unitsPerPixel * screenY + yPos) / pixelUnitDistance).toInt()
+        val x = round((viewport.unitsPerPixel * screenX + xPos) / pixelUnitDistance + (if (y % 2 == 0) 0f else 0.5f))
+        return Pair(x.toInt(), y)
+    }
+
+    fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
+        val x = ((nodeX - (if (nodeY % 2 == 0) 0f else 0.5f)) * pixelUnitDistance - xPos) / viewport.unitsPerPixel
+        val y = (nodeY * pixelUnitDistance - yPos) / viewport.unitsPerPixel
+        return Pair(x.toInt(), y.toInt())
     }
 
     /**
