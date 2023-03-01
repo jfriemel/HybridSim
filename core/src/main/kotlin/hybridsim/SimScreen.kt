@@ -23,11 +23,14 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     }
     private val bkgSprite = Sprite(bkgTexture)
 
-    private val PIXEL_UNIT_DIST = bkgTexture.width / 2
+    // Number of pixels corresponding to one horizontal unit in the triangular lattice
+    private val pixelUnitDistance = bkgTexture.width / 2
 
-    private var xPos = 0f
-    private var yPos = 0f
+    // The initial configuration is centred around (0,0)
+    private var xPos = - viewport.unitsPerPixel * Gdx.graphics.width / 2f
+    private var yPos = - viewport.unitsPerPixel * Gdx.graphics.height / 2f
 
+    // How much the map moves per frame, only relevant while arrow keys (or WASD) are pressed
     var xMomentum = 0
     var yMomentum = 0
 
@@ -76,9 +79,12 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     }
 
     fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Pair<Float, Float> {
-        TODO("Find out how to do this")
-        // println((screenY - yPos) / (PIXEL_UNIT_DIST * sqrt(3f) / 2))
-        // return Pair(0f, 0f)
+        //TODO("Find out how to do this")
+        var x = ((viewport.unitsPerPixel * screenY + yPos) / (pixelUnitDistance * sqrt(3f) / 2) + (viewport.unitsPerPixel * screenX + xPos) / pixelUnitDistance) / 2
+        val y = (viewport.unitsPerPixel * screenY + yPos) / pixelUnitDistance
+        x = (viewport.unitsPerPixel * screenX + xPos) / pixelUnitDistance - y / sqrt(3f)
+        println("$x  $y")
+        return Pair(x, y)
     }
 
     /**
