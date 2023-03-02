@@ -10,12 +10,15 @@ import ktx.app.KtxScreen
 import ktx.graphics.use
 import kotlin.math.*
 
+val Y_SCALE = sqrt(3f) / 2f
+
 class SimScreen(private val batch: Batch) : KtxScreen {
     private val camera = OrthographicCamera()
     private val viewport = ScreenViewport(camera).apply {
         unitsPerPixel = 16f  // Reasonable initial zoom level
     }
-    private val bkgTexture = Texture(Gdx.files.internal("graphics/grid.png")).apply {
+    private val bkgTexture = Texture(Gdx.files.internal("graphics/grid.png"), true).apply {
+        setFilter(Texture.TextureFilter.MipMapLinearNearest, Texture.TextureFilter.Linear)
         setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat)  // Grid should be infinite
     }
     private val bkgSprite = Sprite(bkgTexture)
@@ -71,19 +74,21 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     fun move(xDir: Int, yDir: Int) {
         val factor = viewport.unitsPerPixel
         xPos += factor * xDir
-        yPos += factor * yDir
+        yPos += factor * yDir / Y_SCALE
         moveBackground()
     }
 
     fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Pair<Int, Int> {
-        val y = round((viewport.unitsPerPixel * screenY + yPos) / pixelUnitDistance).toInt()
-        val x = round((viewport.unitsPerPixel * screenX + xPos) / pixelUnitDistance + (if (y % 2 == 0) 0f else 0.5f))
+        val y = round(((viewport.unitsPerPixel / Y_SCALE) * screenY + yPos) / pixelUnitDistance).toInt()
+        val x = round((viewport.unitsPerPixel * screenX + xPos) / pixelUnitDistance +
+                (if (Math.floorMod(y, 2) == 0) 0f else 0.5f))
         return Pair(x.toInt(), y)
     }
 
     fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
-        val x = ((nodeX - (if (nodeY % 2 == 0) 0f else 0.5f)) * pixelUnitDistance - xPos) / viewport.unitsPerPixel
-        val y = (nodeY * pixelUnitDistance - yPos) / viewport.unitsPerPixel
+        val x = ((nodeX - (if (Math.floorMod(nodeY, 2) == 0) 0f else 0.5f)) * pixelUnitDistance - xPos) /
+                viewport.unitsPerPixel
+        val y = (nodeY * pixelUnitDistance - yPos) *Y_SCALE / viewport.unitsPerPixel
         return Pair(x.toInt(), y.toInt())
     }
 
@@ -91,9 +96,8 @@ class SimScreen(private val batch: Batch) : KtxScreen {
      * Moves the background (i.e. the background texture) to correspond to the current x and y position of the scene.
      */
     private fun moveBackground() {
-        val factor = viewport.unitsPerPixel
-        val width = ceil(factor * Gdx.graphics.width)
-        val height = ceil(factor * Gdx.graphics.height)
+        val width = ceil(viewport.unitsPerPixel * Gdx.graphics.width)
+        val height = ceil(viewport.unitsPerPixel * Gdx.graphics.height / Y_SCALE)
         bkgSprite.setRegion(xPos.toInt(), yPos.toInt(), width.toInt(), height.toInt())
     }
 }
