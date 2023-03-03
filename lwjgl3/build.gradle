@@ -21,6 +21,7 @@ sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
 mainClassName = 'dev.friemel.hybridsim.lwjgl3.Lwjgl3LauncherKt'
 eclipse.project.name = appName + '-lwjgl3'
 sourceCompatibility = 17
+targetCompatibility = 17
 
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"

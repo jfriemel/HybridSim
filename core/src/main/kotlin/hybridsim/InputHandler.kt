@@ -17,6 +17,13 @@ class InputHandler(private val screen: SimScreen) : InputProcessor {
             Input.Keys.S, Input.Keys.DOWN -> screen.yMomentum = 1
             Input.Keys.D, Input.Keys.RIGHT -> screen.xMomentum = 1
             Input.Keys.F11 -> toggleFullscreen()
+            Input.Keys.SPACE -> Scheduler.toggle()
+            Input.Keys.ESCAPE -> {  // Emergency handbrake, basically stop everything
+                if (Gdx.graphics.isFullscreen) {
+                    Gdx.graphics.setWindowedMode(1024, 768)
+                }
+                Scheduler.stop()
+            }
         }
         return true
     }
@@ -48,9 +55,9 @@ class InputHandler(private val screen: SimScreen) : InputProcessor {
             }
             Input.Buttons.RIGHT -> {  // Only for testing, will be removed later
                 println("($screenX, $screenY)")
-                val pair = screen.screenCoordsToNodeCoords(screenX, screenY)
-                println(pair)
-                println(screen.nodeCoordsToScreenCoords(pair.first, pair.second))
+                val node = screen.screenCoordsToNodeCoords(screenX, screenY)
+                println(node)
+                println(screen.nodeCoordsToScreenCoords(node.x, node.y))
                 print("\n")
             }
         }

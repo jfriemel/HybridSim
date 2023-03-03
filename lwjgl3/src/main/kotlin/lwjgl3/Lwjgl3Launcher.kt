@@ -11,6 +11,6 @@ fun main() {
         useVsync(true)
         setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate)
         setWindowedMode(1024, 768)
-        setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png")
+        setWindowIcon("icon128.png", "icon64.png", "icon32.png", "icon16.png")
     })
 }

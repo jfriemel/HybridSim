@@ -1,8 +1,9 @@
-package hybridsim
+package hybridsim.entities
 
 import com.badlogic.gdx.graphics.g2d.Sprite
 
-class Tile(var x: Int, var y: Int, var sprite: Sprite ?= null) {
+class Tile(node: Node, sprite: Sprite ?= null): Entity(node, sprite) {
+
     private var numPebbles = 0
 
     fun addPebble() {
