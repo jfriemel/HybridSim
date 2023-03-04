@@ -3,6 +3,7 @@ package hybridsim
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
+import hybridsim.entities.Node
 
 class InputHandler(private val screen: SimScreen) : InputProcessor {
     private var mousePressed = false
@@ -57,6 +58,9 @@ class InputHandler(private val screen: SimScreen) : InputProcessor {
                 println("($screenX, $screenY)")
                 val node = screen.screenCoordsToNodeCoords(screenX, screenY)
                 println(node)
+                val sciCoords = node.scientificCoordinates()
+                println(sciCoords)
+                println(Node.sciCoordsToNode(sciCoords.first, sciCoords.second))
                 println(screen.nodeCoordsToScreenCoords(node.x, node.y))
                 print("\n")
             }

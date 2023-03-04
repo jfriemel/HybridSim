@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Main-Class: lwjgl3.Lwjgl3LauncherKt
+

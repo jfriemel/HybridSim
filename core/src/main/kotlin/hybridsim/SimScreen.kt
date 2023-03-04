@@ -15,13 +15,12 @@ import ktx.graphics.use
 import kotlin.math.*
 
 // Squeeze factor to make the triangles equilateral
-val Y_SCALE = sqrt(3f) / 2f
+val X_SCALE = sqrt(3f) / 2f
 
 class SimScreen(private val batch: Batch) : KtxScreen {
     private val camera = OrthographicCamera()
     private val viewport = ScreenViewport(camera).apply {
         unitsPerPixel = 16f  // Reasonable initial zoom level
-        setWorldSize(16f*1024f, 16f*768f)
     }
 
     // Background texture (triangular lattice)
@@ -45,10 +44,10 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     }
 
     // Number of pixels corresponding to one horizontal unit in the triangular lattice
-    private val pixelUnitDistance = bkgTexture.width
+    private val pixelUnitDistance = bkgTexture.height
 
     // The initial configuration is centred around (0,0)
-    private var xPos = - viewport.unitsPerPixel * Gdx.graphics.width / 2f
+    private var xPos = - viewport.unitsPerPixel * Gdx.graphics.width / (2f * X_SCALE)
     private var yPos = - viewport.unitsPerPixel * Gdx.graphics.height / 2f
 
     // How much the map moves per frame, only relevant while arrow keys (or WASD) are pressed
@@ -103,24 +102,24 @@ class SimScreen(private val batch: Batch) : KtxScreen {
      * @param yDir Y direction.
      */
     fun move(xDir: Int, yDir: Int) {
-        xPos += viewport.unitsPerPixel * xDir
-        yPos += viewport.unitsPerPixel * yDir / Y_SCALE
+        xPos += viewport.unitsPerPixel * xDir / X_SCALE
+        yPos += viewport.unitsPerPixel * yDir
         setEntityScreenPositions(Configuration.tiles)
         setEntityScreenPositions(Configuration.robots)
         moveBackground()
     }
 
     fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Node {
-        val y = round(((viewport.unitsPerPixel / Y_SCALE) * screenY + yPos) / pixelUnitDistance).toInt()
-        val offset = if (y.mod(2) == 0) 0f else 0.5f  // Every second horizontal line is slightly offset
-        val x = round((viewport.unitsPerPixel * screenX + xPos) / pixelUnitDistance + offset).toInt()
+        val x = round(((viewport.unitsPerPixel / X_SCALE) * screenX + xPos) / pixelUnitDistance).toInt()
+        val offset = if (x.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
+        val y = round((viewport.unitsPerPixel * screenY + yPos) / pixelUnitDistance + offset).toInt()
         return Node(x, y)
     }
 
     fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
-        val offset = if (nodeY.mod(2) == 0) 0f else 0.5f  // Every second horizontal line is slightly offset
-        val x = round(((nodeX - offset) * pixelUnitDistance - xPos) / viewport.unitsPerPixel)
-        val y = round((nodeY * pixelUnitDistance - yPos) * Y_SCALE / viewport.unitsPerPixel)
+        val offset = if (nodeX.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
+        val x = round((nodeX * pixelUnitDistance - xPos) * X_SCALE / viewport.unitsPerPixel)
+        val y = round(((nodeY - offset) * pixelUnitDistance - yPos) / viewport.unitsPerPixel)
         return Pair(x.toInt(), y.toInt())
     }
 
@@ -128,8 +127,8 @@ class SimScreen(private val batch: Batch) : KtxScreen {
      * Moves the background (i.e. the background texture) to correspond to the current x and y position of the scene.
      */
     private fun moveBackground() {
-        val width = ceil(viewport.unitsPerPixel * Gdx.graphics.width)
-        val height = ceil(viewport.unitsPerPixel * Gdx.graphics.height / Y_SCALE)
+        val width = ceil(viewport.unitsPerPixel * Gdx.graphics.width / X_SCALE)
+        val height = ceil(viewport.unitsPerPixel * Gdx.graphics.height)
         bkgSprite.setRegion(xPos.toInt(), yPos.toInt(), width.toInt(), height.toInt())
     }
     private fun setEntityScreenPositions(entities: Map<Node, Entity>) {
@@ -153,6 +152,4 @@ class SimScreen(private val batch: Batch) : KtxScreen {
             entity.sprite?.setPosition(x, y)
         }
     }
-
-
 }

@@ -6,7 +6,7 @@ import kotlin.random.Random
 object Scheduler {
 
     private var active = false
-    private var intervalTime = 10L
+    private var intervalTime = 500L
 
     fun start() {
         active = true

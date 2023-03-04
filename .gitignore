@@ -57,6 +57,7 @@ www-test/
 *.ipr
 *.iws
 *.iml
+out/
 
 ## Eclipse:
 .classpath
