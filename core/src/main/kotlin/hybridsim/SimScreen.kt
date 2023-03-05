@@ -14,7 +14,7 @@ import ktx.app.KtxScreen
 import ktx.graphics.use
 import kotlin.math.*
 
-// Squeeze factor to make the triangles equilateral
+// Squeeze factor to make the triangles equilateral (the texture is stretched horizontally)
 val X_SCALE = sqrt(3f) / 2f
 
 class SimScreen(private val batch: Batch) : KtxScreen {
@@ -46,9 +46,13 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     // Number of pixels corresponding to one horizontal unit in the triangular lattice
     private val pixelUnitDistance = bkgTexture.height
 
-    // The initial configuration is centred around (0,0)
-    private var xPos = - viewport.unitsPerPixel * Gdx.graphics.width / (2f * X_SCALE)
-    private var yPos = - viewport.unitsPerPixel * Gdx.graphics.height / 2f
+    // Keep track of the x and y offset of the triangular lattice texture
+    private var xPos = 0f
+    private var yPos = 0f
+
+    // Keep track of window width and height to maintain the same centre point when resizing the window
+    private var width = 0
+    private var height = 0
 
     // How much the map moves per frame, only relevant while arrow keys (or WASD) are pressed
     var xMomentum = 0
@@ -69,6 +73,9 @@ class SimScreen(private val batch: Batch) : KtxScreen {
 
     override fun resize(width: Int, height: Int) {
         viewport.update(width, height, true)
+        move((this.width - width) / 2, (this.height - height) / 2)
+        this.width = width
+        this.height = height
         bkgSprite.setSize(ceil(viewport.unitsPerPixel * width), ceil(viewport.unitsPerPixel * height))
         moveBackground()
     }
@@ -84,12 +91,12 @@ class SimScreen(private val batch: Batch) : KtxScreen {
      * @param mouseX X position of the mouse. Default: Horizontal centre of the screen.
      * @param mouseY Y position of the mouse. Default: Vertical centre of the screen.
      */
-    fun zoom(amount: Float, mouseX: Int = Gdx.graphics.width / 2, mouseY: Int = Gdx.graphics.height / 2) {
+    fun zoom(amount: Float, mouseX: Int = width / 2, mouseY: Int = height / 2) {
         val previousUPP = viewport.unitsPerPixel
         viewport.unitsPerPixel = min(max(previousUPP + amount, 1f), 80f)
 
-        viewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
-        bkgSprite.setSize(ceil(viewport.unitsPerPixel * Gdx.graphics.width), ceil(viewport.unitsPerPixel * Gdx.graphics.height))
+        viewport.update(width, height, true)
+        bkgSprite.setSize(ceil(viewport.unitsPerPixel * width), ceil(viewport.unitsPerPixel * height))
 
         val zoomFactor = previousUPP/viewport.unitsPerPixel - 1f
         move((mouseX * zoomFactor).toInt(), (mouseY * zoomFactor).toInt())
@@ -127,10 +134,15 @@ class SimScreen(private val batch: Batch) : KtxScreen {
      * Moves the background (i.e. the background texture) to correspond to the current x and y position of the scene.
      */
     private fun moveBackground() {
-        val width = ceil(viewport.unitsPerPixel * Gdx.graphics.width / X_SCALE)
-        val height = ceil(viewport.unitsPerPixel * Gdx.graphics.height)
+        val width = ceil(viewport.unitsPerPixel * width / X_SCALE)
+        val height = ceil(viewport.unitsPerPixel * height)
         bkgSprite.setRegion(xPos.toInt(), yPos.toInt(), width.toInt(), height.toInt())
     }
+
+    /**
+     * Assigns sprites with the correct textures to all entities (robots, tiles) that do not have sprites yet.
+     * Then sets the sprite's screen position variables such that the entities are drawn at the correct locations.
+     */
     private fun setEntityScreenPositions(entities: Map<Node, Entity>) {
         for (entity in entities.values) {
             val texture = when (entity) {
@@ -148,7 +160,7 @@ class SimScreen(private val batch: Batch) : KtxScreen {
 
             val coords = nodeCoordsToScreenCoords(entity.node.x, entity.node.y)
             val x = viewport.unitsPerPixel * coords.first - texture.width / 2f
-            val y = viewport.unitsPerPixel * (Gdx.graphics.height - coords.second) - texture.height / 2f
+            val y = viewport.unitsPerPixel * (height - coords.second) - texture.height / 2f
             entity.sprite?.setPosition(x, y)
         }
     }
