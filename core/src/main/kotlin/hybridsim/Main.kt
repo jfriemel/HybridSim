@@ -4,12 +4,14 @@ import com.badlogic.gdx.Application.LOG_DEBUG
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import kotlinx.coroutines.launch
 import ktx.app.KtxGame
 import ktx.app.KtxScreen
 import ktx.async.KtxAsync
 import ktx.log.Logger
 import ktx.log.logger
+import ktx.scene2d.Scene2DSkin
 
 private val logger : Logger = logger<Main>()
 
@@ -18,6 +20,7 @@ class Main : KtxGame<KtxScreen>() {
         val batch : Batch = SpriteBatch()
         Gdx.app.logLevel = LOG_DEBUG
         logger.debug { "HybridSim started" }
+        Scene2DSkin.defaultSkin = Skin(Gdx.files.internal("ui/uiskin.json"))
         val screen = SimScreen(batch)
         addScreen(screen)
         setScreen<SimScreen>()

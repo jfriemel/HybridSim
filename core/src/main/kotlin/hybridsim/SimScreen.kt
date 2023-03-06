@@ -1,10 +1,12 @@
 package hybridsim
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import hybridsim.entities.Entity
 import hybridsim.entities.Node
@@ -12,6 +14,7 @@ import hybridsim.entities.Robot
 import hybridsim.entities.Tile
 import ktx.app.KtxScreen
 import ktx.graphics.use
+import ktx.scene2d.*
 import kotlin.math.*
 
 // Squeeze factor to make the triangles equilateral (the texture is stretched horizontally)
@@ -58,6 +61,25 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     var xMomentum = 0
     var yMomentum = 0
 
+    // Menu
+    var showMenu = true
+    private val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
+        actors {
+            table {
+                setFillParent(true)
+                defaults().pad(2f)
+                setPosition(Gdx.graphics.width / 2f - 100f, 0f)
+                label("Menu (M)").color = Color.BLACK
+                row()
+                textButton("Load Configuration (L)")
+                row()
+                textButton("Save Configuration (K)")
+                row()
+                textButton("Load Algorithm (X)")
+            }
+        }
+    }
+
     override fun render(delta: Float) {
         move(xMomentum, yMomentum)  // Movement speed depends on FPS, is that an issue?
         batch.use(viewport.camera.combined) {
@@ -69,15 +91,26 @@ class SimScreen(private val batch: Batch) : KtxScreen {
                 robot.sprite?.draw(it)
             }
         }
+        if (showMenu) {
+            menuStage.act()
+            menuStage.draw()
+        }
     }
 
     override fun resize(width: Int, height: Int) {
+        // Update viewport and move to maintain centre node
         viewport.update(width, height, true)
         move((this.width - width) / 2, (this.height - height) / 2)
         this.width = width
         this.height = height
+
+        // Update texture cutout to fit new window size
         bkgSprite.setSize(ceil(viewport.unitsPerPixel * width), ceil(viewport.unitsPerPixel * height))
         moveBackground()
+
+        // Keep menu on the right hand side of the screen
+        menuStage.viewport.update(width, height, true)
+        menuStage.actors.get(0).setPosition(width / 2f - 100f, 0f)
     }
 
     override fun dispose() {
