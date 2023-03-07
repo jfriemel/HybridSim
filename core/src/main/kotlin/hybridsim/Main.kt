@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
+import hybridsim.ui.Menu
+import hybridsim.ui.SimScreen
 import kotlinx.coroutines.launch
 import ktx.app.KtxGame
 import ktx.app.KtxScreen
@@ -21,7 +23,7 @@ class Main : KtxGame<KtxScreen>() {
         Gdx.app.logLevel = LOG_DEBUG
         logger.debug { "HybridSim started" }
         Scene2DSkin.defaultSkin = Skin(Gdx.files.internal("ui/uiskin.json"))
-        val screen = SimScreen(batch)
+        val screen = SimScreen(batch, Menu(batch))
         addScreen(screen)
         setScreen<SimScreen>()
         Gdx.input.inputProcessor = InputHandler(screen)

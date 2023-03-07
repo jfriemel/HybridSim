@@ -1,26 +1,24 @@
-package hybridsim
+package hybridsim.ui
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
-import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import hybridsim.Configuration
 import hybridsim.entities.Entity
 import hybridsim.entities.Node
 import hybridsim.entities.Robot
 import hybridsim.entities.Tile
 import ktx.app.KtxScreen
 import ktx.graphics.use
-import ktx.scene2d.*
 import kotlin.math.*
 
 // Squeeze factor to make the triangles equilateral (the texture is stretched horizontally)
 val X_SCALE = sqrt(3f) / 2f
 
-class SimScreen(private val batch: Batch) : KtxScreen {
+class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     private val camera = OrthographicCamera()
     private val viewport = ScreenViewport(camera).apply {
         unitsPerPixel = 16f  // Reasonable initial zoom level
@@ -63,22 +61,6 @@ class SimScreen(private val batch: Batch) : KtxScreen {
 
     // Menu
     var showMenu = true
-    private val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
-        actors {
-            table {
-                setFillParent(true)
-                defaults().pad(2f)
-                setPosition(Gdx.graphics.width / 2f - 100f, 0f)
-                label("Menu (M)").color = Color.BLACK
-                row()
-                textButton("Load Configuration (L)")
-                row()
-                textButton("Save Configuration (K)")
-                row()
-                textButton("Load Algorithm (X)")
-            }
-        }
-    }
 
     override fun render(delta: Float) {
         move(xMomentum, yMomentum)  // Movement speed depends on FPS, is that an issue?
@@ -92,8 +74,7 @@ class SimScreen(private val batch: Batch) : KtxScreen {
             }
         }
         if (showMenu) {
-            menuStage.act()
-            menuStage.draw()
+            menu.draw()
         }
     }
 
@@ -109,8 +90,7 @@ class SimScreen(private val batch: Batch) : KtxScreen {
         moveBackground()
 
         // Keep menu on the right hand side of the screen
-        menuStage.viewport.update(width, height, true)
-        menuStage.actors.get(0).setPosition(width / 2f - 100f, 0f)
+        menu.resize(width, height)
     }
 
     override fun dispose() {
@@ -149,6 +129,13 @@ class SimScreen(private val batch: Batch) : KtxScreen {
         moveBackground()
     }
 
+    /**
+     * Converts screen coordinates (pixel coordinates) to a node.
+     *
+     * @param screenX X screen coordinate.
+     * @param screenY Y screen coordinate.
+     * @return Node corresponding to the given screen coordinates.
+     */
     fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Node {
         val x = round(((viewport.unitsPerPixel / X_SCALE) * screenX + xPos) / pixelUnitDistance).toInt()
         val offset = if (x.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
@@ -156,6 +143,13 @@ class SimScreen(private val batch: Batch) : KtxScreen {
         return Node(x, y)
     }
 
+    /**
+     * Converts node coordinates to screen / pixel coordinates.
+     *
+     * @param nodeX Node's x coordinate.
+     * @param nodeY Node's y coordinate.
+     * @return Screen coordinates of the form (x, y).
+     */
     fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
         val offset = if (nodeX.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
         val x = round((nodeX * pixelUnitDistance - xPos) * X_SCALE / viewport.unitsPerPixel)
@@ -175,6 +169,8 @@ class SimScreen(private val batch: Batch) : KtxScreen {
     /**
      * Assigns sprites with the correct textures to all entities (robots, tiles) that do not have sprites yet.
      * Then sets the sprite's screen position variables such that the entities are drawn at the correct locations.
+     *
+     * @param entities Map of nodes and entities at those nodes.
      */
     private fun setEntityScreenPositions(entities: Map<Node, Entity>) {
         for (entity in entities.values) {
@@ -188,7 +184,7 @@ class SimScreen(private val batch: Batch) : KtxScreen {
                 entity.sprite = Sprite(texture)
             } else {  // Always update texture in case it changes (e.g. tile has a pebble now)
                 entity.sprite?.texture = texture
-                entity.sprite?.color = entity.color
+                entity.sprite?.color = entity.getColor()
             }
 
             val coords = nodeCoordsToScreenCoords(entity.node.x, entity.node.y)

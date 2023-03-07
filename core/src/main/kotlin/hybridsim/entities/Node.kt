@@ -6,6 +6,7 @@ data class Node(val x: Int, val y: Int) {
      * Find the node in the given global direction.
      * Directions start at N and go clockwise: 0 = N, 1 = NE, 2 = SE, 3 = S, 4 = SW, 5 = NW.
      *
+     * @param dir Global direction.
      * @return The node in the given global direction.
      */
     fun nodeInDir(dir: Int): Node {
@@ -31,6 +32,10 @@ data class Node(val x: Int, val y: Int) {
         val origin = Node(0, 0)
 
         /**
+         * Returns a node corresponding to the given scientific node coordinates.
+         *
+         * @param scx Scientific x coordinate.
+         * @param scy Scientific y coordinate.
          * @return The node corresponding to the given scientific node coordinates.
          */
         fun sciCoordsToNode(scx: Double, scy: Double): Node {

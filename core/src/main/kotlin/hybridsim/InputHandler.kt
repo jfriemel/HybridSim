@@ -3,6 +3,7 @@ package hybridsim
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import hybridsim.entities.Node
+import hybridsim.ui.SimScreen
 import ktx.app.KtxInputAdapter
 
 class InputHandler(private val screen: SimScreen) : KtxInputAdapter {
