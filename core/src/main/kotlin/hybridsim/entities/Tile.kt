@@ -4,8 +4,13 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Sprite
 import hybridsim.Configuration
 
-class Tile(node: Node, sprite: Sprite ?= null, private var numPebbles: Int = 0, private var maxPebbles: Int = 1):
-    Entity(node, sprite) {
+const val MAX_PEBBLES: Int = 1
+
+val TARGET_COLOR: Color = Color.CYAN
+val DEFAULT_COLOR: Color = Color.CORAL
+
+class Tile(node: Node, sprite: Sprite ?= null, var numPebbles: Int = 0): Entity(node, sprite) {
+    // Constructor values cannot be private as they need to be accessed to save configurations.
 
     /**
      * The tile's colour depends on whether the tile is located at a target node.
@@ -14,9 +19,9 @@ class Tile(node: Node, sprite: Sprite ?= null, private var numPebbles: Int = 0, 
      */
     override fun getColor(): Color {
         return if (Configuration.targetNodes.contains(node)) {
-            Color.CYAN
+            TARGET_COLOR
         } else {
-            Color.CORAL
+            DEFAULT_COLOR
         }
     }
 
@@ -26,7 +31,7 @@ class Tile(node: Node, sprite: Sprite ?= null, private var numPebbles: Int = 0, 
      * @return True, if the pebble was added successfully. False, if the tile is already full.
      */
     fun addPebble(): Boolean {
-        if (numPebbles >= maxPebbles) {
+        if (numPebbles >= MAX_PEBBLES) {
             return false
         }
         numPebbles++

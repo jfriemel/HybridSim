@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite
 import hybridsim.Configuration
 import kotlin.random.Random
 
-class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null): Entity(node, sprite) {
+class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null, var carriesTile: Boolean = false):
+    Entity(node, sprite) {
+    // Constructor values cannot be private as they need to be accessed to save configurations.
 
     private var color = Color.WHITE
 
@@ -33,7 +35,9 @@ class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null): Entity(no
      * @param label Port label.
      */
     private fun moveToLabel(label: Int) {
+        Configuration.robots.remove(node)
         node = nodeAtLabel(label)
+        Configuration.robots[node] = this
     }
 
     /**
@@ -41,6 +45,37 @@ class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null): Entity(no
      */
     private fun isOnTile(): Boolean {
         return Configuration.tiles.contains(node)
+    }
+
+    /**
+     * @return The tile at the robot's location or null if there is no tile.
+     */
+    private fun tileBelow(): Tile? {
+        return Configuration.tiles[node]
+    }
+
+    /**
+     * @return True, if the robot could successfully lift the tile at its current location. False, otherwise.
+     */
+    private fun liftTile(): Boolean {
+        if (!isOnTile() || carriesTile || tileBelow()?.hasPebble() == true) {
+            return false
+        }
+        Configuration.tiles.remove(node)
+        carriesTile = true
+        return true
+    }
+
+    /**
+     * @return True, if the robot could successfully place a tile at its current location. False, otherwise.
+     */
+    private fun placeTile(): Boolean {
+        if (isOnTile() || !carriesTile) {
+            return false
+        }
+        Configuration.tiles[node] = Tile(node)
+        carriesTile = false
+        return true
     }
 
     /**
