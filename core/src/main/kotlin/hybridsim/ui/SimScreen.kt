@@ -70,6 +70,9 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
                 tile.sprite?.draw(it)
             }
             for (robot in Configuration.robots.values) {
+                if (robot.carriesTile) {
+                    robot.carrySprite?.draw(it)
+                }
                 robot.sprite?.draw(it)
             }
         }
@@ -188,9 +191,17 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
             }
 
             val coords = nodeCoordsToScreenCoords(entity.node.x, entity.node.y)
-            val x = viewport.unitsPerPixel * coords.first - texture.width / 2f
-            val y = viewport.unitsPerPixel * (height - coords.second) - texture.height / 2f
-            entity.sprite?.setPosition(x, y)
+            val x = viewport.unitsPerPixel * coords.first
+            val y = viewport.unitsPerPixel * (height - coords.second)
+
+            entity.sprite?.setPosition(x - texture.width / 2f, y - texture.height / 2f)
+
+            if (entity is Robot && entity.carriesTile) {
+                if (entity.carrySprite == null) {
+                    entity.carrySprite = Sprite(tileTexture).apply { setScale(0.55f) }
+                }
+                entity.carrySprite?.setPosition(x - tileTexture.width / 2f, y - tileTexture.height / 2f)
+            }
         }
     }
 }
