@@ -3,11 +3,8 @@ package hybridsim.entities
 data class Node(val x: Int, val y: Int) {
 
     /**
-     * Find the node in the given global direction.
+     * Finds and returns the node in the given global direction [dir].
      * Directions start at N and go clockwise: 0 = N, 1 = NE, 2 = SE, 3 = S, 4 = SW, 5 = NW.
-     *
-     * @param dir Global direction.
-     * @return The node in the given global direction.
      */
     fun nodeInDir(dir: Int): Node {
         assert(dir in 0..5)
@@ -17,10 +14,9 @@ data class Node(val x: Int, val y: Int) {
     }
 
     /**
-     * Convert the node's internal integer coordinates to scientific coordinates as used in the hybrid model literature.
+     * Converts the node's internal integer coordinates to scientific coordinates as used in the hybrid model
+     * literature. Returns scientific coordinates as a pair (x, y).
      * See: https://doi.org/10.1007/s11047-019-09774-2
-     *
-     * @return The node's scientific coordinates in form (x, y).
      */
     fun scientificCoordinates(): Pair<Double, Double> {
         val scx = x.toDouble()
@@ -32,11 +28,7 @@ data class Node(val x: Int, val y: Int) {
         val origin = Node(0, 0)
 
         /**
-         * Returns a node corresponding to the given scientific node coordinates.
-         *
-         * @param scx Scientific x coordinate.
-         * @param scy Scientific y coordinate.
-         * @return The node corresponding to the given scientific node coordinates.
+         * Returns a node corresponding to the given scientific node coordinates ([scx], [scy]).
          */
         fun sciCoordsToNode(scx: Double, scy: Double): Node {
             val x = scx.toInt()

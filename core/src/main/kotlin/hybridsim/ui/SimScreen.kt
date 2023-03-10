@@ -18,6 +18,8 @@ import kotlin.math.*
 // Squeeze factor to make the triangles equilateral (the texture is stretched horizontally)
 val X_SCALE = sqrt(3f) / 2f
 
+private val logger = ktx.log.logger<SimScreen>()
+
 class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     private val camera = OrthographicCamera()
     private val viewport = ScreenViewport(camera).apply {
@@ -59,9 +61,6 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     var xMomentum = 0
     var yMomentum = 0
 
-    // Menu
-    var showMenu = true
-
     override fun render(delta: Float) {
         move(xMomentum, yMomentum)  // Movement speed depends on FPS, is that an issue?
         batch.use(viewport.camera.combined) {
@@ -76,12 +75,12 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
                 robot.sprite?.draw(it)
             }
         }
-        if (showMenu) {
-            menu.draw()
-        }
+        menu.draw()
     }
 
     override fun resize(width: Int, height: Int) {
+        logger.debug { "Resized window: width = $width, height = $height" }
+
         // Update viewport and move to maintain centre node
         viewport.update(width, height, true)
         move((this.width - width) / 2, (this.height - height) / 2)
@@ -101,11 +100,8 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     /**
-     * Zoom in (amount < 0) or out (amount > 0) towards the centre or the mouse if mouse coordinates are given.
-     *
-     * @param amount Zoom factor. Negative: Zoom in. Positive: Zoom out.
-     * @param mouseX X position of the mouse. Default: Horizontal centre of the screen.
-     * @param mouseY Y position of the mouse. Default: Vertical centre of the screen.
+     * Zoom towards ([amount] < 0) or away from ([amount] > 0) the screen centre or the mouse if mouse coordinates
+     * ([mouseX], [mouseY]) are given.
      */
     fun zoom(amount: Float, mouseX: Int = width / 2, mouseY: Int = height / 2) {
         val previousUPP = viewport.unitsPerPixel
@@ -118,12 +114,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         move((mouseX * zoomFactor).toInt(), (mouseY * zoomFactor).toInt())
     }
 
-    /**
-     * Move the scene in specified direction.
-     *
-     * @param xDir X direction.
-     * @param yDir Y direction.
-     */
+    /** Move the scene in specified direction ([xDir], [yDir]). */
     fun move(xDir: Int, yDir: Int) {
         xPos += viewport.unitsPerPixel * xDir / X_SCALE
         yPos += viewport.unitsPerPixel * yDir
@@ -132,13 +123,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         moveBackground()
     }
 
-    /**
-     * Converts screen coordinates (pixel coordinates) to a node.
-     *
-     * @param screenX X screen coordinate.
-     * @param screenY Y screen coordinate.
-     * @return Node corresponding to the given screen coordinates.
-     */
+    /** Converts screen / pixel coordinates ([screenX], [screenY]) to a node. */
     fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Node {
         val x = round(((viewport.unitsPerPixel / X_SCALE) * screenX + xPos) / pixelUnitDistance).toInt()
         val offset = if (x.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
@@ -146,13 +131,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         return Node(x, y)
     }
 
-    /**
-     * Converts node coordinates to screen / pixel coordinates.
-     *
-     * @param nodeX Node's x coordinate.
-     * @param nodeY Node's y coordinate.
-     * @return Screen coordinates of the form (x, y).
-     */
+    /** Converts node coordinates ([nodeX], [nodeY]) to screen / pixel coordinates (x, y). */
     fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
         val offset = if (nodeX.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
         val x = round((nodeX * pixelUnitDistance - xPos) * X_SCALE / viewport.unitsPerPixel)
@@ -160,9 +139,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         return Pair(x.toInt(), y.toInt())
     }
 
-    /**
-     * Moves the background (i.e. the background texture) to correspond to the current x and y position of the scene.
-     */
+    /** Moves the background texture to correspond to the current x and y position of the scene. */
     private fun moveBackground() {
         val width = ceil(viewport.unitsPerPixel * width / X_SCALE)
         val height = ceil(viewport.unitsPerPixel * height)
@@ -170,10 +147,8 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     /**
-     * Assigns sprites with the correct textures to all entities (robots, tiles) that do not have sprites yet.
-     * Then sets the sprite's screen position variables such that the entities are drawn at the correct locations.
-     *
-     * @param entities Map of nodes and entities at those nodes.
+     * Assigns sprites with the correct textures to all [entities] (robots, tiles) that do not have sprites yet.
+     * Then sets the sprite's screen position variables such that the [entities] are drawn at the correct locations.
      */
     private fun setEntityScreenPositions(entities: Map<Node, Entity>) {
         for (entity in entities.values) {

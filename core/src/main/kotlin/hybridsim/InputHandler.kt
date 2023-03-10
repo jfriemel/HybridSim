@@ -3,10 +3,11 @@ package hybridsim
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import hybridsim.entities.Node
+import hybridsim.ui.Menu
 import hybridsim.ui.SimScreen
 import ktx.app.KtxInputAdapter
 
-class InputHandler(private val screen: SimScreen) : KtxInputAdapter {
+class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxInputAdapter {
     private var mousePressed = false
     private var mouseX = 0
     private var mouseY = 0
@@ -44,7 +45,7 @@ class InputHandler(private val screen: SimScreen) : KtxInputAdapter {
             '+' -> screen.zoom(-1f)
             '-' -> screen.zoom(1f)
             'f', 'F' -> toggleFullscreen()
-            'm', 'M' -> screen.showMenu = !screen.showMenu
+            'm', 'M' -> menu.active = !menu.active
         }
         return true
     }

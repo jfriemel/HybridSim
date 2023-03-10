@@ -5,7 +5,9 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import ktx.actors.onClick
 import ktx.scene2d.actors
 import ktx.scene2d.label
 import ktx.scene2d.table
@@ -13,7 +15,11 @@ import ktx.scene2d.textButton
 
 class Menu(batch: Batch) {
 
-    private val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
+    var active: Boolean = true
+
+    private var buttonLoadConfig: TextButton
+
+    val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
         actors {
             table {
                 setFillParent(true)
@@ -21,7 +27,7 @@ class Menu(batch: Batch) {
                 setPosition(Gdx.graphics.width / 2f - 100f, 0f)
                 label("Menu (M)").color = Color.BLACK
                 row()
-                textButton("Load Configuration (L)")
+                buttonLoadConfig = textButton("Load Configuration (L)")
                 row()
                 textButton("Save Configuration (K)")
                 row()
@@ -30,9 +36,19 @@ class Menu(batch: Batch) {
         }
     }
 
+    init {
+        buttonLoadConfig.onClick {
+            if (!active) {
+                return@onClick
+            }
+        }
+    }
+
     fun draw() {
-        menuStage.act()
-        menuStage.draw()
+        if (active) {
+            menuStage.act()
+            menuStage.draw()
+        }
     }
 
     fun resize(width: Int, height: Int) {
