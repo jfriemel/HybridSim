@@ -8,8 +8,8 @@ import kotlin.random.Random
 
 const val MAX_PEBBLES_ROBOT: Int = 2
 
-class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null, var carriesTile: Boolean = false,
-            var numPebbles: Int = 0, @Json(ignored = true) var carrySprite: Sprite ?= null): Entity(node, sprite) {
+open class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null, var carriesTile: Boolean = false,
+                 var numPebbles: Int = 0, @Json(ignored = true) var carrySprite: Sprite ?= null): Entity(node, sprite) {
     // Constructor values cannot be private (even if the IDE claims otherwise) because they need to be accessed to save
     // configurations to JSON files.
 

@@ -15,7 +15,7 @@ object Configuration {
         loadConfiguration("{\"robots\" : {\"Node(x=0, y=0)\": {\"orientation\" : 4, \"node\" : {\"x\" : 0, \"y\" : 0}, \"carriesTile\" : true, \"numPebbles\" : 1}, \"Node(x=0, y=-1)\": {\"orientation\" : 1, \"node\" : {\"x\" : 0, \"y\" : -1}, \"carriesTile\" : true, \"numPebbles\" : 1}}, \"targetNodes\" : [{\"x\" : 1, \"y\" : 1}], \"tiles\" : {\"Node(x=0, y=-1)\": {\"node\" : {\"x\" : 0, \"y\" : -1}}, \"Node(x=0, y=0)\": {\"node\" : {\"x\" : 0, \"y\" : 0}}, \"Node(x=1, y=1)\": {\"node\" : {\"x\" : 1, \"y\" : 1}}, \"Node(x=0, y=1)\": {\"node\" : {\"x\" : 0, \"y\" : 1}}, \"Node(x=-1, y=1)\": {\"node\" : {\"x\" : -1, \"y\" : 1}}, \"Node(x=-1, y=0)\": {\"node\" : {\"x\" : -1, \"y\" : 0}}, \"Node(x=1, y=-1)\": {\"node\" : {\"x\" : 1, \"y\" : -1}}, \"Node(x=-1, y=-1)\": {\"node\" : {\"x\" : -1, \"y\" : -1}}}}\n")
     }
 
-    /** Takes a JSON string and loads the configuration from that string. */
+    /** Takes a [json] string and loads the configuration from that string. */
     fun loadConfiguration(json: String) {
         val schedulerActive = Scheduler.isRunning()
         Scheduler.stop()

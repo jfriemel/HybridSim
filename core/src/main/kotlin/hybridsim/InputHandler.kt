@@ -15,10 +15,10 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
     override fun keyDown(keycode: Int): Boolean {
         // Using the key codes from Input.Keys is pretty annoying since it assumes a standard QWERTY layout
         when (keycode) {
-            Input.Keys.W, Input.Keys.UP -> screen.yMomentum = -1
-            Input.Keys.A, Input.Keys.LEFT -> screen.xMomentum = -1
-            Input.Keys.S, Input.Keys.DOWN -> screen.yMomentum = 1
-            Input.Keys.D, Input.Keys.RIGHT -> screen.xMomentum = 1
+            Input.Keys.UP -> screen.yMomentum = -1
+            Input.Keys.LEFT -> screen.xMomentum = -1
+            Input.Keys.DOWN -> screen.yMomentum = 1
+            Input.Keys.RIGHT -> screen.xMomentum = 1
             Input.Keys.F11 -> toggleFullscreen()
             Input.Keys.SPACE -> Scheduler.toggle()
             Input.Keys.ESCAPE -> {  // Emergency handbrake, basically stop everything
@@ -34,8 +34,8 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
     override fun keyUp(keycode: Int): Boolean {
         // Using the key codes from Input.Keys is pretty annoying since it assumes a standard QWERTY layout
         when (keycode) {
-            Input.Keys.W, Input.Keys.UP, Input.Keys.S, Input.Keys.DOWN -> screen.yMomentum = 0
-            Input.Keys.A, Input.Keys.LEFT, Input.Keys.D, Input.Keys.RIGHT -> screen.xMomentum = 0
+            Input.Keys.UP, Input.Keys.DOWN -> screen.yMomentum = 0
+            Input.Keys.LEFT, Input.Keys.RIGHT -> screen.xMomentum = 0
         }
         return true
     }
@@ -46,6 +46,8 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             '-' -> screen.zoom(1f)
             'f', 'F' -> toggleFullscreen()
             'm', 'M' -> menu.active = !menu.active
+            'l', 'L' -> menu.loadConfiguration()
+            'k', 'K' -> menu.saveConfiguration()
         }
         return true
     }

@@ -28,6 +28,9 @@ configure(subprojects) {
   compileJava {
     options.incremental = true
   }
+  compileKotlin {
+    targetCompatibility = 17
+  }
 }
 
 subprojects {
