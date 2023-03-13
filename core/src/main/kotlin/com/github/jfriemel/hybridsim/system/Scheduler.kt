@@ -1,15 +1,16 @@
-package com.github.jfriemel.hybridsim
+package com.github.jfriemel.hybridsim.system
 
 import kotlinx.coroutines.delay
 import kotlin.random.Random
+import ktx.log.logger
 
-private val logger = ktx.log.logger<Scheduler>()
+private val logger = logger<Scheduler>()
 
 object Scheduler {
 
     private var active = false
     private var cycleDelay = 1L  // Delay after completion of each activation cycle in ms
-    private var activationsPerCycle = 1  // Number of activations per scheduler cycle
+    private var activationsPerCycle = 10  // Number of activations per scheduler cycle
 
     /** Returns true if the scheduler is running. */
     fun isRunning(): Boolean {

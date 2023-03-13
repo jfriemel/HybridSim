@@ -2,7 +2,7 @@ package com.github.jfriemel.hybridsim.entities
 
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.beust.klaxon.Json
-import com.github.jfriemel.hybridsim.Configuration
+import com.github.jfriemel.hybridsim.system.Configuration
 
 open class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null, var carriesTile: Boolean = false,
                  var numPebbles: Int = 0, val maxPebbles: Int = 2,

@@ -1,9 +1,10 @@
-package com.github.jfriemel.hybridsim
+package com.github.jfriemel.hybridsim.system
 
 import com.beust.klaxon.Klaxon
 import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
+import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
 
 object Configuration {
 
@@ -34,6 +35,10 @@ object Configuration {
             tmpRobots[robot.node] = robot
         }
         robots = tmpRobots
+        for (node in robots.keys) {
+            AlgorithmLoader.replaceRobot(node)
+        }
+        targetNodes = targetNodes.toMutableSet()
 
         if (schedulerActive) {
             Scheduler.start()

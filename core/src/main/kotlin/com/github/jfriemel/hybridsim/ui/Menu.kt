@@ -1,14 +1,14 @@
 package com.github.jfriemel.hybridsim.ui
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import com.github.jfriemel.hybridsim.Configuration
+import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.Main
+import com.github.jfriemel.hybridsim.system.Scheduler
 import ktx.actors.onClick
 import ktx.scene2d.actors
 import ktx.scene2d.label
@@ -22,33 +22,51 @@ import javax.swing.filechooser.FileNameExtensionFilter
 
 private val logger = ktx.log.logger<Main>()
 
+private const val BUTTON_WIDTH = 190f
+
 class Menu(batch: Batch) {
 
-    var active: Boolean = true
+    // Indicates whether the menu is shown on the screen
+    var active = true
 
+    // When active, tiles/robots/target nodes can be added/removed by mouse clicks
+    var putTiles = false
+    var putRobots = false
+    var selectTarget = false
+
+    // All menu buttons
     private var buttonLoadConfig: TextButton
     private var buttonSaveConfig: TextButton
     private var buttonLoadAlgorithm: TextButton
+    private var buttonPutTiles: TextButton
+    private var buttonPutRobots: TextButton
+    private var buttonSelectTarget: TextButton
+
+    // File extension filters for the files used by the simulator
+    private val jsonFilter = FileNameExtensionFilter("HybridSim configuration JSON files", "json")
+    private val algoFilter = FileNameExtensionFilter("HybridSim algorithm scripts", "kts")
 
     val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
         actors {
             table {
                 setFillParent(true)
                 defaults().pad(2f)
-                setPosition(Gdx.graphics.width / 2f - 100f, 0f)
-                label("Menu (M)").color = Color.BLACK
+                add(label("Menu (M)")).actor.color = Color.BLACK
                 row()
-                buttonLoadConfig = textButton("Load Configuration (L)")
+                buttonLoadConfig = add(textButton("Load Configuration (L)")).width(BUTTON_WIDTH).actor
                 row()
-                buttonSaveConfig = textButton("Save Configuration (K)")
+                buttonSaveConfig = add(textButton("Save Configuration (K)")).width(BUTTON_WIDTH).actor
                 row()
-                buttonLoadAlgorithm = textButton("Load Algorithm (X)")
+                buttonLoadAlgorithm = add(textButton("Load Algorithm (X)")).width(BUTTON_WIDTH).actor
+                row()
+                buttonPutTiles = add(textButton("Put Tiles (T)")).width(BUTTON_WIDTH).actor
+                row()
+                buttonPutRobots = add(textButton("Put Robots (R)")).width(BUTTON_WIDTH).actor
+                row()
+                buttonSelectTarget = add(textButton("Select Target Nodes (Z)")).width(BUTTON_WIDTH).actor
             }
         }
     }
-
-    private val jsonFilter = FileNameExtensionFilter("HybridSim configuration JSON files", "json")
-    private val algoFilter = FileNameExtensionFilter("HybridSim algorithm scripts", "kts")
 
     init {
         try {
@@ -61,6 +79,9 @@ class Menu(batch: Batch) {
         buttonLoadConfig.onClick { loadConfiguration() }
         buttonSaveConfig.onClick { saveConfiguration() }
         buttonLoadAlgorithm.onClick { loadAlgorithm() }
+        buttonPutTiles.onClick { togglePutTiles() }
+        buttonPutRobots.onClick { togglePutRobots() }
+        buttonSelectTarget.onClick { toggleSelectTarget() }
     }
 
     /** Called when a frame is rendered to draw the menu. Menu is only drawn when [active] is true. */
@@ -74,7 +95,7 @@ class Menu(batch: Batch) {
     /** Called when the window is resized to ensure that the menu remains at the right-hand side of the screen. */
     fun resize(width: Int, height: Int) {
         menuStage.viewport.update(width, height, true)
-        menuStage.actors.get(0).setPosition(width / 2f - 100f, 0f)
+        menuStage.actors.get(0).setPosition(width / 2f - BUTTON_WIDTH - 6f, 0f)
     }
 
     /** Opens a file selector window. The user can select a configuration file (JSON format) to be loaded. */
@@ -113,6 +134,52 @@ class Menu(batch: Batch) {
             return
         }
         AlgorithmLoader.loadAlgorithm(algorithmFile)
+    }
+
+    /** Toggles whether tiles should be placed by a mouse click. */
+    fun togglePutTiles() {
+        if (!active) {
+            return
+        }
+        Scheduler.stop()
+        val nextBool = !putTiles
+        deactivateToggleButtons()
+        putTiles = nextBool
+        buttonPutTiles.color = if (putTiles) Color.GRAY else Color.WHITE
+    }
+
+    /** Toggles whether robots should be placed by a mouse click. */
+    fun togglePutRobots() {
+        if (!active) {
+            return
+        }
+        Scheduler.stop()
+        val nextBool = !putRobots
+        deactivateToggleButtons()
+        putRobots = nextBool
+        buttonPutRobots.color = if (putRobots) Color.GRAY else Color.WHITE
+    }
+
+    /** Toggles whether nodes should be marked as target nodes by a mouse click. */
+    fun toggleSelectTarget() {
+        if (!active) {
+            return
+        }
+        val nextBool = !selectTarget
+        Scheduler.stop()
+        deactivateToggleButtons()
+        selectTarget = nextBool
+        buttonSelectTarget.color = if (selectTarget) Color.GRAY else Color.WHITE
+    }
+
+    /** Deactivates all toggle buttons. */
+    fun deactivateToggleButtons() {
+        putTiles = false
+        putRobots = false
+        selectTarget = false
+        buttonPutTiles.color = Color.WHITE
+        buttonPutRobots.color = Color.WHITE
+        buttonSelectTarget.color = Color.WHITE
     }
 
     /**

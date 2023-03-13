@@ -6,19 +6,20 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import com.github.jfriemel.hybridsim.Configuration
+import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.entities.Entity
 import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
 import ktx.app.KtxScreen
 import ktx.graphics.use
+import ktx.log.logger
 import kotlin.math.*
 
 // Squeeze factor to make the triangles equilateral (the texture is stretched horizontally)
 val X_SCALE = sqrt(3f) / 2f
 
-private val logger = ktx.log.logger<SimScreen>()
+private val logger = logger<SimScreen>()
 
 class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     private val camera = OrthographicCamera()
@@ -46,6 +47,11 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
     }
 
+    private val emptyTargetTexture = Texture(Gdx.files.internal("graphics/empty_target.png"), true).apply {
+        setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
+    }
+    private val emptyTargetSprites = HashMap<Node, Sprite>()
+
     // Number of pixels corresponding to one horizontal unit in the triangular lattice
     private val pixelUnitDistance = bkgTexture.height
 
@@ -67,6 +73,11 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
             bkgSprite.draw(it)
             for (tile in Configuration.tiles.values) {
                 tile.sprite?.draw(it)
+            }
+            for (targetNode in Configuration.targetNodes) {
+                if (targetNode !in Configuration.tiles) {
+                    emptyTargetSprites[targetNode]?.draw(it)
+                }
             }
             for (robot in Configuration.robots.values) {
                 if (robot.carriesTile) {
@@ -120,6 +131,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         yPos += viewport.unitsPerPixel * yDir
         setEntityScreenPositions(Configuration.tiles)
         setEntityScreenPositions(Configuration.robots)
+        setTargetScreenPositions()
         moveBackground()
     }
 
@@ -177,6 +189,18 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
                 }
                 entity.carrySprite?.setPosition(x - tileTexture.width / 2f, y - tileTexture.height / 2f)
             }
+        }
+    }
+
+    private fun setTargetScreenPositions() {
+        for (targetNode in Configuration.targetNodes) {
+            if (targetNode !in emptyTargetSprites) {
+                emptyTargetSprites[targetNode] = Sprite(emptyTargetTexture).apply { color = Tile.colorTarget }
+            }
+            val coords = nodeCoordsToScreenCoords(targetNode.x, targetNode.y)
+            val x = viewport.unitsPerPixel * coords.first
+            val y = viewport.unitsPerPixel * (height - coords.second)
+            emptyTargetSprites[targetNode]?.setPosition(x - emptyTargetTexture.width / 2, y - emptyTargetTexture.height / 2)
         }
     }
 }

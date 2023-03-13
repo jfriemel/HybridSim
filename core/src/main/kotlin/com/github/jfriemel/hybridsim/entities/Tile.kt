@@ -2,14 +2,10 @@ package com.github.jfriemel.hybridsim.entities
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Sprite
-import com.github.jfriemel.hybridsim.Configuration
+import com.github.jfriemel.hybridsim.system.Configuration
 
 // Typically, no more than one pebble is allowed per tile. But, you know, future-proofing.
 const val MAX_PEBBLES_TILE: Int = 1
-
-val DEFAULT_COLOR: Color = Color.WHITE
-val TARGET_COLOR: Color = Color.CYAN
-val NON_TARGET_COLOR: Color = Color.CORAL
 
 class Tile(node: Node, sprite: Sprite ?= null, var numPebbles: Int = 0): Entity(node, sprite) {
     // Constructor values cannot be private (even if the IDE claims otherwise) because they need to be accessed to save
@@ -21,11 +17,11 @@ class Tile(node: Node, sprite: Sprite ?= null, var numPebbles: Int = 0): Entity(
      */
     override fun getColor(): Color {
         return if (Configuration.targetNodes.isEmpty()) {
-            DEFAULT_COLOR
+            colorDefault
         } else if (Configuration.targetNodes.contains(node)) {
-            TARGET_COLOR
+            colorTarget
         } else {
-            NON_TARGET_COLOR
+            colorNonTarget
         }
     }
 
@@ -50,5 +46,11 @@ class Tile(node: Node, sprite: Sprite ?= null, var numPebbles: Int = 0): Entity(
     /** Checks whether the tile has a pebble. */
     fun hasPebble(): Boolean {
         return numPebbles > 0
+    }
+
+    companion object {
+        val colorDefault: Color = Color.WHITE
+        val colorTarget: Color = Color.CYAN
+        val colorNonTarget: Color = Color.CORAL
     }
 }

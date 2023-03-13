@@ -1,7 +1,8 @@
 package com.github.jfriemel.hybridsim.ui
 
-import com.github.jfriemel.hybridsim.Configuration
-import com.github.jfriemel.hybridsim.Scheduler
+import com.github.jfriemel.hybridsim.system.Configuration
+import com.github.jfriemel.hybridsim.system.Scheduler
+import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import java.io.File
 import javax.script.Compilable
@@ -9,6 +10,8 @@ import javax.script.Invocable
 import javax.script.ScriptEngineManager
 
 object AlgorithmLoader {
+
+    private var invocator: Invocable ?= null
 
     /**
      * Loads a new algorithm from the [scriptFile] (kts script, see examples). The script implements Robot and overrides
@@ -25,13 +28,24 @@ object AlgorithmLoader {
         val engine = ScriptEngineManager().getEngineByExtension("kts") as Compilable
         engine.compile("import com.github.jfriemel.hybridsim.entities.*").eval()  // Default import
         engine.compile(scriptFile.readText().trim()).eval()
-        val invocator = engine as Invocable
-        for (key in Configuration.robots.keys) {
-            val robot = Configuration.robots[key] ?: continue
-            Configuration.robots[key] = invocator.invokeFunction(
-                "getRobot", robot.orientation, robot.node, robot.carriesTile, robot.numPebbles, robot.maxPebbles
-            ) as Robot
+        invocator = engine as Invocable
+        for (node in Configuration.robots.keys) {
+            replaceRobot(node)
         }
+    }
+
+    /**
+     * Replaces the robot at the given [node] with the robot from the previously loaded kts script.
+     * Does nothing if there is no robot at the [node] or if no kts script was loaded before the call.
+     */
+    fun replaceRobot(node: Node) {
+        if (invocator == null) {
+            return
+        }
+        val robot = Configuration.robots[node] ?: return
+        Configuration.robots[node] = invocator!!.invokeFunction(
+            "getRobot", robot.orientation, robot.node, robot.carriesTile, robot.numPebbles, robot.maxPebbles
+        ) as Robot
     }
 
 }
