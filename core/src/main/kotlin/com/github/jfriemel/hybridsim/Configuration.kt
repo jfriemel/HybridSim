@@ -1,9 +1,9 @@
-package hybridsim
+package com.github.jfriemel.hybridsim
 
 import com.beust.klaxon.Klaxon
-import hybridsim.entities.Node
-import hybridsim.entities.Robot
-import hybridsim.entities.Tile
+import com.github.jfriemel.hybridsim.entities.Node
+import com.github.jfriemel.hybridsim.entities.Robot
+import com.github.jfriemel.hybridsim.entities.Tile
 
 object Configuration {
 
@@ -12,7 +12,7 @@ object Configuration {
     var targetNodes: MutableSet<Node> = HashSet()
 
     init {
-        loadConfiguration("{\"robots\" : {\"Node(x=0, y=0)\": {\"orientation\" : 4, \"node\" : {\"x\" : 0, \"y\" : 0}, \"carriesTile\" : true, \"numPebbles\" : 1}, \"Node(x=0, y=-1)\": {\"orientation\" : 1, \"node\" : {\"x\" : 0, \"y\" : -1}, \"carriesTile\" : true, \"numPebbles\" : 1}}, \"targetNodes\" : [{\"x\" : 1, \"y\" : 1}], \"tiles\" : {\"Node(x=0, y=-1)\": {\"node\" : {\"x\" : 0, \"y\" : -1}}, \"Node(x=0, y=0)\": {\"node\" : {\"x\" : 0, \"y\" : 0}}, \"Node(x=1, y=1)\": {\"node\" : {\"x\" : 1, \"y\" : 1}}, \"Node(x=0, y=1)\": {\"node\" : {\"x\" : 0, \"y\" : 1}}, \"Node(x=-1, y=1)\": {\"node\" : {\"x\" : -1, \"y\" : 1}}, \"Node(x=-1, y=0)\": {\"node\" : {\"x\" : -1, \"y\" : 0}}, \"Node(x=1, y=-1)\": {\"node\" : {\"x\" : 1, \"y\" : -1}}, \"Node(x=-1, y=-1)\": {\"node\" : {\"x\" : -1, \"y\" : -1}}}}\n")
+        loadConfiguration("{\"robots\" : {\"Node(x=0, y=0)\": {\"orientation\" : 4, \"node\" : {\"x\" : 0, \"y\" : 0}, \"carriesTile\" : false, \"numPebbles\" : 1}}, \"targetNodes\" : [{\"x\" : 0, \"y\" : -1}], \"tiles\" : {\"Node(x=0, y=-1)\": {\"node\" : {\"x\" : 0, \"y\" : -1}}, \"Node(x=0, y=0)\": {\"node\" : {\"x\" : 0, \"y\" : 0}}, \"Node(x=1, y=1)\": {\"node\" : {\"x\" : 1, \"y\" : 1}}, \"Node(x=0, y=1)\": {\"node\" : {\"x\" : 0, \"y\" : 1}}, \"Node(x=-1, y=1)\": {\"node\" : {\"x\" : -1, \"y\" : 1}}, \"Node(x=-1, y=0)\": {\"node\" : {\"x\" : -1, \"y\" : 0}}, \"Node(x=1, y=-1)\": {\"node\" : {\"x\" : 1, \"y\" : -1}}, \"Node(x=-1, y=-1)\": {\"node\" : {\"x\" : -1, \"y\" : -1}}}}\n")
     }
 
     /** Takes a [json] string and loads the configuration from that string. */

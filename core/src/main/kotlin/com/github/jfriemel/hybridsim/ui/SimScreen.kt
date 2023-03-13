@@ -1,4 +1,4 @@
-package hybridsim.ui
+package com.github.jfriemel.hybridsim.ui
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import hybridsim.Configuration
-import hybridsim.entities.Entity
-import hybridsim.entities.Node
-import hybridsim.entities.Robot
-import hybridsim.entities.Tile
+import com.github.jfriemel.hybridsim.Configuration
+import com.github.jfriemel.hybridsim.entities.Entity
+import com.github.jfriemel.hybridsim.entities.Node
+import com.github.jfriemel.hybridsim.entities.Robot
+import com.github.jfriemel.hybridsim.entities.Tile
 import ktx.app.KtxScreen
 import ktx.graphics.use
 import kotlin.math.*

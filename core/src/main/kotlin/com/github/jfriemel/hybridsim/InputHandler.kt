@@ -1,10 +1,10 @@
-package hybridsim
+package com.github.jfriemel.hybridsim
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import hybridsim.entities.Node
-import hybridsim.ui.Menu
-import hybridsim.ui.SimScreen
+import com.github.jfriemel.hybridsim.entities.Node
+import com.github.jfriemel.hybridsim.ui.Menu
+import com.github.jfriemel.hybridsim.ui.SimScreen
 import ktx.app.KtxInputAdapter
 
 class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxInputAdapter {
@@ -48,6 +48,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             'm', 'M' -> menu.active = !menu.active
             'l', 'L' -> menu.loadConfiguration()
             'k', 'K' -> menu.saveConfiguration()
+            'x', 'X' -> menu.loadAlgorithm()
         }
         return true
     }

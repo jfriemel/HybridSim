@@ -12,10 +12,9 @@ dependencies {
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
   implementation "com.beust:klaxon:$klaxonVersion"
-  implementation "org.jetbrains.kotlin:kotlin-scripting-common:$kotlinVersion"
-  implementation "org.jetbrains.kotlin:kotlin-scripting-jvm:$kotlinVersion"
-  implementation "org.jetbrains.kotlin:kotlin-scripting-jvm-host:$kotlinVersion"
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
+
+  runtimeOnly "org.jetbrains.kotlin:kotlin-scripting-jsr223:$kotlinVersion"
 
   testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
 }

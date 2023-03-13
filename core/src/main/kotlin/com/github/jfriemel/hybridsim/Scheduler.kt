@@ -1,4 +1,4 @@
-package hybridsim
+package com.github.jfriemel.hybridsim
 
 import kotlinx.coroutines.delay
 import kotlin.random.Random
@@ -42,6 +42,7 @@ object Scheduler {
     }
 
     /** Sets the (expected) interval time between activations to [intervalTime] * 0.1ms. */
+    @Suppress("Unused")
     fun setIntervalTime(intervalTime: Long) {
         if (intervalTime > 0L) {
             if (intervalTime < 10L) {

@@ -1,4 +1,4 @@
-package hybridsim.ui
+package com.github.jfriemel.hybridsim.ui
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import hybridsim.Configuration
-import hybridsim.Main
+import com.github.jfriemel.hybridsim.Configuration
+import com.github.jfriemel.hybridsim.Main
 import ktx.actors.onClick
 import ktx.scene2d.actors
 import ktx.scene2d.label
@@ -60,8 +60,10 @@ class Menu(batch: Batch) {
 
         buttonLoadConfig.onClick { loadConfiguration() }
         buttonSaveConfig.onClick { saveConfiguration() }
+        buttonLoadAlgorithm.onClick { loadAlgorithm() }
     }
 
+    /** Called when a frame is rendered to draw the menu. Menu is only drawn when [active] is true. */
     fun draw() {
         if (active) {
             menuStage.act()
@@ -69,11 +71,13 @@ class Menu(batch: Batch) {
         }
     }
 
+    /** Called when the window is resized to ensure that the menu remains at the right-hand side of the screen. */
     fun resize(width: Int, height: Int) {
         menuStage.viewport.update(width, height, true)
         menuStage.actors.get(0).setPosition(width / 2f - 100f, 0f)
     }
 
+    /** Opens a file selector window. The user can select a configuration file (JSON format) to be loaded. */
     fun loadConfiguration() {
         if (!active) {
             return
@@ -86,6 +90,7 @@ class Menu(batch: Batch) {
         Configuration.loadConfiguration(configFile.readText())
     }
 
+    /** Opens a file selector window. The user can select a file where the current configuration is to be saved. */
     fun saveConfiguration() {
         if (!active) {
             return
@@ -97,6 +102,23 @@ class Menu(batch: Batch) {
         configFile.writeText(Configuration.getJson())
     }
 
+    /** Opens a file selector window. The user can select an algorithm file (kts script) to be loaded. */
+    fun loadAlgorithm() {
+        if (!active) {
+            return
+        }
+        val algorithmFile = getFile(algoFilter) ?: return
+        if (!algorithmFile.exists()) {
+            logger.error { "Cannot load algorithm, selected file $algorithmFile does not exist" }
+            return
+        }
+        AlgorithmLoader.loadAlgorithm(algorithmFile)
+    }
+
+    /**
+     * Opens a file selector window, [filter] specifies which file endings are allowed.
+     * Returns the selected file or null if no file was selected.
+     */
     private fun getFile(filter: FileNameExtensionFilter): File? {
         val fileChooser = JFileChooser()
         fileChooser.fileFilter = filter

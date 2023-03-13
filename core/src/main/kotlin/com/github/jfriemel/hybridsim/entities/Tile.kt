@@ -1,8 +1,8 @@
-package hybridsim.entities
+package com.github.jfriemel.hybridsim.entities
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Sprite
-import hybridsim.Configuration
+import com.github.jfriemel.hybridsim.Configuration
 
 // Typically, no more than one pebble is allowed per tile. But, you know, future-proofing.
 const val MAX_PEBBLES_TILE: Int = 1

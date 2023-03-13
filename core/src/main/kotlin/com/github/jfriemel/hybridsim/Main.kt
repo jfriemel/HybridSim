@@ -1,4 +1,4 @@
-package hybridsim
+package com.github.jfriemel.hybridsim
 
 import com.badlogic.gdx.Application.LOG_DEBUG
 import com.badlogic.gdx.Gdx
@@ -6,8 +6,8 @@ import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import hybridsim.ui.Menu
-import hybridsim.ui.SimScreen
+import com.github.jfriemel.hybridsim.ui.Menu
+import com.github.jfriemel.hybridsim.ui.SimScreen
 import kotlinx.coroutines.launch
 import ktx.app.KtxGame
 import ktx.app.KtxScreen
@@ -35,7 +35,6 @@ class Main : KtxGame<KtxScreen>() {
         // Start a new coroutine for the scheduler
         KtxAsync.initiate()
         launchScheduler()
-        Scheduler.start()
     }
 
     private fun launchScheduler() {

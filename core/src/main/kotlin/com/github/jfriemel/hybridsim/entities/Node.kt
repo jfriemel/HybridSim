@@ -1,4 +1,4 @@
-package hybridsim.entities
+package com.github.jfriemel.hybridsim.entities
 
 data class Node(val x: Int, val y: Int) {
 
@@ -25,6 +25,7 @@ data class Node(val x: Int, val y: Int) {
     }
 
     companion object {
+        @Suppress("Unused")
         val origin = Node(0, 0)
 
         /**
