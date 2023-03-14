@@ -3,25 +3,31 @@ package com.github.jfriemel.hybridsim.ui
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.ui.Image
+import com.badlogic.gdx.scenes.scene2d.ui.Slider
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.Main
 import com.github.jfriemel.hybridsim.system.Scheduler
+import ktx.actors.onChange
 import ktx.actors.onClick
-import ktx.scene2d.actors
-import ktx.scene2d.label
-import ktx.scene2d.table
-import ktx.scene2d.textButton
+import ktx.log.logger
+import ktx.scene2d.*
 import java.io.File
 import java.lang.Exception
 import javax.swing.JFileChooser
 import javax.swing.UIManager
 import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.sqrt
 
-private val logger = ktx.log.logger<Main>()
+private val logger = logger<Main>()
 
 private const val BUTTON_WIDTH = 190f
 
@@ -46,6 +52,16 @@ class Menu(batch: Batch) {
     private var buttonPutTiles: TextButton
     private var buttonPutRobots: TextButton
     private var buttonSelectTarget: TextButton
+    private var buttonToggleScheduler: KTextButton
+    private var sliderScheduler: Slider
+
+    private val schedulerOnDrawable = TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_on.png"), true).apply {
+        setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
+    })
+    private val schedulerOffDrawable = TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_off.png"), true).apply {
+        setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
+    })
+    private var schedulerButtonImage: Image
 
     // File extension filters for the files used by the simulator
     private val jsonFilter = FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
@@ -69,6 +85,10 @@ class Menu(batch: Batch) {
                 buttonPutRobots = add(textButton("Put Robots (R)")).width(BUTTON_WIDTH).actor
                 row()
                 buttonSelectTarget = add(textButton("Select Target Nodes (Z)")).width(BUTTON_WIDTH).actor
+                row()
+                buttonToggleScheduler = add(textButton("").apply { schedulerButtonImage = image(schedulerOnDrawable) }).actor
+                row()
+                sliderScheduler = add(slider(0f, 100f)).width(BUTTON_WIDTH).actor
             }
         }
     }
@@ -84,9 +104,17 @@ class Menu(batch: Batch) {
         buttonLoadConfig.onClick { loadConfiguration() }
         buttonSaveConfig.onClick { saveConfiguration() }
         buttonLoadAlgorithm.onClick { loadAlgorithm() }
+
         buttonPutTiles.onClick { togglePutTiles() }
         buttonPutRobots.onClick { togglePutRobots() }
         buttonSelectTarget.onClick { toggleSelectTarget() }
+
+        buttonToggleScheduler.onClick {
+            deactivateToggleButtons()
+            Scheduler.toggle()
+        }
+        sliderScheduler.onChange { Scheduler.setIntervalTime((100f - sliderScheduler.value).pow(2).toLong()) }
+        sliderScheduler.value = max(0f, 100f - sqrt(Scheduler.getIntervalTime().toFloat()))
     }
 
     /** Called when a frame is rendered to draw the menu. Menu is only drawn when [active] is true. */
@@ -100,6 +128,11 @@ class Menu(batch: Batch) {
                 buttonLoadConfig.color = buttonColorDefault
                 buttonSaveConfig.color = buttonColorDefault
                 buttonLoadAlgorithm.color = buttonColorDefault
+            }
+            schedulerButtonImage.drawable = if (Scheduler.isRunning()) {
+                schedulerOffDrawable
+            } else {
+                schedulerOnDrawable
             }
             menuStage.act()
             menuStage.draw()
@@ -203,6 +236,7 @@ class Menu(batch: Batch) {
     private fun getFile(filter: FileNameExtensionFilter): File? {
         val fileChooser = JFileChooser()
         fileChooser.fileFilter = filter
+        fileChooser.currentDirectory = File(System.getProperty("user.home"))
         val choice = fileChooser.showOpenDialog(null)
         if (choice == JFileChooser.APPROVE_OPTION) {
             return fileChooser.selectedFile

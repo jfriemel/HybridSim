@@ -26,7 +26,7 @@ object AlgorithmLoader {
     fun loadAlgorithm(scriptFile: File) {
         Scheduler.stop()  // Make sure the scheduler is not running while the robots are replaced
         val engine = ScriptEngineManager().getEngineByExtension("kts") as Compilable
-        engine.compile("import com.github.jfriemel.hybridsim.entities.*").eval()  // Default import
+        engine.compile("import com.github.jfriemel.hybridsim.entities.*; import com.badlogic.gdx.graphics.Color").eval()
         engine.compile(scriptFile.readText().trim()).eval()
         invocator = engine as Invocable
         for (node in Configuration.robots.keys) {

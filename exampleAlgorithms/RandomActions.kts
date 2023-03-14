@@ -1,12 +1,8 @@
-import com.badlogic.gdx.graphics.Color
-import com.github.jfriemel.hybridsim.entities.*
 import kotlin.random.Random
-
 
 fun getRobot(orientation: Int, node: Node, carriesTile: Boolean, numPebbles: Int, maxPebbles: Int): Robot {
     return RobotImpl(orientation, node, carriesTile, numPebbles, maxPebbles)
 }
-
 
 class RobotImpl(
     orientation: Int,

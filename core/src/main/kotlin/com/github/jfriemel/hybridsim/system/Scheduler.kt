@@ -9,15 +9,17 @@ private val logger = logger<Scheduler>()
 object Scheduler {
 
     private var active = false
-    private var cycleDelay = 1L  // Delay after completion of each activation cycle in ms
-    private var activationsPerCycle = 10  // Number of activations per scheduler cycle
+    private var cycleDelay = 100L  // Delay after completion of each activation cycle in ms
+    private var activationsPerCycle = 1  // Number of activations per scheduler cycle
 
     /** Returns true if the scheduler is running. */
+    @Suppress("Unused")
     fun isRunning(): Boolean {
         return active
     }
 
     /** Starts the scheduler. */
+    @SuppressWarnings("WeakerAccess")
     fun start() {
         if (!active) {
             logger.debug { "Scheduler started" }
@@ -42,8 +44,7 @@ object Scheduler {
         }
     }
 
-    /** Sets the (expected) interval time between activations to [intervalTime] * 0.1ms. */
-    @Suppress("Unused")
+    /** Sets the (expected) interval time between robot activations to [intervalTime] * 0.1ms. */
     fun setIntervalTime(intervalTime: Long) {
         if (intervalTime > 0L) {
             if (intervalTime < 10L) {
@@ -56,7 +57,11 @@ object Scheduler {
         } else {
             cycleDelay = 1L
         }
-        logger.debug { "cycleDelay = $cycleDelay, activationsPerCycle = $activationsPerCycle" }
+    }
+
+    /** Returns the (expected) interval time between robot activations. */
+    fun getIntervalTime(): Long {
+        return activationsPerCycle * cycleDelay
     }
 
     /** Infinite loop running in a separate coroutine, performs the actual scheduling. */
