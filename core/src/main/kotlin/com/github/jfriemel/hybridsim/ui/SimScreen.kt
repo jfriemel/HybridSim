@@ -107,7 +107,9 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     override fun dispose() {
-        bkgTexture.dispose()
+        for (texture in arrayOf(bkgTexture, robotTexture, tileTexture, tilePebbleTexture, emptyTargetTexture)) {
+            texture.dispose()
+        }
     }
 
     /**
@@ -160,7 +162,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
 
     /**
      * Assigns sprites with the correct textures to all [entities] (robots, tiles) that do not have sprites yet.
-     * Then sets the sprite's screen position variables such that the [entities] are drawn at the correct locations.
+     * Then sets the sprites' screen position variables such that the [entities] are drawn at the correct locations.
      */
     private fun setEntityScreenPositions(entities: Map<Node, Entity>) {
         for (entity in entities.values) {
@@ -192,6 +194,10 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         }
     }
 
+    /**
+     * Creates sprites for target nodes that do not have sprites yet.
+     * Then sets the sprites' screen position variables such that they are drawn at their nodes' positions.
+     */
     private fun setTargetScreenPositions() {
         for (targetNode in Configuration.targetNodes) {
             if (targetNode !in emptyTargetSprites) {

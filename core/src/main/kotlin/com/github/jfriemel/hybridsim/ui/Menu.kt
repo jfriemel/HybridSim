@@ -1,5 +1,6 @@
 package com.github.jfriemel.hybridsim.ui
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -24,6 +25,10 @@ private val logger = ktx.log.logger<Main>()
 
 private const val BUTTON_WIDTH = 190f
 
+private val buttonColorDefault = Color.WHITE
+private val buttonColorToggled = Color.GRAY
+private val buttonColorDisabled = Color(1f, 1f, 1f, 0.5f)
+
 class Menu(batch: Batch) {
 
     // Indicates whether the menu is shown on the screen
@@ -43,8 +48,8 @@ class Menu(batch: Batch) {
     private var buttonSelectTarget: TextButton
 
     // File extension filters for the files used by the simulator
-    private val jsonFilter = FileNameExtensionFilter("HybridSim configuration JSON files", "json")
-    private val algoFilter = FileNameExtensionFilter("HybridSim algorithm scripts", "kts")
+    private val jsonFilter = FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
+    private val algoFilter = FileNameExtensionFilter("HybridSim algorithm scripts (.kts)", "kts")
 
     val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
         actors {
@@ -87,6 +92,15 @@ class Menu(batch: Batch) {
     /** Called when a frame is rendered to draw the menu. Menu is only drawn when [active] is true. */
     fun draw() {
         if (active) {
+            if (Gdx.graphics.isFullscreen) {
+                buttonLoadConfig.color = buttonColorDisabled
+                buttonSaveConfig.color = buttonColorDisabled
+                buttonLoadAlgorithm.color = buttonColorDisabled
+            } else {
+                buttonLoadConfig.color = buttonColorDefault
+                buttonSaveConfig.color = buttonColorDefault
+                buttonLoadAlgorithm.color = buttonColorDefault
+            }
             menuStage.act()
             menuStage.draw()
         }
@@ -100,7 +114,7 @@ class Menu(batch: Batch) {
 
     /** Opens a file selector window. The user can select a configuration file (JSON format) to be loaded. */
     fun loadConfiguration() {
-        if (!active) {
+        if (!active || Gdx.graphics.isFullscreen) {
             return
         }
         val configFile = getFile(jsonFilter) ?: return
@@ -113,7 +127,7 @@ class Menu(batch: Batch) {
 
     /** Opens a file selector window. The user can select a file where the current configuration is to be saved. */
     fun saveConfiguration() {
-        if (!active) {
+        if (!active || Gdx.graphics.isFullscreen) {
             return
         }
         var configFile = getFile(jsonFilter) ?: return
@@ -125,7 +139,7 @@ class Menu(batch: Batch) {
 
     /** Opens a file selector window. The user can select an algorithm file (kts script) to be loaded. */
     fun loadAlgorithm() {
-        if (!active) {
+        if (!active || Gdx.graphics.isFullscreen) {
             return
         }
         val algorithmFile = getFile(algoFilter) ?: return
@@ -145,7 +159,7 @@ class Menu(batch: Batch) {
         val nextBool = !putTiles
         deactivateToggleButtons()
         putTiles = nextBool
-        buttonPutTiles.color = if (putTiles) Color.GRAY else Color.WHITE
+        buttonPutTiles.color = if (putTiles) buttonColorToggled else buttonColorDefault
     }
 
     /** Toggles whether robots should be placed by a mouse click. */
@@ -157,7 +171,7 @@ class Menu(batch: Batch) {
         val nextBool = !putRobots
         deactivateToggleButtons()
         putRobots = nextBool
-        buttonPutRobots.color = if (putRobots) Color.GRAY else Color.WHITE
+        buttonPutRobots.color = if (putRobots) buttonColorToggled else buttonColorDefault
     }
 
     /** Toggles whether nodes should be marked as target nodes by a mouse click. */
@@ -169,7 +183,7 @@ class Menu(batch: Batch) {
         Scheduler.stop()
         deactivateToggleButtons()
         selectTarget = nextBool
-        buttonSelectTarget.color = if (selectTarget) Color.GRAY else Color.WHITE
+        buttonSelectTarget.color = if (selectTarget) buttonColorToggled else buttonColorDefault
     }
 
     /** Deactivates all toggle buttons. */
@@ -177,9 +191,9 @@ class Menu(batch: Batch) {
         putTiles = false
         putRobots = false
         selectTarget = false
-        buttonPutTiles.color = Color.WHITE
-        buttonPutRobots.color = Color.WHITE
-        buttonSelectTarget.color = Color.WHITE
+        buttonPutTiles.color = buttonColorDefault
+        buttonPutRobots.color = buttonColorDefault
+        buttonSelectTarget.color = buttonColorDefault
     }
 
     /**

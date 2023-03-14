@@ -18,7 +18,3 @@ dependencies {
 
   testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
 }
-
-compileKotlin {
-  targetCompatibility = 17
-}

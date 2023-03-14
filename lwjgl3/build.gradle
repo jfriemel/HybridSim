@@ -18,10 +18,8 @@ else {
 }
 
 sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
-mainClassName = 'dev.friemel.hybridsim.lwjgl3.Lwjgl3LauncherKt'
+mainClassName = 'lwjgl3.Lwjgl3LauncherKt'
 eclipse.project.name = appName + '-lwjgl3'
-sourceCompatibility = 17
-targetCompatibility = 17
 
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
@@ -101,8 +99,4 @@ if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_14)) {
 // Equivalent to the jar task; here for compatibility with gdx-setup.
 tasks.register('dist') {
   dependsOn[jar as String]
-}
-
-compileKotlin {
-  targetCompatibility = 17
 }

@@ -23,13 +23,10 @@ allprojects {
 configure(subprojects) {
   apply plugin: 'java-library'
   apply plugin: 'kotlin'
-  sourceCompatibility = 17
-  targetCompatibility = 17
-  compileJava {
-    options.incremental = true
-  }
-  compileKotlin {
-    targetCompatibility = 17
+  kotlin {
+    jvmToolchain {
+      languageVersion.set(JavaLanguageVersion.of("17"))
+    }
   }
 }
 
