@@ -59,9 +59,9 @@ object Scheduler {
         }
     }
 
-    /** Returns the (expected) interval time between robot activations. */
+    /** Returns the (expected) interval time between robot activations in 0.1ms. */
     fun getIntervalTime(): Long {
-        return activationsPerCycle * cycleDelay
+        return cycleDelay * 10 / activationsPerCycle
     }
 
     /** Infinite loop running in a separate coroutine, performs the actual scheduling. */

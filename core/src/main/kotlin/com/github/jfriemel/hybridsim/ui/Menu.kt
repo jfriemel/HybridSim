@@ -110,10 +110,17 @@ class Menu(batch: Batch) {
         buttonSelectTarget.onClick { toggleSelectTarget() }
 
         buttonToggleScheduler.onClick {
+            if (!active) return@onClick
             deactivateToggleButtons()
             Scheduler.toggle()
         }
-        sliderScheduler.onChange { Scheduler.setIntervalTime((100f - sliderScheduler.value).pow(2).toLong()) }
+        sliderScheduler.onChange {
+            if (!active) {
+                sliderScheduler.value = max(0f, 100f - sqrt(Scheduler.getIntervalTime().toFloat()))
+                return@onChange
+            }
+            Scheduler.setIntervalTime((100f - sliderScheduler.value).pow(2).toLong())
+        }
         sliderScheduler.value = max(0f, 100f - sqrt(Scheduler.getIntervalTime().toFloat()))
     }
 

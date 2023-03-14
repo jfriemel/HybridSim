@@ -4,11 +4,13 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.Scheduler
-import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
 import ktx.app.KtxInputAdapter
+import ktx.log.logger
 import kotlin.random.Random
+
+private val logger = logger<InputHandler>()
 
 class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxInputAdapter {
 
@@ -69,7 +71,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         val node = screen.screenCoordsToNodeCoords(screenX, screenY)
         when (button) {
             Input.Buttons.LEFT -> {
-                if (menu.putTiles && node !in Configuration.tiles) {
+                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                    Configuration.robots[node]?.activate()
+                } else if (menu.putTiles && node !in Configuration.tiles) {
                     Configuration.tiles[node] = Tile(node)
                 } else if (menu.putRobots && node !in Configuration.robots) {
                     Configuration.robots[node] = Robot(Random.nextInt(0, 6), node)
@@ -89,14 +93,11 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     Configuration.robots.remove(node)
                 } else if (menu.selectTarget && node in Configuration.targetNodes) {
                     Configuration.targetNodes.remove(node)
-                } else {  // Only for testing, will be removed later
-                    println("($screenX, $screenY)")
-                    println(node)
+                } else if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {  // Log coordinates, sometimes helpful
+                    logger.debug { "Screen coordinates:     ($screenX, $screenY)" }
+                    logger.debug { "Node coordinates:       (${node.x}, ${node.y})" }
                     val sciCoords = node.scientificCoordinates()
-                    println(sciCoords)
-                    println(Node.sciCoordsToNode(sciCoords.first, sciCoords.second))
-                    println(screen.nodeCoordsToScreenCoords(node.x, node.y))
-                    print("\n")
+                    logger.debug { "Scientific coordinates: (${sciCoords.first}, ${sciCoords.second})" }
                 }
             }
         }
@@ -114,6 +115,8 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             screen.move(mouseX - screenX, mouseY - screenY)
             mouseX = screenX
             mouseY = screenY
+        } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+            Configuration.robots[node]?.activate()
         } else if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (menu.putTiles && node !in Configuration.tiles) {
                 Configuration.tiles[node] = Tile(node)
