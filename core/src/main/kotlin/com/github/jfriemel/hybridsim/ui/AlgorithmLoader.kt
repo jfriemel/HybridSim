@@ -29,9 +29,7 @@ object AlgorithmLoader {
         engine.compile("import com.github.jfriemel.hybridsim.entities.*; import com.badlogic.gdx.graphics.Color").eval()
         engine.compile(scriptFile.readText().trim()).eval()
         invocator = engine as Invocable
-        for (node in Configuration.robots.keys) {
-            replaceRobot(node)
-        }
+        Configuration.robots.keys.forEach { replaceRobot(it) }
         Configuration.clearUndoQueues()
     }
 

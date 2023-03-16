@@ -63,29 +63,36 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     private var width = 0
     private var height = 0
 
-    // How much the map moves per frame, only relevant while arrow keys (or WASD) are pressed
+    // How much the map moves per frame, only relevant when arrow keys are pressed
     var xMomentum = 0
     var yMomentum = 0
 
     override fun render(delta: Float) {
-        move(xMomentum, yMomentum)  // Movement speed depends on FPS, is that an issue?
-        batch.use(viewport.camera.combined) {
-            bkgSprite.draw(it)
-            for (tile in Configuration.tiles.values) {
-                tile.sprite?.draw(it)
-            }
-            for (targetNode in Configuration.targetNodes) {
-                if (targetNode !in Configuration.tiles) {
-                    emptyTargetSprites[targetNode]?.draw(it)
-                }
-            }
-            for (robot in Configuration.robots.values) {
+        // Move the map when arrow keys are pressed
+        move(xMomentum, yMomentum)
+
+        batch.use(viewport.camera.combined) { batch ->
+            // Draw triangular lattice
+            bkgSprite.draw(batch)
+
+            // Draw tiles
+            Configuration.tiles.values.forEach { tile -> tile.sprite?.draw(batch) }
+
+            // Draw empty target nodes
+            Configuration.targetNodes
+                .filter { node -> node !in Configuration.tiles }
+                .forEach { node -> emptyTargetSprites[node]?.draw(batch) }
+
+            // Draw robots
+            Configuration.robots.values.forEach { robot ->
                 if (robot.carriesTile) {
-                    robot.carrySprite?.draw(it)
+                    robot.carrySprite?.draw(batch)
                 }
-                robot.sprite?.draw(it)
+                robot.sprite?.draw(batch)
             }
         }
+
+        // Draw menu
         menu.draw()
     }
 
@@ -146,7 +153,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     /** Converts node coordinates ([nodeX], [nodeY]) to screen / pixel coordinates (x, y). */
-    fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
+    private fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
         val offset = if (nodeX.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
         val x = round((nodeX * pixelUnitDistance - xPos) * X_SCALE / viewport.unitsPerPixel)
         val y = round(((nodeY - offset) * pixelUnitDistance - yPos) / viewport.unitsPerPixel)

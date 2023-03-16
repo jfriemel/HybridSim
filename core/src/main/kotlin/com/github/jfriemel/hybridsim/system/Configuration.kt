@@ -97,19 +97,9 @@ object Configuration {
 //      Klaxon converts the keys of Maps to Strings. To get our Node keys back, we create temporary Maps, fill them
 //      with the values parsed by Klaxon and then replace the Klaxon Maps with our temporary Maps.
 //      There is probably a much cleaner way to do this (with Klaxon Converters), but I don't really care right now.
-        val tmpTiles = HashMap<Node, Tile>()
-        for (tile in tiles.values) {
-            tmpTiles[tile.node] = tile
-        }
-        tiles = tmpTiles
-        val tmpRobots = HashMap<Node, Robot>()
-        for (robot in robots.values) {
-            tmpRobots[robot.node] = robot
-        }
-        robots = tmpRobots
-        for (node in robots.keys) {
-            AlgorithmLoader.replaceRobot(node)
-        }
+        tiles = tiles.values.associateBy { it.node }.toMutableMap()
+        robots = robots.values.associateBy { it.node }.toMutableMap()
+        robots.values.forEach { AlgorithmLoader.replaceRobot(it.node) }
         targetNodes = targetNodes.toMutableSet()
 
         clearUndoQueues()

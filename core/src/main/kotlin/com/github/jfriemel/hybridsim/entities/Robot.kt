@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite
 import com.beust.klaxon.Json
 import com.github.jfriemel.hybridsim.system.Configuration
 
-open class Robot(val orientation: Int, node: Node,
+open class Robot(val orientation: Int,
+                 node: Node,
                  sprite: Sprite ?= null,
                  @Json(ignored = true) var carriesTile: Boolean = false,
                  @Json(ignored = true) var numPebbles: Int = 0,
@@ -15,7 +16,7 @@ open class Robot(val orientation: Int, node: Node,
 
     /**
      * The code executed by the robot when it is activated.
-     * The function needs to be overriden by imported algorithms (.kts scripts).
+     * The function is overriden by imported algorithms (.kts scripts).
      * As per the model, the algorithm needs to be convertible to an equivalent finite state automaton.
      * In other words, it needs to run in constant time and with constant space.
      * For further constraints, check out this paper: https://doi.org/10.1007/s11047-019-09774-2

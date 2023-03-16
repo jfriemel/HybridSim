@@ -3,11 +3,11 @@ fun getRobot(orientation: Int, node: Node): Robot {
 }
 
 class RobotImpl(orientation: Int, node: Node): Robot(
-    orientation = orientation,
+    orientation = orientation,  // Replace with constant (0-5) if you want the robots to share a compass
     node = node,
-    carriesTile = false,
-    numPebbles = 2,
-    maxPebbles = 2
+    carriesTile = false,  // Change constants to fit your needs
+    numPebbles = 2,  // Change constants to fit your needs
+    maxPebbles = 2  // Change constants to fit your needs
 ) {
     override fun activate() {
         TODO("Replace with your algorithm implementation")
