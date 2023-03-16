@@ -1,19 +1,13 @@
-fun getRobot(orientation: Int, node: Node, carriesTile: Boolean, numPebbles: Int, maxPebbles: Int): Robot {
-    return RobotImpl(orientation, node, carriesTile, numPebbles, maxPebbles)
+fun getRobot(orientation: Int, node: Node): Robot {
+    return RobotImpl(orientation, node)
 }
 
-class RobotImpl(
-    orientation: Int,
-    node: Node,
-    carriesTile: Boolean,
-    numPebbles: Int,
-    maxPebbles: Int
-): Robot(
+class RobotImpl(orientation: Int, node: Node): Robot(
     orientation = orientation,
     node = node,
-    carriesTile = carriesTile,
-    numPebbles = numPebbles,
-    maxPebbles = maxPebbles
+    carriesTile = false,
+    numPebbles = 2,
+    maxPebbles = 2
 ) {
     override fun activate() {
         TODO("Replace with your algorithm implementation")

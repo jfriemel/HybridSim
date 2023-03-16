@@ -18,7 +18,7 @@ object AlgorithmLoader {
      * the existing activate() function.
      *
      * Important: The script needs to have a getRobot() function of the following form:
-     *     fun getRobot(orientation: Int, node: Node, carriesTile: Boolean, numPebbles: Int, maxPebbles: Int): Robot
+     *     fun getRobot(orientation: Int, node: Node): Robot
      *
      * If this function is absent, or there is a syntax error in the script or the script could not be loaded for any
      * other reason, the program crashes.
@@ -32,6 +32,7 @@ object AlgorithmLoader {
         for (node in Configuration.robots.keys) {
             replaceRobot(node)
         }
+        Configuration.clearUndoQueues()
     }
 
     /**
@@ -39,13 +40,14 @@ object AlgorithmLoader {
      * Does nothing if there is no robot at the [node] or if no kts script was loaded before the call.
      */
     fun replaceRobot(node: Node) {
-        if (invocator == null) {
-            return
-        }
         val robot = Configuration.robots[node] ?: return
-        Configuration.robots[node] = invocator!!.invokeFunction(
-            "getRobot", robot.orientation, robot.node, robot.carriesTile, robot.numPebbles, robot.maxPebbles
-        ) as Robot
+        Configuration.robots[node] = getAlgorithmRobot(robot)
     }
 
+    fun getAlgorithmRobot(robot: Robot): Robot {
+        if (invocator == null) {
+            return robot
+        }
+        return invocator!!.invokeFunction("getRobot", robot.orientation, robot.node) as Robot
+    }
 }

@@ -1,4 +1,4 @@
-fun getRobot(orientation: Int, node: Node, carriesTile: Boolean, numPebbles: Int, maxPebbles: Int): Robot {
+fun getRobot(orientation: Int, node: Node): Robot {
     return RobotImpl(orientation, node)
 }
 
@@ -6,10 +6,7 @@ enum class Phase {
     TC, RS, TB
 }
 
-class RobotImpl(
-    orientation: Int,
-    node: Node
-): Robot(
+class RobotImpl(orientation: Int, node: Node): Robot(
     orientation = orientation,
     node = node,
     carriesTile = false,

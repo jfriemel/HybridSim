@@ -38,6 +38,18 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     Gdx.graphics.setWindowedMode(1024, 768)
                 }
             }
+            Input.Keys.Y, Input.Keys.Z -> {
+                // Undo with Ctrl+Y or Ctrl+Z, redo with Ctrl+Shift+Y or Ctrl+Shift+Z
+                // I strongly dislike this, but I see no alternative as I cannot access the user's keyboard layout
+                if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
+                    Scheduler.stop()
+                    if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                        Configuration.redo()
+                    } else {
+                        Configuration.undo()
+                    }
+                }
+            }
         }
         return true
     }
@@ -74,12 +86,12 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                     Configuration.robots[node]?.activate()
                 } else if (menu.putTiles && node !in Configuration.tiles) {
-                    Configuration.tiles[node] = Tile(node)
+                    Configuration.addTile(Tile(node), node)
                 } else if (menu.putRobots && node !in Configuration.robots) {
-                    Configuration.robots[node] = Robot(Random.nextInt(0, 6), node)
-                    AlgorithmLoader.replaceRobot(node)
+                    val robot = AlgorithmLoader.getAlgorithmRobot(Robot(Random.nextInt(0, 6), node))
+                    Configuration.addRobot(robot, node)
                 } else if (menu.selectTarget && node !in Configuration.targetNodes) {
-                    Configuration.targetNodes.add(node)
+                    Configuration.addTarget(node)
                 } else {
                     mouseX = screenX
                     mouseY = screenY
@@ -88,11 +100,11 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             }
             Input.Buttons.RIGHT -> {
                 if (menu.putTiles && node in Configuration.tiles) {
-                    Configuration.tiles.remove(node)
+                    Configuration.removeTile(node)
                 } else if (menu.putRobots && node in Configuration.robots) {
-                    Configuration.robots.remove(node)
+                    Configuration.removeRobot(node)
                 } else if (menu.selectTarget && node in Configuration.targetNodes) {
-                    Configuration.targetNodes.remove(node)
+                    Configuration.removeTarget(node)
                 } else if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {  // Log coordinates, sometimes helpful
                     logger.debug { "Screen coordinates:     ($screenX, $screenY)" }
                     logger.debug { "Node coordinates:       (${node.x}, ${node.y})" }
@@ -119,20 +131,20 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             Configuration.robots[node]?.activate()
         } else if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (menu.putTiles && node !in Configuration.tiles) {
-                Configuration.tiles[node] = Tile(node)
+                Configuration.addTile(Tile(node), node)
             } else if (menu.putRobots && node !in Configuration.robots) {
-                Configuration.robots[node] = Robot(Random.nextInt(0, 6), node)
-                AlgorithmLoader.replaceRobot(node)
+                val robot = AlgorithmLoader.getAlgorithmRobot(Robot(Random.nextInt(0, 6), node))
+                Configuration.addRobot(robot, node)
             } else if (menu.selectTarget && node !in Configuration.targetNodes) {
-                Configuration.targetNodes.add(node)
+                Configuration.addTarget(node)
             }
         } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             if (menu.putTiles && node in Configuration.tiles) {
-                Configuration.tiles.remove(node)
+                Configuration.removeTile(node)
             } else if (menu.putRobots && node in Configuration.robots) {
-                Configuration.robots.remove(node)
+                Configuration.removeRobot(node)
             } else if (menu.selectTarget && node in Configuration.targetNodes) {
-                Configuration.targetNodes.remove(node)
+                Configuration.removeTarget(node)
             }
         }
         return true

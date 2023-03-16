@@ -4,12 +4,14 @@ import com.badlogic.gdx.graphics.g2d.Sprite
 import com.beust.klaxon.Json
 import com.github.jfriemel.hybridsim.system.Configuration
 
-open class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null, var carriesTile: Boolean = false,
-                 var numPebbles: Int = 0, val maxPebbles: Int = 2,
+open class Robot(val orientation: Int, node: Node,
+                 sprite: Sprite ?= null,
+                 @Json(ignored = true) var carriesTile: Boolean = false,
+                 @Json(ignored = true) var numPebbles: Int = 0,
+                 @Json(ignored = true) val maxPebbles: Int = 2,
                  @Json(ignored = true) var carrySprite: Sprite ?= null): Entity(node, sprite) {
-    // Constructor values cannot be private (even if the IDE claims otherwise) because they need to be accessed to save
-    // configurations to JSON files.
-    // Functions cannot be private as they need to be accessible by the algorithm scripts implementing custom Robots.
+    // Functions and constructor values cannot be private as they need to be accessible by the algorithm scripts
+    // implementing custom Robots.
 
     /**
      * The code executed by the robot when it is activated.
@@ -28,9 +30,8 @@ open class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null, var c
         if (nodeAtLabel(label) in Configuration.robots) {
             return false
         }
-        Configuration.robots.remove(node)
+        Configuration.moveRobot(node, nodeAtLabel(label))
         node = nodeAtLabel(label)
-        Configuration.robots[node] = this
         return true
     }
 
@@ -52,7 +53,7 @@ open class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null, var c
         if (!isOnTile() || carriesTile || tileBelow()?.hasPebble() == true) {
             return false
         }
-        Configuration.tiles.remove(node)
+        Configuration.removeTile(node)
         carriesTile = true
         return true
     }
@@ -63,7 +64,7 @@ open class Robot(val orientation: Int, node: Node, sprite: Sprite ?= null, var c
         if (isOnTile() || !carriesTile) {
             return false
         }
-        Configuration.tiles[node] = Tile(node)
+        Configuration.addTile(Tile(node), node)
         carriesTile = false
         return true
     }
