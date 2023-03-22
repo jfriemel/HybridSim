@@ -85,6 +85,11 @@ object Scheduler {
                 robots[Random.nextInt(robots.size)].activate()
             }
 
+            // Stop when all robots are finished
+            if (robots.all { it.finished() }) {
+                stop()
+            }
+
             // Sleep for a short period between cycles
             delay(cycleDelay)
         }

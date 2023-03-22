@@ -11,11 +11,7 @@ class RobotImpl(orientation: Int, node: Node): Robot(
     numPebbles = 2,
     maxPebbles = 2
 ) {
-    private var color: Color = Color.WHITE
-
-    override fun getColor(): Color {
-        return color
-    }
+    private var color = Color.WHITE
 
     override fun activate() {
         color = Color(Random.nextFloat(), Random.nextFloat(), Random.nextFloat(), 1f)
@@ -32,4 +28,6 @@ class RobotImpl(orientation: Int, node: Node): Robot(
             moveToLabel(label)
         }
     }
+
+    override fun getColor() = color
 }

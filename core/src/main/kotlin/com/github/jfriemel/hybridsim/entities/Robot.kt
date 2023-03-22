@@ -25,6 +25,13 @@ open class Robot(val orientation: Int,
         return
     }
 
+    /**
+     * The function can be overriden by imported algorithms to indicate whether the robot is finished with executing
+     * its algorithm.
+     * When all robots are finished (i.e. every finished() call returns true), the Scheduler stops automatically.
+     */
+    open fun finished(): Boolean = false
+
     /** The robot tries to move to the node at the given [label]. Returns true if successful. */
     @Suppress("Unused")
     open fun moveToLabel(label: Int): Boolean {

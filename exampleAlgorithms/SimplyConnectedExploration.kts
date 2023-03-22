@@ -1,9 +1,11 @@
+/* Compact layer traversal algorithm from https://ris.uni-paderborn.de/record/25126 */
+
 fun getRobot(orientation: Int, node: Node): Robot {
     return RobotImpl(orientation, node)
 }
 
 enum class Phase {
-    TC, RS, TB
+    TraverseColumn, ReturnSouth, TraverseBoundary
 }
 
 class RobotImpl(orientation: Int, node: Node): Robot(
@@ -13,23 +15,24 @@ class RobotImpl(orientation: Int, node: Node): Robot(
     numPebbles = 0,
     maxPebbles = 0
 ) {
-    private var phase: Phase = Phase.TC
-    private var enterLabel: Int = 0
+    private var phase = Phase.TraverseColumn
 
-    override fun getColor(): Color {
-        return when (phase) {
-            Phase.TC -> Color.BLUE
-            Phase.RS -> Color.ORANGE
-            Phase.TB -> Color.MAGENTA
+    private var enterLabel = 0
+
+    override fun activate() {
+        tileBelow()?.setColor(Color.SKY)
+        when (phase) {
+            Phase.TraverseColumn -> traverseColumn()
+            Phase.ReturnSouth -> returnSouth()
+            Phase.TraverseBoundary -> traverseBoundary()
         }
     }
 
-    override fun activate() {
-        tileBelow()?.setColor(Color.GREEN)
-        when (phase) {
-            Phase.TC -> traverseColumn()
-            Phase.RS -> returnSouth()
-            Phase.TB -> traverseBoundary()
+    override fun getColor(): Color {
+        return when (phase) {
+            Phase.TraverseColumn -> Color.ORANGE
+            Phase.ReturnSouth -> Color.TEAL
+            Phase.TraverseBoundary -> Color.BROWN
         }
     }
 
@@ -37,7 +40,7 @@ class RobotImpl(orientation: Int, node: Node): Robot(
         if (hasTileAtLabel(0)) {
             moveAndUpdate(0)
         } else {
-            phase = Phase.RS
+            phase = Phase.ReturnSouth
         }
     }
 
@@ -49,17 +52,17 @@ class RobotImpl(orientation: Int, node: Node): Robot(
         for (label in arrayOf(4, 5, 0, 1, 2)) {
             if (hasTileAtLabel(label)) {
                 moveAndUpdate(label)
-                phase = Phase.TB
+                phase = Phase.TraverseBoundary
                 return
             }
         }
-        phase = Phase.TC
+        phase = Phase.TraverseColumn
     }
 
     private fun traverseBoundary() {
         if ((0 <= enterLabel && enterLabel <= 2 && !hasTileAtLabel(3) && (enterLabel == 2 || !hasTileAtLabel(2)))
                 || ((enterLabel == 4 || enterLabel == 5) && !hasTileAtLabel(0) && !hasTileAtLabel(1) && !hasTileAtLabel(2) && !hasTileAtLabel(3))) {
-            phase = Phase.TC
+            phase = Phase.TraverseColumn
             return
         }
         var label = enterLabel
