@@ -4,13 +4,15 @@ import com.badlogic.gdx.graphics.g2d.Sprite
 import com.beust.klaxon.Json
 import com.github.jfriemel.hybridsim.system.Configuration
 
-open class Robot(val orientation: Int,
-                 node: Node,
-                 sprite: Sprite ?= null,
-                 @Json(ignored = true) var carriesTile: Boolean = false,
-                 @Json(ignored = true) var numPebbles: Int = 0,
-                 @Json(ignored = true) val maxPebbles: Int = 2,
-                 @Json(ignored = true) var carrySprite: Sprite ?= null): Entity(node, sprite) {
+open class Robot(
+    val orientation: Int,
+    node: Node,
+    sprite: Sprite? = null,
+    @Json(ignored = true) var carriesTile: Boolean = false,
+    @Json(ignored = true) var numPebbles: Int = 0,
+    @Json(ignored = true) val maxPebbles: Int = 2,
+    @Json(ignored = true) var carrySprite: Sprite? = null
+) : Entity(node, sprite) {
     // Functions and constructor values cannot be private as they need to be accessible by the algorithm scripts
     // implementing custom Robots.
 

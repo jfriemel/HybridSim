@@ -79,8 +79,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
             Configuration.tiles.values.forEach { tile -> tile.sprite?.draw(batch) }
 
             // Draw empty target nodes
-            Configuration.targetNodes
-                .filter { node -> node !in Configuration.tiles }
+            Configuration.targetNodes.filter { node -> node !in Configuration.tiles }
                 .forEach { node -> emptyTargetSprites[node]?.draw(batch) }
 
             // Draw robots
@@ -130,7 +129,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         viewport.update(width, height, true)
         bkgSprite.setSize(ceil(viewport.unitsPerPixel * width), ceil(viewport.unitsPerPixel * height))
 
-        val zoomFactor = previousUPP/viewport.unitsPerPixel - 1f
+        val zoomFactor = previousUPP / viewport.unitsPerPixel - 1f
         move((mouseX * zoomFactor).toInt(), (mouseY * zoomFactor).toInt())
     }
 
@@ -213,7 +212,9 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
             val coords = nodeCoordsToScreenCoords(targetNode.x, targetNode.y)
             val x = viewport.unitsPerPixel * coords.first
             val y = viewport.unitsPerPixel * (height - coords.second)
-            emptyTargetSprites[targetNode]?.setPosition(x - emptyTargetTexture.width / 2, y - emptyTargetTexture.height / 2)
+            emptyTargetSprites[targetNode]?.setPosition(
+                x - emptyTargetTexture.width / 2, y - emptyTargetTexture.height / 2
+            )
         }
     }
 }

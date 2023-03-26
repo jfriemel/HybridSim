@@ -21,7 +21,7 @@ private val logger = logger<Main>()
 
 class Main : KtxGame<KtxScreen>() {
     override fun create() {
-        val batch : Batch = SpriteBatch()
+        val batch: Batch = SpriteBatch()
         Gdx.app.logLevel = LOG_DEBUG
         logger.debug { "HybridSim started" }
         Scene2DSkin.defaultSkin = Skin(Gdx.files.internal("ui/uiskin.json"))

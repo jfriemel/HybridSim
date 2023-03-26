@@ -8,7 +8,11 @@ import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
 import java.util.Deque
 import java.util.LinkedList
 
-data class TimeState(val tiles: MutableMap<Node, Tile>, val robots: MutableMap<Node, Robot>, val targetNodes: MutableSet<Node>)
+data class TimeState(
+    val tiles: MutableMap<Node, Tile>,
+    val robots: MutableMap<Node, Robot>,
+    val targetNodes: MutableSet<Node>
+)
 
 const val MAX_UNDO_STATES = 1000
 

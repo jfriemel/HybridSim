@@ -29,7 +29,7 @@ fun getRobot(orientation: Int, node: Node): Robot {
 // Put helper classes here, e.g.
 // private enum class Phase { PhaseOne, PhaseTwo, PhaseThree }
 
-class RobotImpl(orientation: Int, node: Node): Robot(
+class RobotImpl(orientation: Int, node: Node) : Robot(
     orientation = orientation,  // Replace with constant (0-5) if you want the robots to share a compass
     node = node,
     carriesTile = false,  // Change constants to fit your needs

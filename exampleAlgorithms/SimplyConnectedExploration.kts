@@ -4,11 +4,11 @@ fun getRobot(orientation: Int, node: Node): Robot {
     return RobotImpl(orientation, node)
 }
 
-enum class Phase {
+private enum class Phase {
     TraverseColumn, ReturnSouth, TraverseBoundary
 }
 
-class RobotImpl(orientation: Int, node: Node): Robot(
+class RobotImpl(orientation: Int, node: Node) : Robot(
     orientation = orientation,
     node = node,
     carriesTile = false,
@@ -61,7 +61,8 @@ class RobotImpl(orientation: Int, node: Node): Robot(
 
     private fun traverseBoundary() {
         if ((0 <= enterLabel && enterLabel <= 2 && !hasTileAtLabel(3) && (enterLabel == 2 || !hasTileAtLabel(2)))
-                || ((enterLabel == 4 || enterLabel == 5) && !hasTileAtLabel(0) && !hasTileAtLabel(1) && !hasTileAtLabel(2) && !hasTileAtLabel(3))) {
+            || ((enterLabel == 4 || enterLabel == 5) && arrayOf(0, 1, 2, 3).all { !hasTileAtLabel(it) })
+        ) {
             phase = Phase.TraverseColumn
             return
         }

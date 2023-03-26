@@ -55,12 +55,14 @@ class Menu(batch: Batch) {
     private var buttonToggleScheduler: KTextButton
     private var sliderScheduler: Slider
 
-    private val schedulerOnDrawable = TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_on.png"), true).apply {
-        setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
-    })
-    private val schedulerOffDrawable = TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_off.png"), true).apply {
-        setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
-    })
+    private val schedulerOnDrawable =
+        TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_on.png"), true).apply {
+            setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
+        })
+    private val schedulerOffDrawable =
+        TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_off.png"), true).apply {
+            setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
+        })
     private var schedulerButtonImage: Image
 
     // File extension filters for the files used by the simulator
@@ -86,7 +88,8 @@ class Menu(batch: Batch) {
                 row()
                 buttonSelectTarget = add(textButton("Select Target Nodes (Z)")).width(BUTTON_WIDTH).actor
                 row()
-                buttonToggleScheduler = add(textButton("").apply { schedulerButtonImage = image(schedulerOnDrawable) }).actor
+                buttonToggleScheduler =
+                    add(textButton("").apply { schedulerButtonImage = image(schedulerOnDrawable) }).actor
                 row()
                 sliderScheduler = add(slider(0f, 100f)).width(BUTTON_WIDTH).actor
             }

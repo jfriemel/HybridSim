@@ -11,7 +11,7 @@ import javax.script.ScriptEngineManager
 
 object AlgorithmLoader {
 
-    private var invocator: Invocable ?= null
+    private var invocator: Invocable? = null
 
     /**
      * Loads a new algorithm from the [scriptFile] (kts script, see examples). The script implements Robot and overrides

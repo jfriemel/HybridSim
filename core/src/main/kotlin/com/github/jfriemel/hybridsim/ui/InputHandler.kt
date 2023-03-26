@@ -26,10 +26,12 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             Input.Keys.DOWN -> screen.yMomentum = 1
             Input.Keys.RIGHT -> screen.xMomentum = 1
             Input.Keys.F11 -> toggleFullscreen()
+
             Input.Keys.SPACE -> {
                 menu.deactivateToggleButtons()
                 Scheduler.toggle()
             }
+
             Input.Keys.ESCAPE -> {  // Emergency handbrake, basically stop everything
                 Scheduler.stop()
                 menu.deactivateToggleButtons()
@@ -38,6 +40,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     Gdx.graphics.setWindowedMode(1024, 768)
                 }
             }
+
             Input.Keys.Y, Input.Keys.Z -> {
                 // Undo with Ctrl+Y or Ctrl+Z, redo with Ctrl+Shift+Y or Ctrl+Shift+Z
                 // I strongly dislike this, but I see no alternative as I cannot access the user's keyboard layout
@@ -98,6 +101,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     mousePressed = true
                 }
             }
+
             Input.Buttons.RIGHT -> {
                 if (menu.putTiles && node in Configuration.tiles) {
                     Configuration.removeTile(node)

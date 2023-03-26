@@ -28,9 +28,8 @@ data class Node(val x: Int, val y: Int) {
         @Suppress("Unused")
         val origin = Node(0, 0)
 
-        /**
-         * Returns a node corresponding to the given scientific node coordinates ([scx], [scy]).
-         */
+        /** @return A node corresponding to the given scientific node coordinates ([scx], [scy]). */
+        @Suppress("Unused")
         fun sciCoordsToNode(scx: Double, scy: Double): Node {
             val x = scx.toInt()
             val y = (scy + if (x.mod(2) == 0) 0.0 else 0.5).toInt()

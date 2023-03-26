@@ -8,7 +8,7 @@ private enum class Phase {
     FindTile, MoveTile, Finished
 }
 
-class RobotImpl(orientation: Int, node: Node): Robot(
+class RobotImpl(orientation: Int, node: Node) : Robot(
     orientation = orientation,
     node = node,
     carriesTile = false,

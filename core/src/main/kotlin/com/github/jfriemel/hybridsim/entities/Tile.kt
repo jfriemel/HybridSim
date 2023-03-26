@@ -7,7 +7,7 @@ import com.github.jfriemel.hybridsim.system.Configuration
 // Typically, no more than one pebble is allowed per tile; but, you know, future-proofing
 const val MAX_PEBBLES_TILE: Int = 1
 
-class Tile(node: Node, sprite: Sprite ?= null, private var numPebbles: Int = 0): Entity(node, sprite) {
+class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) : Entity(node, sprite) {
     // Constructor values cannot be private (even if the IDE claims otherwise) because they need to be accessed to save
     // configurations to JSON files.
 
