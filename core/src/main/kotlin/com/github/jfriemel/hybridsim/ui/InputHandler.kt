@@ -2,12 +2,17 @@ package com.github.jfriemel.hybridsim.ui
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.files.FileHandle
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.Scheduler
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
 import ktx.app.KtxInputAdapter
+import ktx.graphics.takeScreenshot
 import ktx.log.logger
+import java.lang.Exception
+import java.nio.file.Paths
+import java.time.LocalDateTime
 import kotlin.random.Random
 
 private val logger = logger<InputHandler>()
@@ -51,6 +56,17 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     } else {
                         Configuration.undo()
                     }
+                }
+            }
+
+            Input.Keys.F2 -> {  // Take a screenshot
+                try {
+                    val time = LocalDateTime.now().toString().replace(':', '-').split(".")[0]
+                    val path = Paths.get(System.getProperty("user.dir"), "screenshots", "$time.png")
+                    takeScreenshot(FileHandle(path.toFile()))
+                    logger.debug { "Screenshot: $path" }
+                } catch (e: Exception) {
+                    logger.error { "Screenshot failed! Exception: $e" }
                 }
             }
         }
