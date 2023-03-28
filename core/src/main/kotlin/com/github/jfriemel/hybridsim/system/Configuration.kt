@@ -11,7 +11,7 @@ import java.util.LinkedList
 data class TimeState(
     val tiles: MutableMap<Node, Tile>,
     val robots: MutableMap<Node, Robot>,
-    val targetNodes: MutableSet<Node>
+    val targetNodes: MutableSet<Node>,
 )
 
 const val MAX_UNDO_STATES = 1000
@@ -56,10 +56,8 @@ object Configuration {
     /** Move the robot at [startNode] to [nextNode]. */
     fun moveRobot(startNode: Node, nextNode: Node) {
         addToQueue(undoQueue)
-        val robot = robots.remove(startNode)
-        if (robot != null) {
-            robots[nextNode] = robot
-        }
+        val robot = robots.remove(startNode) ?: return
+        robots[nextNode] = robot
     }
 
     /** Add the given [node] to the target area. */

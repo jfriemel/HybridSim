@@ -22,16 +22,17 @@ Make sure that your imports do not clash with the default imports.
 For example, do not import java.awt.Color as it clashes with com.badlogic.gdx.graphics.Color.
  */
 
-fun getRobot(orientation: Int, node: Node): Robot {
-    return RobotImpl(orientation, node)
+/** This function must remain in your script. */
+fun getRobot(node: Node, orientation: Int): Robot {
+    return RobotImpl(node, orientation)
 }
 
 // Put helper classes here, e.g.
 // private enum class Phase { PhaseOne, PhaseTwo, PhaseThree }
 
-class RobotImpl(orientation: Int, node: Node) : Robot(
-    orientation = orientation,  // Replace with constant (0-5) if you want the robots to share a compass
+class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
+    orientation = orientation,  // Replace with constant (0-5) if you want the robots to share a compass
     carriesTile = false,  // Change constants to fit your needs
     numPebbles = 2,  // Change constants to fit your needs
     maxPebbles = 2  // Change constants to fit your needs

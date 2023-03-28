@@ -46,6 +46,6 @@ object AlgorithmLoader {
         if (invocator == null) {
             return robot
         }
-        return invocator!!.invokeFunction("getRobot", robot.orientation, robot.node) as Robot
+        return invocator!!.invokeFunction("getRobot", robot.node, robot.orientation) as Robot
     }
 }

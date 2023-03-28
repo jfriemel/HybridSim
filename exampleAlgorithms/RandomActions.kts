@@ -1,12 +1,12 @@
 import kotlin.random.Random
 
-fun getRobot(orientation: Int, node: Node): Robot {
-    return RobotImpl(orientation, node)
+fun getRobot(node: Node, orientation: Int): Robot {
+    return RobotImpl(node, orientation)
 }
 
-class RobotImpl(orientation: Int, node: Node) : Robot(
-    orientation = orientation,
+class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
+    orientation = orientation,
     carriesTile = false,
     numPebbles = 2,
     maxPebbles = 2

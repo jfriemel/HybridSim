@@ -37,6 +37,8 @@ private val buttonColorDisabled = Color(1f, 1f, 1f, 0.5f)
 
 class Menu(batch: Batch) {
 
+    var screen: SimScreen? = null
+
     // Indicates whether the menu is shown on the screen
     var active = true
 
@@ -78,9 +80,9 @@ class Menu(batch: Batch) {
                 row()
                 buttonLoadConfig = add(textButton("Load Configuration (L)")).width(BUTTON_WIDTH).actor
                 row()
-                buttonSaveConfig = add(textButton("Save Configuration (K)")).width(BUTTON_WIDTH).actor
+                buttonSaveConfig = add(textButton("Save Configuration (S)")).width(BUTTON_WIDTH).actor
                 row()
-                buttonLoadAlgorithm = add(textButton("Load Algorithm (X)")).width(BUTTON_WIDTH).actor
+                buttonLoadAlgorithm = add(textButton("Load Algorithm (A)")).width(BUTTON_WIDTH).actor
                 row()
                 buttonPutTiles = add(textButton("Put Tiles (T)")).width(BUTTON_WIDTH).actor
                 row()
@@ -139,11 +141,7 @@ class Menu(batch: Batch) {
                 buttonSaveConfig.color = buttonColorDefault
                 buttonLoadAlgorithm.color = buttonColorDefault
             }
-            schedulerButtonImage.drawable = if (Scheduler.isRunning()) {
-                schedulerOffDrawable
-            } else {
-                schedulerOnDrawable
-            }
+            schedulerButtonImage.drawable = if (Scheduler.isRunning()) schedulerOffDrawable else schedulerOnDrawable
             menuStage.act()
             menuStage.draw()
         }
@@ -166,6 +164,7 @@ class Menu(batch: Batch) {
             return
         }
         Configuration.loadConfiguration(configFile.readText())
+        screen?.resetCamera()
     }
 
     /** Opens a file selector window. The user can select a file where the current configuration is to be saved. */

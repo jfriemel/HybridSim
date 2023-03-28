@@ -16,15 +16,17 @@ import ktx.graphics.use
 import ktx.log.logger
 import kotlin.math.*
 
-// Squeeze factor to make the triangles equilateral (the texture is stretched horizontally)
-val X_SCALE = sqrt(3f) / 2f
-
 private val logger = logger<SimScreen>()
 
+private const val INITIAL_ZOOM = 16f  // Reasonable initial zoom level
+
 class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
+    // Squeeze factor to make the triangles equilateral (the texture is stretched horizontally)
+    private val xScale = sqrt(3f) / 2f
+
     private val camera = OrthographicCamera()
     private val viewport = ScreenViewport(camera).apply {
-        unitsPerPixel = 16f  // Reasonable initial zoom level
+        unitsPerPixel = INITIAL_ZOOM
     }
 
     // Background texture (triangular lattice)
@@ -66,6 +68,10 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     // How much the map moves per frame, only relevant when arrow keys are pressed
     var xMomentum = 0
     var yMomentum = 0
+
+    init {
+        menu.screen = this
+    }
 
     override fun render(delta: Float) {
         // Move the map when arrow keys are pressed
@@ -135,7 +141,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
 
     /** Move the scene in specified direction ([xDir], [yDir]). */
     fun move(xDir: Int, yDir: Int) {
-        xPos += viewport.unitsPerPixel * xDir / X_SCALE
+        xPos += viewport.unitsPerPixel * xDir / xScale
         yPos += viewport.unitsPerPixel * yDir
         setEntityScreenPositions(Configuration.tiles)
         setEntityScreenPositions(Configuration.robots)
@@ -145,23 +151,45 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
 
     /** Converts screen / pixel coordinates ([screenX], [screenY]) to a node. */
     fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Node {
-        val x = round(((viewport.unitsPerPixel / X_SCALE) * screenX + xPos) / pixelUnitDistance).toInt()
+        val x = round(((viewport.unitsPerPixel / xScale) * screenX + xPos) / pixelUnitDistance).toInt()
         val offset = if (x.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
         val y = round((viewport.unitsPerPixel * screenY + yPos) / pixelUnitDistance + offset).toInt()
         return Node(x, y)
     }
 
+    /** Resets the zoom level and points the camera to the centre of the tile configuration or the origin. */
+    fun resetCamera() {
+        // Reset zoom level
+        zoom(INITIAL_ZOOM - viewport.unitsPerPixel)
+
+        // Reset camera position
+        xPos = 0f
+        yPos = 0f
+
+        // Point camera to centre of tile configuration or origin if no tiles exist
+        val tileNodes = Configuration.tiles.keys
+        val centerNode = if (tileNodes.isEmpty()) {
+            Node.origin
+        } else {
+            val centerX = (tileNodes.minOf { it.x } + tileNodes.maxOf { it.x }) / 2
+            val centerY = (tileNodes.minOf { it.y } + tileNodes.maxOf { it.y }) / 2
+            Node(centerX, centerY)
+        }
+        val coords = nodeCoordsToScreenCoords(centerNode.x, centerNode.y)
+        move(- width / 2 + coords.first, - height / 2 + coords.second)
+    }
+
     /** Converts node coordinates ([nodeX], [nodeY]) to screen / pixel coordinates (x, y). */
     private fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
         val offset = if (nodeX.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
-        val x = round((nodeX * pixelUnitDistance - xPos) * X_SCALE / viewport.unitsPerPixel)
+        val x = round((nodeX * pixelUnitDistance - xPos) * xScale / viewport.unitsPerPixel)
         val y = round(((nodeY - offset) * pixelUnitDistance - yPos) / viewport.unitsPerPixel)
         return Pair(x.toInt(), y.toInt())
     }
 
     /** Moves the background texture to correspond to the current x and y position of the scene. */
     private fun moveBackground() {
-        val width = ceil(viewport.unitsPerPixel * width / X_SCALE)
+        val width = ceil(viewport.unitsPerPixel * width / xScale)
         val height = ceil(viewport.unitsPerPixel * height)
         bkgSprite.setRegion(xPos.toInt(), yPos.toInt(), width.toInt(), height.toInt())
     }

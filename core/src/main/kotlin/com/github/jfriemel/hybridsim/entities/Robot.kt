@@ -3,10 +3,11 @@ package com.github.jfriemel.hybridsim.entities
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.beust.klaxon.Json
 import com.github.jfriemel.hybridsim.system.Configuration
+import kotlin.random.Random
 
 open class Robot(
-    val orientation: Int,
     node: Node,
+    val orientation: Int = Random.nextInt(0, 6),
     sprite: Sprite? = null,
     @Json(ignored = true) var carriesTile: Boolean = false,
     @Json(ignored = true) var numPebbles: Int = 0,

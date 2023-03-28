@@ -1,16 +1,16 @@
 /* Compact layer traversal algorithm from https://ris.uni-paderborn.de/record/25126 */
 
-fun getRobot(orientation: Int, node: Node): Robot {
-    return RobotImpl(orientation, node)
+fun getRobot(node: Node, orientation: Int): Robot {
+    return RobotImpl(node, orientation)
 }
 
 private enum class Phase {
     TraverseColumn, ReturnSouth, TraverseBoundary
 }
 
-class RobotImpl(orientation: Int, node: Node) : Robot(
-    orientation = orientation,
+class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
+    orientation = orientation,
     carriesTile = false,
     numPebbles = 0,
     maxPebbles = 0

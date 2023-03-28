@@ -1,16 +1,16 @@
 /* Single-robot block formation algorithm from https://doi.org/10.1007/s11047-019-09774-2 */
 
-fun getRobot(orientation: Int, node: Node): Robot {
-    return RobotImpl(orientation, node)
+fun getRobot(node: Node, orientation: Int): Robot {
+    return RobotImpl(node, orientation)
 }
 
 private enum class Phase {
     FindTile, MoveTile, Finished
 }
 
-class RobotImpl(orientation: Int, node: Node) : Robot(
-    orientation = orientation,
+class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
+    orientation = orientation,
     carriesTile = false,
     numPebbles = 0,
     maxPebbles = 0

@@ -9,8 +9,9 @@ fun main() {
     Lwjgl3Application(Main(), Lwjgl3ApplicationConfiguration().apply {
         setTitle("HybridSim")
         useVsync(true)
-        setForegroundFPS(Lwjgl3ApplicationConfiguration.getDisplayMode().refreshRate)
-        setWindowedMode(1024, 768)
+        val displayMode = Lwjgl3ApplicationConfiguration.getDisplayMode()
+        setForegroundFPS(displayMode.refreshRate)
+        setWindowedMode(displayMode.width * 8 / 10, displayMode.height * 8 / 10)
         setWindowIcon("icon128.png", "icon64.png", "icon32.png", "icon16.png")
     })
 }

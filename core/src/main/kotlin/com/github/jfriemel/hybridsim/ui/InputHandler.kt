@@ -13,7 +13,6 @@ import ktx.log.logger
 import java.lang.Exception
 import java.nio.file.Paths
 import java.time.LocalDateTime
-import kotlin.random.Random
 
 private val logger = logger<InputHandler>()
 
@@ -61,7 +60,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
 
             Input.Keys.F2 -> {  // Take a screenshot
                 try {
-                    val time = LocalDateTime.now().toString().replace(':', '-').split(".")[0]
+                    val time = LocalDateTime.now().toString().split(".")[0].replace(':', '-')
                     val path = Paths.get(System.getProperty("user.dir"), "screenshots", "$time.png")
                     takeScreenshot(FileHandle(path.toFile()))
                     logger.debug { "Screenshot: $path" }
@@ -86,11 +85,12 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         when (character) {
             '+' -> screen.zoom(-1f)
             '-' -> screen.zoom(1f)
+            '0' -> screen.resetCamera()
             'f', 'F' -> toggleFullscreen()
             'm', 'M' -> menu.active = !menu.active
             'l', 'L' -> menu.loadConfiguration()
-            'k', 'K' -> menu.saveConfiguration()
-            'x', 'X' -> menu.loadAlgorithm()
+            's', 'S' -> menu.saveConfiguration()
+            'a', 'A' -> menu.loadAlgorithm()
             't', 'T' -> menu.togglePutTiles()
             'r', 'R' -> menu.togglePutRobots()
             'z', 'Z' -> menu.toggleSelectTarget()
@@ -107,7 +107,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 } else if (menu.putTiles && node !in Configuration.tiles) {
                     Configuration.addTile(Tile(node), node)
                 } else if (menu.putRobots && node !in Configuration.robots) {
-                    val robot = AlgorithmLoader.getAlgorithmRobot(Robot(Random.nextInt(0, 6), node))
+                    val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
                     Configuration.addRobot(robot, node)
                 } else if (menu.selectTarget && node !in Configuration.targetNodes) {
                     Configuration.addTarget(node)
@@ -153,7 +153,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             if (menu.putTiles && node !in Configuration.tiles) {
                 Configuration.addTile(Tile(node), node)
             } else if (menu.putRobots && node !in Configuration.robots) {
-                val robot = AlgorithmLoader.getAlgorithmRobot(Robot(Random.nextInt(0, 6), node))
+                val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
                 Configuration.addRobot(robot, node)
             } else if (menu.selectTarget && node !in Configuration.targetNodes) {
                 Configuration.addTarget(node)
@@ -181,7 +181,8 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
 
     private fun toggleFullscreen() {
         if (Gdx.graphics.isFullscreen) {
-            Gdx.graphics.setWindowedMode(1024, 768)
+            // Scale down
+            Gdx.graphics.setWindowedMode(Gdx.graphics.width * 8 / 10, Gdx.graphics.height * 8 / 10)
         } else {
             Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
         }
