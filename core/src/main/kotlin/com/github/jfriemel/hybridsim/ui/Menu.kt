@@ -55,6 +55,8 @@ class Menu(batch: Batch) {
     private var buttonPutRobots: TextButton
     private var buttonSelectTarget: TextButton
     private var buttonToggleScheduler: KTextButton
+    private var buttonUndo: KTextButton
+    private var buttonRedo: KTextButton
     private var sliderScheduler: Slider
 
     private val schedulerOnDrawable =
@@ -65,7 +67,14 @@ class Menu(batch: Batch) {
         TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_off.png"), true).apply {
             setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
         })
+    private var undoTexture = Texture(Gdx.files.internal("ui/undo.png"), true).apply {
+        setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
+    }
+    private var undoDrawable = TextureRegionDrawable(undoTexture)
+    private var redoDrawable = TextureRegionDrawable(undoTexture).apply { region.flip(true, false) }
     private var schedulerButtonImage: Image
+    private var undoButtonImage: Image
+    private var redoButtonImage: Image
 
     // File extension filters for the files used by the simulator
     private val jsonFilter = FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
@@ -75,25 +84,35 @@ class Menu(batch: Batch) {
         actors {
             table {
                 setFillParent(true)
-                defaults().pad(2f)
-                add(label("Menu (M)")).actor.color = Color.BLACK
+                defaults().pad(2f).colspan(3)
+                label("Menu (M)").color = Color.BLACK
                 row()
-                buttonLoadConfig = add(textButton("Load Configuration (L)")).width(BUTTON_WIDTH).actor
+                buttonLoadConfig = textButton("Load Configuration (L)").cell(width = BUTTON_WIDTH)
                 row()
-                buttonSaveConfig = add(textButton("Save Configuration (S)")).width(BUTTON_WIDTH).actor
+                buttonSaveConfig = textButton("Save Configuration (S)").cell(width = BUTTON_WIDTH)
                 row()
-                buttonLoadAlgorithm = add(textButton("Load Algorithm (A)")).width(BUTTON_WIDTH).actor
+                buttonLoadAlgorithm = textButton("Load Algorithm (A)").cell(width = BUTTON_WIDTH)
                 row()
-                buttonPutTiles = add(textButton("Put Tiles (T)")).width(BUTTON_WIDTH).actor
+                buttonPutTiles = textButton("Put Tiles (T)").cell(width = BUTTON_WIDTH)
                 row()
-                buttonPutRobots = add(textButton("Put Robots (R)")).width(BUTTON_WIDTH).actor
+                buttonPutRobots = textButton("Put Robots (R)").cell(width = BUTTON_WIDTH)
                 row()
-                buttonSelectTarget = add(textButton("Select Target Nodes (Z)")).width(BUTTON_WIDTH).actor
+                buttonSelectTarget = textButton("Select Target Nodes (Z)").cell(width = BUTTON_WIDTH)
                 row()
-                buttonToggleScheduler =
-                    add(textButton("").apply { schedulerButtonImage = image(schedulerOnDrawable) }).actor
+                buttonUndo = textButton("") {
+                    cell(colspan = 1)
+                    undoButtonImage = image(undoDrawable)
+                }
+                buttonToggleScheduler = textButton("") {
+                    cell(colspan = 1)
+                    schedulerButtonImage = image(schedulerOnDrawable)
+                }
+                buttonRedo = textButton("") {
+                    cell(colspan = 1)
+                    redoButtonImage = image(redoDrawable)
+                }
                 row()
-                sliderScheduler = add(slider(0f, 100f)).width(BUTTON_WIDTH).actor
+                sliderScheduler = slider(0f, 100f).cell(width = BUTTON_WIDTH)
             }
         }
     }
@@ -112,6 +131,9 @@ class Menu(batch: Batch) {
         buttonPutTiles.onClick { if (active) togglePutTiles() }
         buttonPutRobots.onClick { if (active) togglePutRobots() }
         buttonSelectTarget.onClick { if (active) toggleSelectTarget() }
+
+        buttonUndo.onClick { if (active) Configuration.undo() }
+        buttonRedo.onClick { if (active) Configuration.redo() }
 
         buttonToggleScheduler.onClick {
             if (!active) return@onClick
@@ -141,6 +163,8 @@ class Menu(batch: Batch) {
                 buttonLoadAlgorithm.color = buttonColorDefault
             }
             schedulerButtonImage.drawable = if (Scheduler.isRunning()) schedulerOffDrawable else schedulerOnDrawable
+            buttonUndo.color = if (Configuration.undoSteps() > 0) buttonColorDefault else buttonColorDisabled
+            buttonRedo.color = if (Configuration.redoSteps() > 0) buttonColorDefault else buttonColorDisabled
             menuStage.act()
             menuStage.draw()
         }
@@ -149,7 +173,7 @@ class Menu(batch: Batch) {
     /** Called when the window is resized to ensure that the menu remains at the right-hand side of the screen. */
     fun resize(width: Int, height: Int) {
         menuStage.viewport.update(width, height, true)
-        menuStage.actors.get(0).setPosition(width / 2f - BUTTON_WIDTH - 6f, 0f)
+        menuStage.actors.get(0).setPosition((width - BUTTON_WIDTH) / 2f - 6f, 0f)
     }
 
     /** Opens a file selector window. The user can select a configuration file (JSON format) to be loaded. */

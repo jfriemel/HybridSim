@@ -31,52 +31,66 @@ object Configuration {
 
     /** Add a [tile] to the given [node]. */
     fun addTile(tile: Tile, node: Node) {
-        addToQueue(undoQueue)
+        addToUndoQueue()
         tiles[node] = tile
     }
 
     /** Remove the [Tile] at the given [node] if it exists. */
     fun removeTile(node: Node) {
-        addToQueue(undoQueue)
+        addToUndoQueue()
         tiles.remove(node)
     }
 
     /** Add a [robot] to the given [node]. */
     fun addRobot(robot: Robot, node: Node) {
-        addToQueue(undoQueue)
+        addToUndoQueue()
         robots[node] = robot
     }
 
     /** Remove the [Robot] at the given [node] if it exists. */
     fun removeRobot(node: Node) {
-        addToQueue(undoQueue)
+        addToUndoQueue()
         robots.remove(node)
     }
 
     /** Move the [Robot] at [startNode] to [nextNode] if it exists. */
     fun moveRobot(startNode: Node, nextNode: Node) {
-        addToQueue(undoQueue)
+        addToUndoQueue()
         val robot = robots.remove(startNode) ?: return
         robots[nextNode] = robot
     }
 
     /** Add the given [node] to the target area. */
     fun addTarget(node: Node) {
-        addToQueue(undoQueue)
+        addToUndoQueue()
         targetNodes.add(node)
     }
 
     /** Remove the given [node] from the target area. */
     fun removeTarget(node: Node) {
-        addToQueue(undoQueue)
+        addToUndoQueue()
         targetNodes.remove(node)
     }
 
+    /** Undo the last operation that affected the [Configuration]. Returns true if undo was successful. */
+    fun undo() = undo(undoQueue, redoQueue)
+
+    /** Revert last undo. Returns true if redo was successful. */
+    fun redo(): Boolean = undo(redoQueue, undoQueue)
+
+    /** @return Number of steps that can be undone. */
+    fun undoSteps(): Int = undoQueue.size
+
+    /** @return Number of steps that can be redone. */
+    fun redoSteps(): Int = redoQueue.size
+
     /**
-     * Undo/redo last operation that affected the configuration (default: undo).
-     * Set [uq] to redoStates and [rq] to undoStates for redo (see fun redo() below).
+     * Undo/redo the last operation that affected the [Configuration].
+     * For undo: [uq] := [undoQueue], [rq] := [redoQueue]
+     * For redo: [uq] := [redoQueue], [rq] := [undoQueue]
+     * @return True if undo/redo was successful.
      */
-    fun undo(uq: Deque<TimeState> = undoQueue, rq: Deque<TimeState> = redoQueue): Boolean {
+    private fun undo(uq: Deque<TimeState>, rq: Deque<TimeState>): Boolean {
         if (uq.size == 0) {
             return false
         }
@@ -88,10 +102,7 @@ object Configuration {
         return true
     }
 
-    /** Revert last undo. */
-    fun redo(): Boolean = undo(redoQueue, undoQueue)
-
-    /** Take a [json] string and load the configuration from that string. */
+    /** Take a [json] string and load the [Configuration] from that string. */
     fun loadConfiguration(json: String) {
         Scheduler.stop()
         Klaxon().parse<Configuration>(json = json)
@@ -107,16 +118,22 @@ object Configuration {
         clearUndoQueues()
     }
 
-    /** Convert the current configuration string to a JSON string that can be saved to a file. */
+    /** Convert the current [Configuration] string to a JSON string that can be saved to a file. */
     fun getJson(): String = Klaxon().toJsonString(Configuration)
 
-    /** To avoid unexpected behaviour, the undo/redo queues can be cleared when loading configurations/algorithms. */
+    /** To avoid unexpected behaviour, the undo/redo queues can be cleared when loading [Configuration]s/algorithms. */
     fun clearUndoQueues() {
         undoQueue.clear()
         redoQueue.clear()
     }
 
-    /** Add the current state of the configuration to the given undo/redo [queue]. */
+    /** Add the current state of the [Configuration] to the [undoQueue], clear the [redoQueue]. */
+    private fun addToUndoQueue() {
+        addToQueue(undoQueue)
+        redoQueue.clear()
+    }
+
+    /** Add the current state of the [Configuration] to the given undo/redo [queue]. */
     private fun addToQueue(queue: Deque<TimeState>) {
         if (queue.size == MAX_UNDO_STATES) {  // Keep memory consumption in check
             queue.removeFirst()
