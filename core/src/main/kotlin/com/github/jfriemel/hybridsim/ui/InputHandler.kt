@@ -39,7 +39,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             Input.Keys.ESCAPE -> {  // Emergency handbrake, basically stop everything
                 Scheduler.stop()
                 menu.untoggleToggleButtons()
-                menu.active = true
+                if (!menu.isActive()) {
+                    menu.toggleActive()
+                }
                 if (Gdx.graphics.isFullscreen) {
                     Gdx.graphics.setWindowedMode(1024, 768)
                 }
@@ -87,7 +89,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             '-' -> screen.zoom(1f)
             '0' -> screen.resetCamera()
             'f', 'F' -> toggleFullscreen()
-            'm', 'M' -> menu.active = !menu.active
+            'm', 'M' -> menu.toggleActive()
             'l', 'L' -> menu.loadConfiguration()
             's', 'S' -> menu.saveConfiguration()
             'a', 'A' -> menu.loadAlgorithm()

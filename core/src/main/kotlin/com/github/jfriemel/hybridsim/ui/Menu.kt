@@ -5,11 +5,14 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Slider
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.Main
@@ -39,13 +42,13 @@ class Menu(batch: Batch) {
 
     var screen: SimScreen? = null
 
-    // Indicates whether the menu is shown on the screen
-    var active = true
-
     // When active, tiles/robots/target nodes can be added/removed by mouse clicks
     var putTiles = false
     var putRobots = false
     var selectTarget = false
+
+    // Indicates whether the menu is shown on the screen
+    private var active = true
 
     // All menu buttons
     private var buttonLoadConfig: TextButton
@@ -54,11 +57,12 @@ class Menu(batch: Batch) {
     private var buttonPutTiles: TextButton
     private var buttonPutRobots: TextButton
     private var buttonSelectTarget: TextButton
-    private var buttonToggleScheduler: KTextButton
-    private var buttonUndo: KTextButton
-    private var buttonRedo: KTextButton
+    private var buttonToggleScheduler: TextButton
+    private var buttonUndo: TextButton
+    private var buttonRedo: TextButton
     private var sliderScheduler: Slider
 
+    // Textures for the scheduler and undo/redo buttons
     private val schedulerOnDrawable =
         TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_on.png"), true).apply {
             setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
@@ -84,38 +88,57 @@ class Menu(batch: Batch) {
         actors {
             table {
                 setFillParent(true)
-                defaults().pad(2f).colspan(3)
-                label("Menu (M)").color = Color.BLACK
+                defaults().pad(2f).colspan(3).width(BUTTON_WIDTH)
+                label("Menu (M)") {
+                    color = Color.BLACK
+                    setAlignment(Align.center)
+                }
                 row()
-                buttonLoadConfig = textButton("Load Configuration (L)").cell(width = BUTTON_WIDTH)
+                buttonLoadConfig = textButton("Load Configuration (L)")
                 row()
-                buttonSaveConfig = textButton("Save Configuration (S)").cell(width = BUTTON_WIDTH)
+                buttonSaveConfig = textButton("Save Configuration (S)")
                 row()
-                buttonLoadAlgorithm = textButton("Load Algorithm (A)").cell(width = BUTTON_WIDTH)
+                buttonLoadAlgorithm = textButton("Load Algorithm (A)")
                 row()
-                buttonPutTiles = textButton("Put Tiles (T)").cell(width = BUTTON_WIDTH)
+                buttonPutTiles = textButton("Put Tiles (T)")
                 row()
-                buttonPutRobots = textButton("Put Robots (R)").cell(width = BUTTON_WIDTH)
+                buttonPutRobots = textButton("Put Robots (R)")
                 row()
-                buttonSelectTarget = textButton("Select Target Nodes (Z)").cell(width = BUTTON_WIDTH)
+                buttonSelectTarget = textButton("Select Target Nodes (Z)")
                 row()
                 buttonUndo = textButton("") {
-                    cell(colspan = 1)
                     undoButtonImage = image(undoDrawable)
+                    cell(colspan = 1, width = undoButtonImage.width)
                 }
                 buttonToggleScheduler = textButton("") {
-                    cell(colspan = 1)
                     schedulerButtonImage = image(schedulerOnDrawable)
+                    cell(colspan = 1, width = schedulerButtonImage.width)
                 }
                 buttonRedo = textButton("") {
-                    cell(colspan = 1)
                     redoButtonImage = image(redoDrawable)
+                    cell(colspan = 1, width = redoButtonImage.width)
                 }
                 row()
-                sliderScheduler = slider(0f, 100f).cell(width = BUTTON_WIDTH)
+                sliderScheduler = slider(0f, 100f)
             }
         }
     }
+
+    // An array of all clickable UI elements for to easily enable / disable all at once
+    private val inputElements: Array<Actor> = arrayOf(
+        buttonLoadConfig,
+        buttonSaveConfig,
+        buttonLoadAlgorithm,
+        buttonPutTiles,
+        buttonPutRobots,
+        buttonSelectTarget,
+        buttonToggleScheduler,
+        buttonUndo,
+        buttonRedo,
+        sliderScheduler,
+    )
+    private val fileChooserButtons = arrayOf(buttonLoadConfig, buttonSaveConfig, buttonLoadAlgorithm)
+    private val toggleButtons = arrayOf(buttonPutTiles, buttonPutRobots, buttonSelectTarget)
 
     init {
         try {
@@ -150,21 +173,56 @@ class Menu(batch: Batch) {
         sliderScheduler.value = max(0f, 100f - sqrt(Scheduler.getIntervalTime().toFloat()))
     }
 
+    /** @return True if the menu is active (i.e. visible). */
+    fun isActive(): Boolean = active
+
+    /** Toggles the visibility of the menu. */
+    fun toggleActive() {
+        active = !active
+        if (active) {
+            inputElements.forEach { it.touchable = Touchable.enabled }
+            fileChooserButtons.forEach { it.color = buttonColorDefault }
+        } else {
+            inputElements.forEach { it.touchable = Touchable.disabled }
+        }
+    }
+
     /** Called when a frame is rendered to draw the menu. Menu is only drawn when [active] is true. */
     fun draw() {
         if (active) {
-            if (Gdx.graphics.isFullscreen) {
-                buttonLoadConfig.color = buttonColorDisabled
-                buttonSaveConfig.color = buttonColorDisabled
-                buttonLoadAlgorithm.color = buttonColorDisabled
-            } else {
-                buttonLoadConfig.color = buttonColorDefault
-                buttonSaveConfig.color = buttonColorDefault
-                buttonLoadAlgorithm.color = buttonColorDefault
+            // Enable / disable file chooser buttons
+            if (Gdx.graphics.isFullscreen && fileChooserButtons.any { it.isTouchable }) {
+                fileChooserButtons.forEach { button ->
+                    button.color = buttonColorDisabled
+                    button.touchable = Touchable.disabled
+                }
+            } else if (!Gdx.graphics.isFullscreen && fileChooserButtons.any { !it.isTouchable }) {
+                fileChooserButtons.forEach { button ->
+                    button.color = buttonColorDefault
+                    button.touchable = Touchable.enabled
+                }
             }
+
+            // Choose correct texture for scheduler button
             schedulerButtonImage.drawable = if (Scheduler.isRunning()) schedulerOffDrawable else schedulerOnDrawable
-            buttonUndo.color = if (Configuration.undoSteps() > 0) buttonColorDefault else buttonColorDisabled
-            buttonRedo.color = if (Configuration.redoSteps() > 0) buttonColorDefault else buttonColorDisabled
+
+            // Enable / disable undo / redo buttons
+            if (Configuration.undoSteps() <= 0 && buttonUndo.isTouchable) {
+                buttonUndo.color = buttonColorDisabled
+                buttonUndo.touchable = Touchable.disabled
+            } else if (Configuration.undoSteps() > 0 && !buttonUndo.isTouchable) {
+                buttonUndo.color = buttonColorDefault
+                buttonUndo.touchable = Touchable.enabled
+            }
+            if (Configuration.redoSteps() <= 0 && buttonRedo.isTouchable) {
+                buttonRedo.color = buttonColorDisabled
+                buttonRedo.touchable = Touchable.disabled
+            } else if (Configuration.redoSteps() > 0 && !buttonRedo.isTouchable) {
+                buttonRedo.color = buttonColorDefault
+                buttonRedo.touchable = Touchable.enabled
+            }
+
+            // Draw the menu
             menuStage.act()
             menuStage.draw()
         }
@@ -176,7 +234,7 @@ class Menu(batch: Batch) {
         menuStage.actors.get(0).setPosition((width - BUTTON_WIDTH) / 2f - 6f, 0f)
     }
 
-    /** Opens a file selector window. The user can select a configuration file (JSON format) to be loaded. */
+    /** Opens a file selector window. The user can select a [Configuration] file (JSON format) to be loaded. */
     fun loadConfiguration() {
         if (Gdx.graphics.isFullscreen) return
 
@@ -189,7 +247,7 @@ class Menu(batch: Batch) {
         screen?.resetCamera()
     }
 
-    /** Opens a file selector window. The user can select a file where the current configuration is to be saved. */
+    /** Opens a file selector window. The user can select a file where the current [Configuration] is to be saved. */
     fun saveConfiguration() {
         if (Gdx.graphics.isFullscreen) return
 
@@ -239,14 +297,12 @@ class Menu(batch: Batch) {
         buttonSelectTarget.color = if (selectTarget) buttonColorToggled else buttonColorDefault
     }
 
-    /** Deactivates all toggle buttons. */
+    /** Untoggles all toggle buttons. */
     fun untoggleToggleButtons() {
         putTiles = false
         putRobots = false
         selectTarget = false
-        buttonPutTiles.color = buttonColorDefault
-        buttonPutRobots.color = buttonColorDefault
-        buttonSelectTarget.color = buttonColorDefault
+        toggleButtons.forEach { it.color = buttonColorDefault }
     }
 
     /**

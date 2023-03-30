@@ -44,8 +44,8 @@ object AlgorithmLoader {
 
     /** Returns a [Robot] with the most recently loaded algorithm and the same properties as the given [robot]. */
     fun getAlgorithmRobot(robot: Robot): Robot {
-        return invocator?.let {
-            it.invokeFunction("getRobot", robot.node, robot.orientation) as Robot
+        return invocator?.let { inv ->
+            inv.invokeFunction("getRobot", robot.node, robot.orientation) as Robot
         } ?: robot
     }
 }
