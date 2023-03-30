@@ -12,11 +12,8 @@ object Scheduler {
     private var cycleDelay = 100L  // Delay after completion of each activation cycle in ms
     private var activationsPerCycle = 1  // Number of activations per scheduler cycle
 
-    /** Returns true if the scheduler is running. */
-    @Suppress("Unused")
-    fun isRunning(): Boolean {
-        return active
-    }
+    /** @return True if the scheduler is running. */
+    fun isRunning(): Boolean = active
 
     /** Starts the scheduler. */
     @SuppressWarnings("WeakerAccess")
@@ -59,10 +56,8 @@ object Scheduler {
         }
     }
 
-    /** Returns the (expected) interval time between robot activations in 0.1ms. */
-    fun getIntervalTime(): Long {
-        return cycleDelay * 10 / activationsPerCycle
-    }
+    /** @return The (expected) interval time between robot activations in 0.1ms. */
+    fun getIntervalTime(): Long = cycleDelay * 10 / activationsPerCycle
 
     /** Infinite loop running in a separate coroutine, performs the actual scheduling. */
     suspend fun run() {
@@ -90,7 +85,7 @@ object Scheduler {
                 stop()
             }
 
-            // Sleep for a short period between cycles
+            // Sleep for a specified period (ms) between cycles
             delay(cycleDelay)
         }
     }

@@ -3,7 +3,7 @@ package com.github.jfriemel.hybridsim.entities
 data class Node(val x: Int, val y: Int) {
 
     /**
-     * Finds and returns the node in the given global direction [dir].
+     * Finds and returns the [Node] in the given global direction [dir].
      * Directions start at N and go clockwise: 0 = N, 1 = NE, 2 = SE, 3 = S, 4 = SW, 5 = NW.
      */
     fun nodeInDir(dir: Int): Node {
@@ -15,7 +15,7 @@ data class Node(val x: Int, val y: Int) {
 
     /**
      * Converts the node's internal integer coordinates to scientific coordinates as used in the hybrid model
-     * literature. Returns scientific coordinates as a pair (x, y).
+     * literature. Returns scientific coordinates as a [Pair] (x, y).
      * See: https://doi.org/10.1007/s11047-019-09774-2
      */
     fun scientificCoordinates(): Pair<Double, Double> {
@@ -25,10 +25,9 @@ data class Node(val x: Int, val y: Int) {
     }
 
     companion object {
-        @Suppress("Unused")
         val origin = Node(0, 0)
 
-        /** @return A node corresponding to the given scientific node coordinates ([scx], [scy]). */
+        /** @return A [Node] corresponding to the given scientific node coordinates ([scx], [scy]). */
         @Suppress("Unused")
         fun sciCoordsToNode(scx: Double, scy: Double): Node {
             val x = scx.toInt()

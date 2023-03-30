@@ -35,7 +35,7 @@ object Configuration {
         tiles[node] = tile
     }
 
-    /** Remove the tile at the given [node]. */
+    /** Remove the [Tile] at the given [node] if it exists. */
     fun removeTile(node: Node) {
         addToQueue(undoQueue)
         tiles.remove(node)
@@ -47,13 +47,13 @@ object Configuration {
         robots[node] = robot
     }
 
-    /** Remove the robot at the given [node]. */
+    /** Remove the [Robot] at the given [node] if it exists. */
     fun removeRobot(node: Node) {
         addToQueue(undoQueue)
         robots.remove(node)
     }
 
-    /** Move the robot at [startNode] to [nextNode]. */
+    /** Move the [Robot] at [startNode] to [nextNode] if it exists. */
     fun moveRobot(startNode: Node, nextNode: Node) {
         addToQueue(undoQueue)
         val robot = robots.remove(startNode) ?: return
@@ -74,7 +74,7 @@ object Configuration {
 
     /**
      * Undo/redo last operation that affected the configuration (default: undo).
-     * Set [uq] to redoStates and [rq] to undoStates for redo.
+     * Set [uq] to redoStates and [rq] to undoStates for redo (see fun redo() below).
      */
     fun undo(uq: Deque<TimeState> = undoQueue, rq: Deque<TimeState> = redoQueue): Boolean {
         if (uq.size == 0) {
@@ -108,9 +108,7 @@ object Configuration {
     }
 
     /** Convert the current configuration string to a JSON string that can be saved to a file. */
-    fun getJson(): String {
-        return Klaxon().toJsonString(Configuration)
-    }
+    fun getJson(): String = Klaxon().toJsonString(Configuration)
 
     /** To avoid unexpected behaviour, the undo/redo queues can be cleared when loading configurations/algorithms. */
     fun clearUndoQueues() {

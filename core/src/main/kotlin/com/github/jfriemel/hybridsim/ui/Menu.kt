@@ -105,18 +105,17 @@ class Menu(batch: Batch) {
             logger.error { "Could not set UI look to system look" }
             logger.error { "Exception: $e" }
         }
+        buttonLoadConfig.onClick { if (active) loadConfiguration() }
+        buttonSaveConfig.onClick { if (active) saveConfiguration() }
+        buttonLoadAlgorithm.onClick { if (active) loadAlgorithm() }
 
-        buttonLoadConfig.onClick { loadConfiguration() }
-        buttonSaveConfig.onClick { saveConfiguration() }
-        buttonLoadAlgorithm.onClick { loadAlgorithm() }
-
-        buttonPutTiles.onClick { togglePutTiles() }
-        buttonPutRobots.onClick { togglePutRobots() }
-        buttonSelectTarget.onClick { toggleSelectTarget() }
+        buttonPutTiles.onClick { if (active) togglePutTiles() }
+        buttonPutRobots.onClick { if (active) togglePutRobots() }
+        buttonSelectTarget.onClick { if (active) toggleSelectTarget() }
 
         buttonToggleScheduler.onClick {
             if (!active) return@onClick
-            deactivateToggleButtons()
+            untoggleToggleButtons()
             Scheduler.toggle()
         }
         sliderScheduler.onChange {
@@ -155,9 +154,8 @@ class Menu(batch: Batch) {
 
     /** Opens a file selector window. The user can select a configuration file (JSON format) to be loaded. */
     fun loadConfiguration() {
-        if (!active || Gdx.graphics.isFullscreen) {
-            return
-        }
+        if (Gdx.graphics.isFullscreen) return
+
         val configFile = getFile(jsonFilter) ?: return
         if (!configFile.exists()) {
             logger.error { "Cannot load configuration, selected file $configFile does not exist" }
@@ -169,9 +167,8 @@ class Menu(batch: Batch) {
 
     /** Opens a file selector window. The user can select a file where the current configuration is to be saved. */
     fun saveConfiguration() {
-        if (!active || Gdx.graphics.isFullscreen) {
-            return
-        }
+        if (Gdx.graphics.isFullscreen) return
+
         var configFile = getFile(jsonFilter) ?: return
         if (configFile.extension != "json") {
             configFile = File(configFile.absolutePath.plus(".json"))
@@ -181,9 +178,8 @@ class Menu(batch: Batch) {
 
     /** Opens a file selector window. The user can select an algorithm file (kts script) to be loaded. */
     fun loadAlgorithm() {
-        if (!active || Gdx.graphics.isFullscreen) {
-            return
-        }
+        if (Gdx.graphics.isFullscreen) return
+
         val algorithmFile = getFile(algoFilter) ?: return
         if (!algorithmFile.exists()) {
             logger.error { "Cannot load algorithm, selected file $algorithmFile does not exist" }
@@ -194,42 +190,33 @@ class Menu(batch: Batch) {
 
     /** Toggles whether tiles should be placed by a mouse click. */
     fun togglePutTiles() {
-        if (!active) {
-            return
-        }
         Scheduler.stop()
         val nextBool = !putTiles
-        deactivateToggleButtons()
+        untoggleToggleButtons()
         putTiles = nextBool
         buttonPutTiles.color = if (putTiles) buttonColorToggled else buttonColorDefault
     }
 
     /** Toggles whether robots should be placed by a mouse click. */
     fun togglePutRobots() {
-        if (!active) {
-            return
-        }
         Scheduler.stop()
         val nextBool = !putRobots
-        deactivateToggleButtons()
+        untoggleToggleButtons()
         putRobots = nextBool
         buttonPutRobots.color = if (putRobots) buttonColorToggled else buttonColorDefault
     }
 
     /** Toggles whether nodes should be marked as target nodes by a mouse click. */
     fun toggleSelectTarget() {
-        if (!active) {
-            return
-        }
         val nextBool = !selectTarget
         Scheduler.stop()
-        deactivateToggleButtons()
+        untoggleToggleButtons()
         selectTarget = nextBool
         buttonSelectTarget.color = if (selectTarget) buttonColorToggled else buttonColorDefault
     }
 
     /** Deactivates all toggle buttons. */
-    fun deactivateToggleButtons() {
+    fun untoggleToggleButtons() {
         putTiles = false
         putRobots = false
         selectTarget = false
@@ -240,7 +227,7 @@ class Menu(batch: Batch) {
 
     /**
      * Opens a file selector window, [filter] specifies which file endings are allowed.
-     * Returns the selected file or null if no file was selected.
+     * Returns the selected [File] or null if no file was selected.
      */
     private fun getFile(filter: FileNameExtensionFilter): File? {
         val fileChooser = JFileChooser()

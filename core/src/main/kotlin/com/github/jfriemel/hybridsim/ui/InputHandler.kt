@@ -32,13 +32,13 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             Input.Keys.F11 -> toggleFullscreen()
 
             Input.Keys.SPACE -> {
-                menu.deactivateToggleButtons()
+                menu.untoggleToggleButtons()
                 Scheduler.toggle()
             }
 
             Input.Keys.ESCAPE -> {  // Emergency handbrake, basically stop everything
                 Scheduler.stop()
-                menu.deactivateToggleButtons()
+                menu.untoggleToggleButtons()
                 menu.active = true
                 if (Gdx.graphics.isFullscreen) {
                     Gdx.graphics.setWindowedMode(1024, 768)

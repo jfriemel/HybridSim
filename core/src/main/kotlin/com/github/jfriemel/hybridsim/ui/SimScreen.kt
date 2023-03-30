@@ -149,15 +149,16 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         moveBackground()
     }
 
-    /** Converts screen / pixel coordinates ([screenX], [screenY]) to a node. */
+    /** Convert screen / pixel coordinates ([screenX], [screenY]) to a [Node]. */
     fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Node {
+        // Not exact, but good enough
         val x = round(((viewport.unitsPerPixel / xScale) * screenX + xPos) / pixelUnitDistance).toInt()
         val offset = if (x.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
         val y = round((viewport.unitsPerPixel * screenY + yPos) / pixelUnitDistance + offset).toInt()
         return Node(x, y)
     }
 
-    /** Resets the zoom level and points the camera to the centre of the tile configuration or the origin. */
+    /** Reset the zoom level and point the camera to the centre of the [Tile] configuration or the origin. */
     fun resetCamera() {
         // Reset zoom level
         zoom(INITIAL_ZOOM - viewport.unitsPerPixel)
@@ -179,7 +180,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         move(- width / 2 + coords.first, - height / 2 + coords.second)
     }
 
-    /** Converts node coordinates ([nodeX], [nodeY]) to screen / pixel coordinates (x, y). */
+    /** Convert [Node] coordinates ([nodeX], [nodeY]) to a [Pair] of screen / pixel coordinates (x, y). */
     private fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
         val offset = if (nodeX.mod(2) == 0) 0f else 0.5f  // Every second column is slightly offset
         val x = round((nodeX * pixelUnitDistance - xPos) * xScale / viewport.unitsPerPixel)
@@ -187,7 +188,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         return Pair(x.toInt(), y.toInt())
     }
 
-    /** Moves the background texture to correspond to the current x and y position of the scene. */
+    /** Move the background texture to correspond to the current x and y position ([xPos], [yPos]) of the scene. */
     private fun moveBackground() {
         val width = ceil(viewport.unitsPerPixel * width / xScale)
         val height = ceil(viewport.unitsPerPixel * height)
@@ -195,8 +196,8 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     /**
-     * Assigns sprites with the correct textures to all [entities] (robots, tiles) that do not have sprites yet.
-     * Then sets the sprites' screen position variables such that the [entities] are drawn at the correct locations.
+     * Assign sprites with the correct textures to all [entities] ([Robot]s, [Tile]s) that do not have sprites yet.
+     * Then set the sprites' screen position variables such that the [entities] are drawn at the correct locations.
      */
     private fun setEntityScreenPositions(entities: Map<Node, Entity>) {
         for (entity in entities.values) {
@@ -229,8 +230,8 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     /**
-     * Creates sprites for target nodes that do not have sprites yet.
-     * Then sets the sprites' screen position variables such that they are drawn at their nodes' positions.
+     * Create sprites for target nodes that do not have sprites yet.
+     * Then set the sprites' screen position variables such that they are drawn at their nodes' positions.
      */
     private fun setTargetScreenPositions() {
         for (targetNode in Configuration.targetNodes) {

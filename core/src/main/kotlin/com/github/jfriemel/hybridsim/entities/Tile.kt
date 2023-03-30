@@ -55,13 +55,11 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
     }
 
     /** Checks whether the tile has a pebble. */
-    fun hasPebble(): Boolean {
-        return numPebbles > 0
-    }
+    fun hasPebble(): Boolean = numPebbles > 0
 
     companion object {
         val colorDefault: Color = Color.LIGHT_GRAY
-        val colorTarget: Color = Color.CYAN
+        val colorTarget: Color = Color.ROYAL
         val colorNonTarget: Color = Color.CORAL
     }
 }

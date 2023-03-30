@@ -14,8 +14,8 @@ object AlgorithmLoader {
     private var invocator: Invocable? = null
 
     /**
-     * Loads a new algorithm from the [scriptFile] (kts script, see examples). The script implements Robot and overrides
-     * the existing activate() function.
+     * Loads a new algorithm from the [scriptFile] (kts script, see examples). The script implements a [Robot] and
+     * overrides the existing activate() function.
      *
      * Important: The script needs to have a getRobot() function of the following form:
      *     fun getRobot(orientation: Int, node: Node): Robot
@@ -34,7 +34,7 @@ object AlgorithmLoader {
     }
 
     /**
-     * Replaces the robot at the given [node] with the robot from the previously loaded kts script.
+     * Replaces the [Robot] at the given [node] with the robot from the most recently loaded kts script.
      * Does nothing if there is no robot at the [node] or if no kts script was loaded before the call.
      */
     fun replaceRobot(node: Node) {
@@ -42,10 +42,10 @@ object AlgorithmLoader {
         Configuration.robots[node] = getAlgorithmRobot(robot)
     }
 
+    /** Returns a [Robot] with the most recently loaded algorithm and the same properties as the given [robot]. */
     fun getAlgorithmRobot(robot: Robot): Robot {
-        if (invocator == null) {
-            return robot
-        }
-        return invocator!!.invokeFunction("getRobot", robot.node, robot.orientation) as Robot
+        return invocator?.let {
+            it.invokeFunction("getRobot", robot.node, robot.orientation) as Robot
+        } ?: robot
     }
 }
