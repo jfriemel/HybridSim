@@ -29,10 +29,10 @@ object Configuration {
         loadConfiguration("{\"robots\" : {\"Node(x=0, y=0)\": {\"orientation\" : 4, \"node\" : {\"x\" : 0, \"y\" : 0}}}, \"targetNodes\" : [], \"tiles\" : {\"Node(x=0, y=-1)\": {\"node\" : {\"x\" : 0, \"y\" : -1}}, \"Node(x=0, y=0)\": {\"node\" : {\"x\" : 0, \"y\" : 0}}, \"Node(x=1, y=1)\": {\"node\" : {\"x\" : 1, \"y\" : 1}}, \"Node(x=0, y=1)\": {\"node\" : {\"x\" : 0, \"y\" : 1}}, \"Node(x=-1, y=1)\": {\"node\" : {\"x\" : -1, \"y\" : 1}}, \"Node(x=-1, y=0)\": {\"node\" : {\"x\" : -1, \"y\" : 0}}, \"Node(x=1, y=-1)\": {\"node\" : {\"x\" : 1, \"y\" : -1}}, \"Node(x=-1, y=-1)\": {\"node\" : {\"x\" : -1, \"y\" : -1}}}}\n")
     }
 
-    /** Add a [tile] to the given [node]. */
-    fun addTile(tile: Tile, node: Node) {
+    /** Add a [tile] to the configuration at the [tile]'s node. */
+    fun addTile(tile: Tile) {
         addToUndoQueue()
-        tiles[node] = tile
+        tiles[tile.node] = tile
     }
 
     /** Remove the [Tile] at the given [node] if it exists. */
@@ -41,10 +41,10 @@ object Configuration {
         tiles.remove(node)
     }
 
-    /** Add a [robot] to the given [node]. */
-    fun addRobot(robot: Robot, node: Node) {
+    /** Add a [robot] to the configuration at the [robot]'s node. */
+    fun addRobot(robot: Robot) {
         addToUndoQueue()
-        robots[node] = robot
+        robots[robot.node] = robot
     }
 
     /** Remove the [Robot] at the given [node] if it exists. */

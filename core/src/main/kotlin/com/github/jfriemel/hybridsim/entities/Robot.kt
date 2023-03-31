@@ -71,7 +71,7 @@ open class Robot(
         if (isOnTile() || !carriesTile) {
             return false
         }
-        Configuration.addTile(Tile(node), node)
+        Configuration.addTile(Tile(node))
         carriesTile = false
         return true
     }

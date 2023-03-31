@@ -107,10 +107,10 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                     Configuration.robots[node]?.activate()
                 } else if (menu.putTiles && node !in Configuration.tiles) {
-                    Configuration.addTile(Tile(node), node)
+                    Configuration.addTile(Tile(node))
                 } else if (menu.putRobots && node !in Configuration.robots) {
                     val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
-                    Configuration.addRobot(robot, node)
+                    Configuration.addRobot(robot)
                 } else if (menu.selectTarget && node !in Configuration.targetNodes) {
                     Configuration.addTarget(node)
                 } else {
@@ -153,10 +153,10 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             Configuration.robots[node]?.activate()
         } else if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (menu.putTiles && node !in Configuration.tiles) {
-                Configuration.addTile(Tile(node), node)
+                Configuration.addTile(Tile(node))
             } else if (menu.putRobots && node !in Configuration.robots) {
                 val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
-                Configuration.addRobot(robot, node)
+                Configuration.addRobot(robot)
             } else if (menu.selectTarget && node !in Configuration.targetNodes) {
                 Configuration.addTarget(node)
             }
