@@ -6,7 +6,7 @@ buildscript {
 // using jpackage only works if the JDK version is 14 or higher.
 // your JAVA_HOME environment variable may also need to be a JDK with version 14 or higher.
     if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_14)) {
-      classpath "org.beryx:badass-runtime-plugin:1.12.7"
+      classpath "org.beryx:badass-runtime-plugin:1.13.0"
     }
   }
 }
@@ -25,7 +25,7 @@ dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   implementation project(':core')
-  implementation "org.jetbrains.kotlin:kotlin-script-runtime:1.8.10"
+  implementation "org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion"
 }
 
 def os = System.properties['os.name'].toLowerCase()

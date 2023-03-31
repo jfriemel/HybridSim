@@ -3,6 +3,7 @@ package com.github.jfriemel.hybridsim.system
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 import ktx.log.logger
+import java.lang.Long.max
 
 private val logger = logger<Scheduler>()
 
@@ -43,16 +44,13 @@ object Scheduler {
 
     /** Sets the (expected) interval time between robot activations to [intervalTime] * 0.1ms. */
     fun setIntervalTime(intervalTime: Long) {
-        if (intervalTime > 0L) {
-            if (intervalTime < 10L) {
-                cycleDelay = intervalTime
-                activationsPerCycle = 10
-            } else {
-                cycleDelay = intervalTime / 10L
-                activationsPerCycle = 1
-            }
+        val iTime = max(1L, intervalTime)
+        if (iTime < 10L) {
+            cycleDelay = iTime
+            activationsPerCycle = 10
         } else {
-            cycleDelay = 1L
+            cycleDelay = iTime / 10L
+            activationsPerCycle = 1
         }
     }
 

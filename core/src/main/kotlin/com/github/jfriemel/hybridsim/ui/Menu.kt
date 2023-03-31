@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Slider
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ScreenViewport
@@ -24,6 +23,7 @@ import ktx.scene2d.*
 import java.io.File
 import java.lang.Exception
 import javax.swing.JFileChooser
+import javax.swing.JFrame
 import javax.swing.UIManager
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.math.max
@@ -51,15 +51,15 @@ class Menu(batch: Batch) {
     private var active = true
 
     // All menu buttons
-    private var buttonLoadConfig: TextButton
-    private var buttonSaveConfig: TextButton
-    private var buttonLoadAlgorithm: TextButton
-    private var buttonPutTiles: TextButton
-    private var buttonPutRobots: TextButton
-    private var buttonSelectTarget: TextButton
-    private var buttonToggleScheduler: TextButton
-    private var buttonUndo: TextButton
-    private var buttonRedo: TextButton
+    private var buttonLoadConfig: KTextButton
+    private var buttonSaveConfig: KTextButton
+    private var buttonLoadAlgorithm: KTextButton
+    private var buttonPutTiles: KTextButton
+    private var buttonPutRobots: KTextButton
+    private var buttonSelectTarget: KTextButton
+    private var buttonToggleScheduler: KTextButton
+    private var buttonUndo: KTextButton
+    private var buttonRedo: KTextButton
     private var sliderScheduler: Slider
 
     // Textures for the scheduler and undo/redo buttons
@@ -119,12 +119,12 @@ class Menu(batch: Batch) {
                     cell(colspan = 1, width = redoButtonImage.width)
                 }
                 row()
-                sliderScheduler = slider(0f, 100f)
+                sliderScheduler = slider(0f, 100f, 0.5f)
             }
         }
     }
 
-    // An array of all clickable UI elements for to easily enable / disable all at once
+    // An array of all clickable UI elements to easily enable / disable all at once
     private val inputElements: Array<Actor> = arrayOf(
         buttonLoadConfig,
         buttonSaveConfig,
@@ -170,6 +170,7 @@ class Menu(batch: Batch) {
             }
             Scheduler.setIntervalTime((100f - sliderScheduler.value).pow(2).toLong())
         }
+
         sliderScheduler.value = max(0f, 100f - sqrt(Scheduler.getIntervalTime().toFloat()))
     }
 
@@ -251,7 +252,7 @@ class Menu(batch: Batch) {
     fun saveConfiguration() {
         if (Gdx.graphics.isFullscreen) return
 
-        var configFile = getFile(jsonFilter) ?: return
+        var configFile = getFile(jsonFilter, true) ?: return
         if (configFile.extension != "json") {
             configFile = File(configFile.absolutePath.plus(".json"))
         }
@@ -309,15 +310,31 @@ class Menu(batch: Batch) {
      * Opens a file selector window, [filter] specifies which file endings are allowed.
      * Returns the selected [File] or null if no file was selected.
      */
-    private fun getFile(filter: FileNameExtensionFilter): File? {
+    private fun getFile(filter: FileNameExtensionFilter, save: Boolean = false): File? {
         val fileChooser = JFileChooser()
         fileChooser.fileFilter = filter
         fileChooser.currentDirectory = File(System.getProperty("user.home"))
-        val choice = fileChooser.showOpenDialog(null)
-        if (choice == JFileChooser.APPROVE_OPTION) {
-            return fileChooser.selectedFile
+
+        // Make sure the file chooser is always visible by creating a proxy frame
+        val f = JFrame()
+        f.isVisible = true
+        f.toFront()
+        f.isAlwaysOnTop = true
+        f.isVisible = false
+
+        // Open either "Open" or "Save" dialog
+        val choice = if (save) {
+            fileChooser.showSaveDialog(f)
+        } else {
+            fileChooser.showOpenDialog(f)
         }
-        return null
+        f.dispose()
+
+        return if (choice == JFileChooser.APPROVE_OPTION) {
+            fileChooser.selectedFile
+        } else {
+            null
+        }
     }
 
 }

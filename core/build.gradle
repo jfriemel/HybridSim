@@ -16,5 +16,9 @@ dependencies {
 
   runtimeOnly "org.jetbrains.kotlin:kotlin-scripting-jsr223:$kotlinVersion"
 
-  testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+  testImplementation "org.junit.jupiter:junit-jupiter:$jUnitVersion"
+}
+
+test {
+  useJUnitPlatform()
 }
