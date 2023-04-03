@@ -19,19 +19,19 @@ data class Node(val x: Int, val y: Int) {
      * See: https://doi.org/10.1007/s11047-019-09774-2
      */
     fun scientificCoordinates(): Pair<Double, Double> {
-        val scx = x.toDouble()
-        val scy = y.toDouble() - if (x.mod(2) == 0) 0.0 else 0.5
-        return Pair(scx, scy)
+        val scX = x.toDouble()
+        val scY = y.toDouble() - if (x.mod(2) == 0) 0.0 else 0.5
+        return Pair(scX, scY)
     }
 
     companion object {
         val origin = Node(0, 0)
 
-        /** @return A [Node] corresponding to the given scientific node coordinates ([scx], [scy]). */
+        /** @return A [Node] corresponding to the given scientific node coordinates ([scX], [scY]). */
         @Suppress("Unused")
-        fun sciCoordsToNode(scx: Double, scy: Double): Node {
-            val x = scx.toInt()
-            val y = (scy + if (x.mod(2) == 0) 0.0 else 0.5).toInt()
+        fun sciCoordsToNode(scX: Double, scY: Double): Node {
+            val x = scX.toInt()
+            val y = (scY + if (x.mod(2) == 0) 0.0 else 0.5).toInt()
             return Node(x, y)
         }
     }

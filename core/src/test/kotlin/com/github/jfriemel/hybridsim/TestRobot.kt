@@ -4,6 +4,7 @@ import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
 import com.github.jfriemel.hybridsim.system.Configuration
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -16,11 +17,12 @@ private val labels = intArrayOf(0, 1, 2, 3, 4, 5)
 class TestRobot {
 
     @BeforeEach
-    fun initializeTilesAndRobots() {
+    fun init() {
+        Configuration.clear()
         // Place a tile at (-5, 4)
-        Configuration.tiles = mutableMapOf(tileNode to Tile(tileNode))
+        Configuration.addTile(Tile(tileNode))
         // Place a robot at (13, 27)
-        Configuration.robots = mutableMapOf(robotNode to Robot(robotNode, 5))
+        Configuration.addRobot(Robot(robotNode))
     }
 
     @ParameterizedTest(name = "movement label {0}")
@@ -34,9 +36,9 @@ class TestRobot {
     )
     fun `can move to free node`(label: Int, endNodeX: Int, endNodeY: Int) {
         val robot = Robot(Node(3, 4), 3)
-        assert(!robot.hasRobotAtLabel(label))
-        assert(robot.moveToLabel(label))
-        assert(robot.node == Node(endNodeX, endNodeY))
+        Assertions.assertFalse(robot.hasRobotAtLabel(label))
+        Assertions.assertTrue(robot.moveToLabel(label))
+        Assertions.assertEquals(Node(endNodeX, endNodeY), robot.node)
     }
 
     @ParameterizedTest(name = "neighbor label {2}")
@@ -51,9 +53,9 @@ class TestRobot {
     fun `can interact with robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
         val startNode = Node(startNodeX, startNodeY)
         val robot = Robot(Node(startNodeX, startNodeY), 0)
-        assert(robot.hasRobotAtLabel(label))
+        Assertions.assertTrue(robot.hasRobotAtLabel(label))
         // nodeInDir(label) works because orientation = 0, so label matches global direction
-        assert(robot.robotAtLabel(label) == Configuration.robots[startNode.nodeInDir(label)])
+        Assertions.assertEquals(Configuration.robots[startNode.nodeInDir(label)], robot.robotAtLabel(label))
     }
 
     @ParameterizedTest(name = "movement label {2}")
@@ -68,81 +70,81 @@ class TestRobot {
     fun `cannot move to occupied node`(startNodeX: Int, startNodeY: Int, label: Int) {
         val startNode = Node(startNodeX, startNodeY)
         val robot = Robot(Node(startNodeX, startNodeY), 0)
-        assert(!robot.moveToLabel(label))
-        assert(robot.node == startNode)
+        Assertions.assertFalse(robot.moveToLabel(label))
+        Assertions.assertEquals(startNode, robot.node)
     }
 
     @Test
     fun `can interact with tile below`() {
         val robot = Robot(tileNode)
-        assert(robot.isOnTile())
-        assert(robot.tileBelow() == Configuration.tiles[tileNode])
+        Assertions.assertTrue(robot.isOnTile())
+        Assertions.assertEquals(Configuration.tiles[tileNode], robot.tileBelow())
     }
 
     @Test
     fun `cannot interact with non-existent neighbor`() {
         val robot = Robot(Node(-30, -60))
-        assert(labels.all { robot.robotAtLabel(it) == null })
-        assert(labels.all { robot.tileAtLabel(it) == null })
-        assert(robot.tileBelow() == null)
+        labels.forEach { label -> Assertions.assertNull(robot.robotAtLabel(label)) }
+        labels.forEach { label -> Assertions.assertNull(robot.tileAtLabel(label)) }
+        Assertions.assertNull(robot.tileBelow())
     }
 
     @Test
     fun `can lift tile when on tile`() {
         val robot = Robot(tileNode, carriesTile = false)
-        assert(robot.liftTile())
-        assert(robot.carriesTile)
-        assert(!robot.isOnTile())
+        Assertions.assertTrue(robot.liftTile())
+        Assertions.assertTrue(robot.carriesTile)
+        Assertions.assertFalse(robot.isOnTile())
     }
 
     @Test
     fun `can place tile when not on tile`() {
         val robot = Robot(Node(100, 200), carriesTile = true)
-        assert(!robot.isOnTile())
-        assert(robot.placeTile())
-        assert(!robot.carriesTile)
-        assert(robot.isOnTile())
+        Assertions.assertFalse(robot.isOnTile())
+        Assertions.assertTrue(robot.placeTile())
+        Assertions.assertFalse(robot.carriesTile)
+        Assertions.assertTrue(robot.isOnTile())
     }
 
     @Test
     fun `can place pebble when on tile`() {
         val robot = Robot(tileNode, numPebbles = 1, maxPebbles = 1)
-        assert(!robot.tileHasPebble())
-        assert(robot.putPebble())
-        assert(robot.tileHasPebble())
-        assert(robot.numPebbles == 0)
+        Assertions.assertFalse(robot.tileHasPebble())
+        Assertions.assertTrue(robot.putPebble())
+        Assertions.assertTrue(robot.tileHasPebble())
+        Assertions.assertEquals(0, robot.numPebbles)
     }
 
     @Test
     fun `cannot place multiple pebbles on single tile`() {
         val robot = Robot(tileNode, numPebbles = 2, maxPebbles = 2)
-        assert(robot.putPebble())
-        assert(robot.tileHasPebble())
-        assert(!robot.putPebble())
-        assert(robot.numPebbles == 1)
+        Assertions.assertTrue(robot.putPebble())
+        Assertions.assertTrue(robot.tileHasPebble())
+        Assertions.assertFalse(robot.putPebble())
+        Assertions.assertEquals(1, robot.numPebbles)
     }
 
     @Test
     fun `cannot place pebble when not on tile`() {
         val robot = Robot(Node(0, 0), numPebbles = 1, maxPebbles = 1)
-        assert(!robot.putPebble())
-        assert(robot.numPebbles == 1)
+        Assertions.assertFalse(robot.putPebble())
+        Assertions.assertEquals(1, robot.numPebbles)
     }
 
     @Test
     fun `can take pebble from tile`() {
         Configuration.tiles[tileNode]!!.addPebble()
         val robot = Robot(tileNode, numPebbles = 0, maxPebbles = 1)
-        assert(robot.takePebble())
-        assert(robot.numPebbles == 1)
+        Assertions.assertTrue(robot.takePebble())
+        Assertions.assertEquals(1, robot.numPebbles)
     }
 
     @Test
     fun `cannot take more pebbles than maxPebbles`() {
         Configuration.tiles[tileNode]!!.addPebble()
         val robot = Robot(tileNode, numPebbles = 0, maxPebbles = 0)
-        assert(!robot.takePebble())
-        assert(robot.numPebbles == 0)
+        Assertions.assertFalse(robot.takePebble())
+        Assertions.assertEquals(0, robot.numPebbles)
     }
 
 }

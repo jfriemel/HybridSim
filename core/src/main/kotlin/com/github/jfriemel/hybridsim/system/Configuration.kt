@@ -115,7 +115,7 @@ object Configuration {
         robots.values.forEach { AlgorithmLoader.replaceRobot(it.node) }
         targetNodes = targetNodes.toMutableSet()
 
-        clearUndoQueues()
+        redoQueue.clear()
     }
 
     /** Convert the current [Configuration] string to a JSON string that can be saved to a file. */
@@ -125,6 +125,13 @@ object Configuration {
     fun clearUndoQueues() {
         undoQueue.clear()
         redoQueue.clear()
+    }
+
+    /** Clears all configuration variables ([tiles], [robots], [targetNodes], [undoQueue], [redoQueue]). */
+    fun clear() {
+        arrayOf(tiles, robots).forEach { it.clear() }
+        arrayOf(targetNodes, undoQueue, redoQueue).forEach { it.clear() }
+
     }
 
     /** Add the current state of the [Configuration] to the [undoQueue], clear the [redoQueue]. */
