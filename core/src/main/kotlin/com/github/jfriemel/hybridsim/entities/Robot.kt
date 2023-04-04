@@ -17,6 +17,8 @@ open class Robot(
     // Functions and constructor values cannot be private as they need to be accessible by the algorithm scripts
     // implementing custom Robots.
 
+    @Json(ignored = true) val labels = intArrayOf(0, 1, 2, 3, 4, 5)
+
     /**
      * The code executed by the robot when it is activated.
      * The function is overriden by imported algorithms (.kts scripts).
@@ -92,6 +94,41 @@ open class Robot(
         tileBelow()?.removePebble()
         numPebbles++
         return true
+    }
+
+    /** @return True if the robot is on a target [Node]. */
+    fun isOnTarget(): Boolean = node in Configuration.targetNodes
+
+    /** @return True if the node at the [label] is a target [Node]. */
+    fun labelIsTarget(label: Int): Boolean = nodeAtLabel(label) in Configuration.targetNodes
+
+    /** @return True if the robot has a [Tile] neighbour that is on a target [Node]. */
+    fun hasTargetTileNbr(): Boolean = labels.any { label -> hasTileAtLabel(label) && labelIsTarget(label) }
+
+    /** @return A [Tile] neighbour that is on a target [Node] or null if there is no such neighbour. */
+    fun targetTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && labelIsTarget(label) }
+
+    /** @return True if the robot has a [Tile] neighbour that is not on a target [Node]. */
+    fun hasOverhangTileNbr(): Boolean = labels.any { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+
+    /** @return A [Tile] neighbour that is not on a target [Node] or null if there is no such neighbour. */
+    fun overhangTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+
+    /** @return The number of connected components of empty nodes adjacent to the robot. */
+    fun numBoundaries(tileBoundaries: Boolean = false): Int {
+        val boundaryCheck = if (tileBoundaries) {
+            { label: Int -> hasTileAtLabel(label) }
+        } else {
+            { label: Int -> !hasTileAtLabel(label) }
+        }
+        val boundaryLabels = labels.filter { boundaryCheck(it) }
+        var numBoundaries = 0
+        boundaryLabels.forEach { label ->
+            if ((label + 1).mod(6) !in boundaryLabels) {
+                numBoundaries++
+            }
+        }
+        return numBoundaries
     }
 
     /** Checks whether the robot has a neighbouring [Tile] at the given [label]. */
