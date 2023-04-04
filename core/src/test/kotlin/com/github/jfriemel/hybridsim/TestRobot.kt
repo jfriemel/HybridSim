@@ -41,7 +41,7 @@ class TestRobot {
         Assertions.assertEquals(Node(endNodeX, endNodeY), robot.node)
     }
 
-    @ParameterizedTest(name = "neighbor label {2}")
+    @ParameterizedTest(name = "neighbour label {2}")
     @CsvSource(
         "13, 28, 0",
         "12, 27, 1",
@@ -50,12 +50,21 @@ class TestRobot {
         "14, 26, 4",
         "14, 27, 5",
     )
-    fun `can interact with robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can interact with robot neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
         val startNode = Node(startNodeX, startNodeY)
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertTrue(robot.hasRobotAtLabel(label))
         // nodeInDir(label) works because orientation = 0, so label matches global direction
         Assertions.assertEquals(Configuration.robots[startNode.nodeInDir(label)], robot.robotAtLabel(label))
+    }
+
+    @Test
+    fun `cannot see non-existent neighbours`() {
+        val robot = Robot(Node(-536, 370))
+        labels.forEach {
+            Assertions.assertFalse(robot.hasTileAtLabel(it))
+            Assertions.assertFalse(robot.hasRobotAtLabel(it))
+        }
     }
 
     @ParameterizedTest(name = "movement label {2}")
@@ -74,6 +83,20 @@ class TestRobot {
         Assertions.assertEquals(startNode, robot.node)
     }
 
+    @ParameterizedTest(name = "tile at label {2}")
+    @CsvSource(
+        "-5, 5, 0",
+        "-6, 4, 1",
+        "-6, 3, 2",
+        "-5, 3, 3",
+        "-4, 3, 4",
+        "-4, 4, 5",
+    )
+    fun `can see tile neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
+        val robot = Robot(Node(startNodeX, startNodeY), 0)
+        Assertions.assertTrue(robot.hasTileAtLabel(label))
+    }
+
     @Test
     fun `can interact with tile below`() {
         val robot = Robot(tileNode)
@@ -82,7 +105,7 @@ class TestRobot {
     }
 
     @Test
-    fun `cannot interact with non-existent neighbor`() {
+    fun `cannot interact with non-existent neighbour`() {
         val robot = Robot(Node(-30, -60))
         labels.forEach { label -> Assertions.assertNull(robot.robotAtLabel(label)) }
         labels.forEach { label -> Assertions.assertNull(robot.tileAtLabel(label)) }

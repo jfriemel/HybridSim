@@ -36,8 +36,7 @@ open class Robot(
     open fun finished(): Boolean = false
 
     /** The robot tries to move to the node at the given [label]. Returns true if successful. */
-    @Suppress("Unused")
-    open fun moveToLabel(label: Int): Boolean {
+    fun moveToLabel(label: Int): Boolean {
         if (nodeAtLabel(label) in Configuration.robots) {
             return false
         }
@@ -47,16 +46,13 @@ open class Robot(
     }
 
     /** Checks whether the robot is on top of a [Tile]. */
-    @SuppressWarnings("WeakerAccess")
-    open fun isOnTile(): Boolean = node in Configuration.tiles
+    fun isOnTile(): Boolean = node in Configuration.tiles
 
     /** @return The [Tile] at the robot's location or null if there is no tile. */
-    @SuppressWarnings("WeakerAccess")
-    open fun tileBelow(): Tile? = Configuration.tiles[node]
+    fun tileBelow(): Tile? = Configuration.tiles[node]
 
     /** Tries to lift the [Tile] at the robot's current location. Returns true if successful. */
-    @Suppress("Unused")
-    open fun liftTile(): Boolean {
+    fun liftTile(): Boolean {
         if (!isOnTile() || carriesTile || tileBelow()?.hasPebble() == true) {
             return false
         }
@@ -66,8 +62,7 @@ open class Robot(
     }
 
     /** Tries to place a [Tile] at the robot's current location. Returns true if successful. */
-    @Suppress("Unused")
-    open fun placeTile(): Boolean {
+    fun placeTile(): Boolean {
         if (isOnTile() || !carriesTile) {
             return false
         }
@@ -77,12 +72,10 @@ open class Robot(
     }
 
     /** @return True if there is a [Tile] at the robot's location, and it has a pebble. */
-    @SuppressWarnings("WeakerAccess")
-    open fun tileHasPebble(): Boolean = tileBelow()?.hasPebble() == true
+    fun tileHasPebble(): Boolean = tileBelow()?.hasPebble() == true
 
     /** Tries to put a pebble on the [Tile] at the robot's current location. Returns true if successful. */
-    @Suppress("Unused")
-    open fun putPebble(): Boolean {
+    fun putPebble(): Boolean {
         if (!isOnTile() || tileHasPebble() || numPebbles == 0) {
             return false
         }
@@ -92,8 +85,7 @@ open class Robot(
     }
 
     /** Tries to take a pebble from the [Tile] at the robot's current location. Returns true if successful. */
-    @Suppress("Unused")
-    open fun takePebble(): Boolean {
+    fun takePebble(): Boolean {
         if (!isOnTile() || !tileHasPebble() || numPebbles >= maxPebbles) {
             return false
         }
@@ -103,20 +95,16 @@ open class Robot(
     }
 
     /** Checks whether the robot has a neighbouring [Tile] at the given [label]. */
-    @Suppress("Unused")
-    open fun hasTileAtLabel(label: Int): Boolean = nodeAtLabel(label) in Configuration.tiles
+    fun hasTileAtLabel(label: Int): Boolean = nodeAtLabel(label) in Configuration.tiles
 
     /** @return The [Tile] at the robot's given [label] or null if there is no such tile. */
-    @Suppress("Unused")
-    open fun tileAtLabel(label: Int): Tile? = Configuration.tiles[nodeAtLabel(label)]
+    fun tileAtLabel(label: Int): Tile? = Configuration.tiles[nodeAtLabel(label)]
 
     /** Checks whether the robot has a [Robot] neighbour at the given [label]. */
-    @Suppress("Unused")
-    open fun hasRobotAtLabel(label: Int): Boolean = nodeAtLabel(label) in Configuration.robots
+    fun hasRobotAtLabel(label: Int): Boolean = nodeAtLabel(label) in Configuration.robots
 
     /** @return The [Robot] neighbour at the given [label] of null if there is no such neighbour. */
-    @Suppress("Unused")
-    open fun robotAtLabel(label: Int): Robot? = Configuration.robots[nodeAtLabel(label)]
+    fun robotAtLabel(label: Int): Robot? = Configuration.robots[nodeAtLabel(label)]
 
     /** @return The [Node] at the given [label]. */
     @SuppressWarnings("WeakerAccess")

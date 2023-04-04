@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.Configuration
-import com.github.jfriemel.hybridsim.Main
 import com.github.jfriemel.hybridsim.system.Scheduler
 import ktx.actors.onChange
 import ktx.actors.onClick
@@ -30,7 +29,7 @@ import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-private val logger = logger<Main>()
+private val logger = logger<Menu>()
 
 private const val BUTTON_WIDTH = 190f
 
@@ -268,7 +267,7 @@ class Menu(batch: Batch) {
             logger.error { "Cannot load algorithm, selected file $algorithmFile does not exist" }
             return
         }
-        AlgorithmLoader.loadAlgorithm(algorithmFile)
+        AlgorithmLoader.loadAlgorithm(scriptFile = algorithmFile)
     }
 
     /** Toggles whether tiles should be placed by a mouse click. */

@@ -68,7 +68,7 @@ class TestConfiguration {
 
     @Test
     fun `clear configuration`() {
-        Configuration.addRobot(Robot(Node(192,  663)))
+        Configuration.addRobot(Robot(Node(192, 663)))
         Configuration.addTile(Tile(Node(-55, -80)))
         Configuration.addTarget(Node(86, 591))
         Configuration.clear()
@@ -172,7 +172,7 @@ class TestConfiguration {
 
     @Test
     fun `get configuration json and load it again`() {
-        val robot = Robot(Node(-973,  306), orientation = 4)
+        val robot = Robot(Node(-973, 306), orientation = 4)
         val tile = Tile(Node(-898, -162))
         val targetNode = Node(-265, 640)
         Configuration.addRobot(robot)

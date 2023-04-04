@@ -172,9 +172,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         return true
     }
 
-    override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
-        return false
-    }
+    override fun mouseMoved(screenX: Int, screenY: Int): Boolean = false
 
     override fun scrolled(amountX: Float, amountY: Float): Boolean {
         screen.zoom(amountY, Gdx.input.x, Gdx.input.y)

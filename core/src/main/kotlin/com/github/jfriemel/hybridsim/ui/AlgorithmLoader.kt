@@ -9,27 +9,40 @@ import javax.script.Compilable
 import javax.script.Invocable
 import javax.script.ScriptEngineManager
 
+private val logger = ktx.log.logger<AlgorithmLoader>()
+
 object AlgorithmLoader {
 
     private var invocator: Invocable? = null
 
     /**
-     * Loads a new algorithm from the [scriptFile] (kts script, see examples). The script implements a [Robot] and
-     * overrides the existing activate() function.
+     * Loads a new algorithm from either the [scriptFile] or the [scriptString] (kts script, see examples).
+     * The script implements a [Robot] and overrides the existing activate() function.
      *
      * Important: The script needs to have a getRobot() function of the following form:
-     *     fun getRobot(orientation: Int, node: Node): Robot
+     *     fun getRobot(node: Node, orientation: Int): Robot
      *
      * If this function is absent, or there is a syntax error in the script or the script could not be loaded for any
      * other reason, the program crashes.
      */
-    fun loadAlgorithm(scriptFile: File) {
-        Scheduler.stop()  // Make sure the scheduler is not running while the robots are replaced
+    fun loadAlgorithm(scriptFile: File? = null, scriptString: String? = null) {
+        val script = scriptFile?.readText()?.trim() ?: scriptString
+        if (script == null) {
+            logger.error { "No arguments provided for loadAlgorithm()" }
+            return
+        }
+
+        // Make sure the scheduler is not running while the robots are replaced
+        Scheduler.stop()
+
+        // Compile the script
         val engine = ScriptEngineManager().getEngineByExtension("kts") as Compilable
         engine.compile("import com.github.jfriemel.hybridsim.entities.*; import com.badlogic.gdx.graphics.Color").eval()
-        engine.compile(scriptFile.readText().trim()).eval()
+        engine.compile(script).eval()
+
+        // Replace robots in the configuration with robots from the loaded script
         invocator = engine as Invocable
-        Configuration.robots.keys.forEach { replaceRobot(it) }
+        Configuration.robots.keys.forEach { node -> replaceRobot(node) }
         Configuration.clearUndoQueues()
     }
 
@@ -47,5 +60,19 @@ object AlgorithmLoader {
         return invocator?.let { inv ->
             inv.invokeFunction("getRobot", robot.node, robot.orientation) as Robot
         } ?: robot
+    }
+
+    /** Resets to the default algorithm and replaces all [Robot]s in the [Configuration] with default robots. */
+    fun reset() {
+        // Reset script function invocator so all new robots are default robots
+        invocator = null
+
+        // Replace all robots in the configuration with default robots
+        Configuration.robots.keys.forEach { node ->
+            val robot = Configuration.robots[node] ?: return@forEach
+            // Only keep node and orientation, all other robot values are algorithm-specific
+            Configuration.robots[node] = Robot(robot.node, orientation = robot.orientation)
+        }
+        Configuration.clearUndoQueues()
     }
 }

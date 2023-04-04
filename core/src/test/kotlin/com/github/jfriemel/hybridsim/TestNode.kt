@@ -18,7 +18,7 @@ class TestNode {
         "4, 1, 8",
         "5, 1, 7",
     )
-    fun `neighbors on even column`(dir: Int, nbrX: Int, nbrY: Int) {
+    fun `neighbours on even column`(dir: Int, nbrX: Int, nbrY: Int) {
         val node = Node(2, 7)
         Assertions.assertEquals(Node(nbrX, nbrY), node.nodeInDir(dir))
     }
@@ -32,7 +32,7 @@ class TestNode {
         "4, -4, -4",
         "5, -4, -5",
     )
-    fun `neighbors on odd column`(dir: Int, nbrX: Int, nbrY: Int) {
+    fun `neighbours on odd column`(dir: Int, nbrX: Int, nbrY: Int) {
         val node = Node(-3, -4)
         Assertions.assertEquals(Node(nbrX, nbrY), node.nodeInDir(dir))
     }
