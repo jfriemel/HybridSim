@@ -3,14 +3,13 @@ package com.github.jfriemel.hybridsim.ui
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
-import com.github.jfriemel.hybridsim.system.Configuration
-import com.github.jfriemel.hybridsim.system.Scheduler
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
+import com.github.jfriemel.hybridsim.system.Configuration
+import com.github.jfriemel.hybridsim.system.Scheduler
 import ktx.app.KtxInputAdapter
 import ktx.graphics.takeScreenshot
 import ktx.log.logger
-import java.lang.Exception
 import java.nio.file.Paths
 import java.time.LocalDateTime
 
@@ -105,7 +104,14 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         when (button) {
             Input.Buttons.LEFT -> {
                 if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-                    Configuration.robots[node]?.activate()
+                    val robot = Configuration.robots[node]
+                    try {
+                        robot?.activate()
+                    } catch (e: Exception) {
+                        logger.error { "Robot at ${robot?.node} crashed!" }
+                        logger.error { e.toString() }
+                        Scheduler.stop()
+                    }
                 } else if (menu.putTiles && node !in Configuration.tiles) {
                     Configuration.addTile(Tile(node))
                 } else if (menu.putRobots && node !in Configuration.robots) {

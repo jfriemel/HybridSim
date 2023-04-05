@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.CsvSource
 
 private val tileNode = Node(-5, 4)
 private val robotNode = Node(13, 27)
-private val labels = intArrayOf(0, 1, 2, 3, 4, 5)
 
 class TestRobot {
 
@@ -61,7 +60,7 @@ class TestRobot {
     @Test
     fun `cannot see non-existent neighbours`() {
         val robot = Robot(Node(-536, 370))
-        labels.forEach {
+        robot.labels.forEach {
             Assertions.assertFalse(robot.hasTileAtLabel(it))
             Assertions.assertFalse(robot.hasRobotAtLabel(it))
         }
@@ -107,8 +106,8 @@ class TestRobot {
     @Test
     fun `cannot interact with non-existent neighbour`() {
         val robot = Robot(Node(-30, -60))
-        labels.forEach { label -> Assertions.assertNull(robot.robotAtLabel(label)) }
-        labels.forEach { label -> Assertions.assertNull(robot.tileAtLabel(label)) }
+        robot.labels.forEach { label -> Assertions.assertNull(robot.robotAtLabel(label)) }
+        robot.labels.forEach { label -> Assertions.assertNull(robot.tileAtLabel(label)) }
         Assertions.assertNull(robot.tileBelow())
     }
 

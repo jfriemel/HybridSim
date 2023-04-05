@@ -1,9 +1,9 @@
 package com.github.jfriemel.hybridsim.system
 
 import kotlinx.coroutines.delay
-import kotlin.random.Random
 import ktx.log.logger
 import java.lang.Long.max
+import kotlin.random.Random
 
 private val logger = logger<Scheduler>()
 
@@ -73,9 +73,19 @@ object Scheduler {
             }
 
             // Activate a number of robots (sequential activations, no overlap)
-            repeat(activationsPerCycle) {
-                // Pick a random robot to activate (fair sequential scheduler)
-                robots[Random.nextInt(robots.size)].activate()
+            run activationBlock@ {
+                repeat(activationsPerCycle) {
+                    // Pick a random robot to activate (fair sequential scheduler)
+                    val robot = robots[Random.nextInt(robots.size)]
+                    try {
+                        robot.activate()
+                    } catch (e: Exception) {
+                        logger.error { "Robot at ${robot.node} crashed!" }
+                        logger.error { e.toString() }
+                        stop()
+                        return@activationBlock
+                    }
+                }
             }
 
             // Stop when all robots are finished
