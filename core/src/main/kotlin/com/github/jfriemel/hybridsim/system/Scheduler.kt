@@ -59,7 +59,7 @@ object Scheduler {
 
     /** Infinite loop running in a separate coroutine, performs the actual scheduling. */
     suspend fun run() {
-        while (true) {
+        schedulerLoop@ while (true) {
             // If the scheduler has been deactivated, wait until it is activated again
             while (!active) {
                 delay(10L)
@@ -73,24 +73,31 @@ object Scheduler {
             }
 
             // Activate a number of robots (sequential activations, no overlap)
-            run activationBlock@ {
-                repeat(activationsPerCycle) {
-                    // Pick a random robot to activate (fair sequential scheduler)
-                    val robot = robots[Random.nextInt(robots.size)]
-                    try {
-                        robot.activate()
-                    } catch (e: Exception) {
-                        logger.error { "Robot at ${robot.node} crashed!" }
-                        logger.error { e.toString() }
-                        stop()
-                        return@activationBlock
-                    }
+            for (activationIndex in 1..activationsPerCycle) {
+                // Pick a random robot to activate (fair sequential scheduler)
+                val robot = robots[Random.nextInt(robots.size)]
+                try {
+                    robot.activate()
+                } catch (e: Exception) {
+                    // Ensure Scheduler does not crash when Robot crashes due to faulty algorithm script
+                    logger.error { "Robot at ${robot.node} crashed!" }
+                    logger.error { e.toString() }
+                    stop()
+                    continue@schedulerLoop
                 }
             }
 
-            // Stop when all robots are finished
-            if (robots.all { it.finished() }) {
+            try {
+                // Stop when all robots are finished
+                if (robots.all { robot -> robot.finished() }) {
+                    stop()
+                }
+            } catch (e: Exception) {
+                // Ensure Scheduler does not crash when Robot crashes due to faulty algorithm script
+                logger.error { "Robot crashed during finished() call!" }
+                logger.error { e.toString() }
                 stop()
+                continue@schedulerLoop
             }
 
             // Sleep for a specified period (ms) between cycles

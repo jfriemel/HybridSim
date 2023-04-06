@@ -96,41 +96,6 @@ open class Robot(
         return true
     }
 
-    /** @return True if the robot is on a target [Node]. */
-    fun isOnTarget(): Boolean = node in Configuration.targetNodes
-
-    /** @return True if the node at the [label] is a target [Node]. */
-    fun labelIsTarget(label: Int): Boolean = nodeAtLabel(label) in Configuration.targetNodes
-
-    /** @return True if the robot has a [Tile] neighbour that is on a target [Node]. */
-    fun hasTargetTileNbr(): Boolean = labels.any { label -> hasTileAtLabel(label) && labelIsTarget(label) }
-
-    /** @return A [Tile] neighbour that is on a target [Node] or null if there is no such neighbour. */
-    fun targetTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && labelIsTarget(label) }
-
-    /** @return True if the robot has a [Tile] neighbour that is not on a target [Node]. */
-    fun hasOverhangTileNbr(): Boolean = labels.any { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
-
-    /** @return A [Tile] neighbour that is not on a target [Node] or null if there is no such neighbour. */
-    fun overhangTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
-
-    /** @return The number of connected components of empty nodes adjacent to the robot. */
-    fun numBoundaries(tileBoundaries: Boolean = false): Int {
-        val boundaryCheck = if (tileBoundaries) {
-            { label: Int -> hasTileAtLabel(label) }
-        } else {
-            { label: Int -> !hasTileAtLabel(label) }
-        }
-        val boundaryLabels = labels.filter { boundaryCheck(it) }
-        var numBoundaries = 0
-        boundaryLabels.forEach { label ->
-            if ((label + 1).mod(6) !in boundaryLabels) {
-                numBoundaries++
-            }
-        }
-        return numBoundaries
-    }
-
     /** Checks whether the robot has a neighbouring [Tile] at the given [label]. */
     fun hasTileAtLabel(label: Int): Boolean = nodeAtLabel(label) in Configuration.tiles
 
@@ -142,6 +107,55 @@ open class Robot(
 
     /** @return The [Robot] neighbour at the given [label] of null if there is no such neighbour. */
     fun robotAtLabel(label: Int): Robot? = Configuration.robots[nodeAtLabel(label)]
+
+    /** @return True if the robot is on a target [Node]. */
+    fun isOnTarget(): Boolean = node in Configuration.targetNodes
+
+    /** @return True if the node at the [label] is a target [Node]. */
+    fun labelIsTarget(label: Int): Boolean = nodeAtLabel(label) in Configuration.targetNodes
+
+    /** @return Label of a [Tile] neighbour that is on a target [Node] or null if there is no such neighbour. */
+    fun targetTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && labelIsTarget(label) }
+
+    /** @return True if the robot has a [Tile] neighbour that is on a target [Node]. */
+    fun hasTargetTileNbr(): Boolean = targetTileNbrLabel() != null
+
+    /** @return A [Tile] neighbour that is on a target [Node] or null if there is no such neighbour. */
+    fun targetTileNbr(): Tile? = targetTileNbrLabel()?.let { label -> tileAtLabel(label) }
+
+    /** @return Label of a [Tile] neighbour that is not on a target [Node] or null if there is no such neighbour. */
+    fun overhangTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+
+    /** @return True if the robot has a [Tile] neighbour that is not on a target [Node]. */
+    fun hasOverhangTileNbr(): Boolean = overhangTileNbrLabel() != null
+
+    /** @return A [Tile] neighbour that is not on a target [Node] or null if there is no such neighbour. */
+    fun overhangTileNbr(): Tile? = overhangTileNbrLabel()?.let { label -> tileAtLabel(label) }
+
+    /**
+     * By default, counts and returns the number of connected components of empty nodes adjacent to the robot.
+     * If [tileBoundaries] is true, counts the number of connected components of tile nodes adjacent to the robot.
+     */
+    fun numBoundaries(tileBoundaries: Boolean = false): Int {
+        val boundaryLabels = if (tileBoundaries) {
+            labels.filter { label -> hasTileAtLabel(label) }
+        } else {
+            labels.filter { label -> !hasTileAtLabel(label) }
+        }
+
+        if (boundaryLabels.size == 6) {  // Completely surrounded by boundary
+            return 1
+        }
+
+        var numBoundaries = 0
+        boundaryLabels.forEach { label ->
+            if ((label + 1).mod(6) !in boundaryLabels) {
+                numBoundaries++
+            }
+        }
+
+        return numBoundaries
+    }
 
     /** @return The [Node] at the given [label]. */
     @SuppressWarnings("WeakerAccess")
