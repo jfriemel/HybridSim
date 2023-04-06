@@ -74,7 +74,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun findEmptyTarget() {
-        if (isOnTarget() && numBoundaries(true) == 1) {
+        if (isOnTarget() && numBoundaries(true) == 1 && hasTargetTileNbr()) {
             placeTile()
             phase = Phase.FindOverhang
             return
