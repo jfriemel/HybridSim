@@ -106,19 +106,19 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                     val robot = Configuration.robots[node]
                     try {
-                        robot?.activate()
+                        robot?.triggerActivate()
                     } catch (e: Exception) {
                         logger.error { "Robot at ${robot?.node} crashed!" }
                         logger.error { e.toString() }
                         Scheduler.stop()
                     }
                 } else if (menu.putTiles && node !in Configuration.tiles) {
-                    Configuration.addTile(Tile(node))
+                    Configuration.addTile(Tile(node), addUndoStep = true)
                 } else if (menu.putRobots && node !in Configuration.robots) {
                     val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
-                    Configuration.addRobot(robot)
+                    Configuration.addRobot(robot, addUndoStep = true)
                 } else if (menu.selectTarget && node !in Configuration.targetNodes) {
-                    Configuration.addTarget(node)
+                    Configuration.addTarget(node, addUndoStep = true)
                 } else {
                     mouseX = screenX
                     mouseY = screenY
@@ -128,11 +128,11 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
 
             Input.Buttons.RIGHT -> {
                 if (menu.putTiles && node in Configuration.tiles) {
-                    Configuration.removeTile(node)
+                    Configuration.removeTile(node, addUndoStep = true)
                 } else if (menu.putRobots && node in Configuration.robots) {
-                    Configuration.removeRobot(node)
+                    Configuration.removeRobot(node, addUndoStep = true)
                 } else if (menu.selectTarget && node in Configuration.targetNodes) {
-                    Configuration.removeTarget(node)
+                    Configuration.removeTarget(node, addUndoStep = true)
                 } else if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {  // Log coordinates, sometimes helpful
                     logger.debug { "Screen coordinates:     ($screenX, $screenY)" }
                     logger.debug { "Node coordinates:       (${node.x}, ${node.y})" }
@@ -156,23 +156,23 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             mouseX = screenX
             mouseY = screenY
         } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-            Configuration.robots[node]?.activate()
+            Configuration.robots[node]?.triggerActivate()
         } else if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (menu.putTiles && node !in Configuration.tiles) {
-                Configuration.addTile(Tile(node))
+                Configuration.addTile(Tile(node), addUndoStep = true)
             } else if (menu.putRobots && node !in Configuration.robots) {
                 val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
-                Configuration.addRobot(robot)
+                Configuration.addRobot(robot, addUndoStep = true)
             } else if (menu.selectTarget && node !in Configuration.targetNodes) {
-                Configuration.addTarget(node)
+                Configuration.addTarget(node, addUndoStep = true)
             }
         } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             if (menu.putTiles && node in Configuration.tiles) {
-                Configuration.removeTile(node)
+                Configuration.removeTile(node, addUndoStep = true)
             } else if (menu.putRobots && node in Configuration.robots) {
-                Configuration.removeRobot(node)
+                Configuration.removeRobot(node, addUndoStep = true)
             } else if (menu.selectTarget && node in Configuration.targetNodes) {
-                Configuration.removeTarget(node)
+                Configuration.removeTarget(node, addUndoStep = true)
             }
         }
         return true

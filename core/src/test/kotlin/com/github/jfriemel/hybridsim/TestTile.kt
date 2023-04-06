@@ -59,7 +59,7 @@ class TestTile {
         Assertions.assertEquals(Tile.colorTarget, tile.getColor())
         Configuration.removeTarget(tile.node)
         Configuration.addTarget(Node(0, 0))
-        Assertions.assertEquals(Tile.colorNonTarget, tile.getColor())
+        Assertions.assertEquals(Tile.colorOverhang, tile.getColor())
     }
 
     @Test

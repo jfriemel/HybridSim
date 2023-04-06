@@ -14,8 +14,6 @@ open class Robot(
     @Json(ignored = true) val maxPebbles: Int = 2,
     @Json(ignored = true) var carrySprite: Sprite? = null,
 ) : Entity(node, sprite) {
-    // Functions and constructor values cannot be private as they need to be accessible by the algorithm scripts
-    // implementing custom Robots.
 
     @Json(ignored = true) val labels = intArrayOf(0, 1, 2, 3, 4, 5)
 
@@ -26,8 +24,17 @@ open class Robot(
      * In other words, it needs to run in constant time and with constant space.
      * For further constraints, check out this paper: https://doi.org/10.1007/s11047-019-09774-2
      */
-    open fun activate() {  // Default implementation does nothing
+    protected open fun activate() {  // Default implementation does nothing
         return
+    }
+
+    /**
+     * Interface for [activate] called by the Scheduler and the InputHandler to activate the robot and create an undo
+     * step in the [Configuration].
+     */
+    fun triggerActivate() {
+        Configuration.addUndoStep()
+        activate()
     }
 
     /**

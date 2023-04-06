@@ -5,8 +5,7 @@ import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
 import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
-import java.util.Deque
-import java.util.LinkedList
+import java.util.*
 
 private data class TimeState(
     val tiles: MutableMap<Node, Tile>,
@@ -15,6 +14,8 @@ private data class TimeState(
 )
 
 private const val MAX_UNDO_STATES = 1000
+
+// Make sure
 
 object Configuration {
 
@@ -25,50 +26,66 @@ object Configuration {
     private var undoQueue: Deque<TimeState> = LinkedList()
     private var redoQueue: Deque<TimeState> = LinkedList()
 
+    private val klaxon = Klaxon()
+
     init {
         loadConfiguration("{\"robots\" : {\"Node(x=0, y=0)\": {\"orientation\" : 4, \"node\" : {\"x\" : 0, \"y\" : 0}}}, \"targetNodes\" : [], \"tiles\" : {\"Node(x=0, y=-1)\": {\"node\" : {\"x\" : 0, \"y\" : -1}}, \"Node(x=0, y=0)\": {\"node\" : {\"x\" : 0, \"y\" : 0}}, \"Node(x=1, y=1)\": {\"node\" : {\"x\" : 1, \"y\" : 1}}, \"Node(x=0, y=1)\": {\"node\" : {\"x\" : 0, \"y\" : 1}}, \"Node(x=-1, y=1)\": {\"node\" : {\"x\" : -1, \"y\" : 1}}, \"Node(x=-1, y=0)\": {\"node\" : {\"x\" : -1, \"y\" : 0}}, \"Node(x=1, y=-1)\": {\"node\" : {\"x\" : 1, \"y\" : -1}}, \"Node(x=-1, y=-1)\": {\"node\" : {\"x\" : -1, \"y\" : -1}}}}\n")
     }
 
     /** Add a [tile] to the configuration at the [tile]'s node. */
-    fun addTile(tile: Tile) {
-        addToUndoQueue()
+    fun addTile(tile: Tile, addUndoStep: Boolean = false) {
+        if (addUndoStep) {
+            addUndoStep()
+        }
         tiles[tile.node] = tile
     }
 
     /** Remove the [Tile] at the given [node] if it exists. */
-    fun removeTile(node: Node) {
-        addToUndoQueue()
+    fun removeTile(node: Node, addUndoStep: Boolean = false) {
+        if (addUndoStep) {
+            addUndoStep()
+        }
         tiles.remove(node)
     }
 
     /** Add a [robot] to the configuration at the [robot]'s node. */
-    fun addRobot(robot: Robot) {
-        addToUndoQueue()
+    fun addRobot(robot: Robot, addUndoStep: Boolean = false) {
+        if (addUndoStep) {
+            addUndoStep()
+        }
         robots[robot.node] = robot
     }
 
     /** Remove the [Robot] at the given [node] if it exists. */
-    fun removeRobot(node: Node) {
-        addToUndoQueue()
+    fun removeRobot(node: Node, addUndoStep: Boolean = false) {
+        if (addUndoStep) {
+            addUndoStep()
+        }
         robots.remove(node)
     }
 
     /** Move the [Robot] at [startNode] to [nextNode] if it exists. */
-    fun moveRobot(startNode: Node, nextNode: Node) {
-        addToUndoQueue()
+    fun moveRobot(startNode: Node, nextNode: Node, addUndoStep: Boolean = false) {
+        if (addUndoStep) {
+            addUndoStep()
+        }
         val robot = robots.remove(startNode) ?: return
         robots[nextNode] = robot
     }
 
     /** Add the given [node] to the target area. */
-    fun addTarget(node: Node) {
-        addToUndoQueue()
+    fun addTarget(node: Node, addUndoStep: Boolean = false) {
+        if (addUndoStep) {
+            addUndoStep()
+        }
         targetNodes.add(node)
     }
 
     /** Remove the given [node] from the target area. */
-    fun removeTarget(node: Node) {
-        addToUndoQueue()
+    fun removeTarget(node: Node, addUndoStep: Boolean = false) {
+        if (addUndoStep) {
+            addUndoStep()
+        }
         targetNodes.remove(node)
     }
 
@@ -105,7 +122,7 @@ object Configuration {
     /** Take a [json] string and load the [Configuration] from that string. */
     fun loadConfiguration(json: String) {
         Scheduler.stop()
-        Klaxon().parse<Configuration>(json = json)
+        klaxon.parse<Configuration>(json = json)
 
 //      Klaxon converts the keys of Maps to Strings. To get our Node keys back, we create temporary Maps, fill them
 //      with the values parsed by Klaxon and then replace the Klaxon Maps with our temporary Maps.
@@ -119,7 +136,7 @@ object Configuration {
     }
 
     /** Convert the current [Configuration] string to a JSON string that can be saved to a file. */
-    fun getJson(): String = Klaxon().toJsonString(Configuration)
+    fun getJson(): String = klaxon.toJsonString(Configuration)
 
     /** To avoid unexpected behaviour, the undo/redo queues can be cleared when loading [Configuration]s/algorithms. */
     fun clearUndoQueues() {
@@ -129,13 +146,13 @@ object Configuration {
 
     /** Clears all configuration variables ([tiles], [robots], [targetNodes], [undoQueue], [redoQueue]). */
     fun clear() {
-        arrayOf(tiles, robots).forEach { it.clear() }
-        arrayOf(targetNodes, undoQueue, redoQueue).forEach { it.clear() }
+        arrayOf(tiles, robots).forEach { entityMap -> entityMap.clear() }
+        arrayOf(targetNodes, undoQueue, redoQueue).forEach { collection -> collection.clear() }
 
     }
 
     /** Add the current state of the [Configuration] to the [undoQueue], clear the [redoQueue]. */
-    private fun addToUndoQueue() {
+    fun addUndoStep() {
         addToQueue(undoQueue)
         redoQueue.clear()
     }

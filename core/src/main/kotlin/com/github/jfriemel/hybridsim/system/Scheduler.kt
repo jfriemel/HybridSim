@@ -77,7 +77,7 @@ object Scheduler {
                 // Pick a random robot to activate (fair sequential scheduler)
                 val robot = robots[Random.nextInt(robots.size)]
                 try {
-                    robot.activate()
+                    robot.triggerActivate()
                 } catch (e: Exception) {
                     // Ensure Scheduler does not crash when Robot crashes due to faulty algorithm script
                     logger.error { "Robot at ${robot.node} crashed!" }

@@ -8,15 +8,13 @@ import com.github.jfriemel.hybridsim.system.Configuration
 const val MAX_PEBBLES_TILE: Int = 1
 
 class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) : Entity(node, sprite) {
-    // Constructor values cannot be private (even if the IDE claims otherwise) because they need to be accessed to save
-    // configurations to JSON files.
 
     private var tileColor: Color? = null
 
     /**
-     * Returns the tile's colour. The colour depends on whether the tile is located at a target node.
-     * If no target nodes exist, all tiles are white.
-     * If tileColor is not null, tileColor is returned.
+     * Returns the tile's colour. If [tileColor] is not null, [tileColor] is returned.
+     * Otherwise, if no target nodes exist, [colorDefault] is returned.
+     * If the tile is at a target node, [colorTarget] is returned. If not, [colorOverhang] is returned.
      */
     override fun getColor(): Color {
         return if (tileColor != null) {
@@ -26,17 +24,16 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
         } else if (node in Configuration.targetNodes) {
             colorTarget
         } else {
-            colorNonTarget
+            colorOverhang
         }
     }
 
-    /** Sets tileColor to [color]. If tileColor is not null, the tile is drawn in that color. */
-    @Suppress("Unused")
+    /** Sets [tileColor] to [color]. If [tileColor] is not null, the tile is drawn in that color. */
     fun setColor(color: Color?) {
         tileColor = color
     }
 
-    /** Adds a pebble to the tile if the tile can carry another pebble. Returns true if successful. */
+    /** Adds a pebble to the tile if the tile can hold another pebble. Returns true if successful. */
     fun addPebble(): Boolean {
         if (numPebbles >= MAX_PEBBLES_TILE) {
             return false
@@ -45,7 +42,7 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
         return true
     }
 
-    /** Removes a pebble from the tile is the tile still has a pebble. Returns true if successful. */
+    /** Removes a pebble from the tile if the tile is holding a pebble. Returns true if successful. */
     fun removePebble(): Boolean {
         if (numPebbles <= 0) {
             return false
@@ -60,6 +57,6 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
     companion object {
         val colorDefault: Color = Color.LIGHT_GRAY
         val colorTarget: Color = Color.ROYAL
-        val colorNonTarget: Color = Color.CORAL
+        val colorOverhang: Color = Color.CORAL
     }
 }

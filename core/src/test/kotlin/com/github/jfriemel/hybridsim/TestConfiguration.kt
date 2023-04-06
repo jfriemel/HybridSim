@@ -20,7 +20,6 @@ class TestConfiguration {
         val tile = Tile(Node(10, -5))
         Configuration.addTile(tile)
         Assertions.assertEquals(tile, Configuration.tiles[tile.node])
-        Assertions.assertEquals(1, Configuration.undoSteps())
     }
 
     @Test
@@ -29,7 +28,6 @@ class TestConfiguration {
         Configuration.addTile(tile)
         Configuration.removeTile(tile.node)
         Assertions.assertFalse(tile.node in Configuration.tiles)
-        Assertions.assertEquals(2, Configuration.undoSteps())
     }
 
     @Test
@@ -37,7 +35,6 @@ class TestConfiguration {
         val robot = Robot(Node(5, -10))
         Configuration.addRobot(robot)
         Assertions.assertEquals(robot, Configuration.robots[robot.node])
-        Assertions.assertEquals(1, Configuration.undoSteps())
     }
 
     @Test
@@ -46,7 +43,6 @@ class TestConfiguration {
         Configuration.addRobot(robot)
         Configuration.removeRobot(robot.node)
         Assertions.assertFalse(robot.node in Configuration.robots)
-        Assertions.assertEquals(2, Configuration.undoSteps())
     }
 
     @Test
@@ -54,7 +50,6 @@ class TestConfiguration {
         val node = Node(10, 5)
         Configuration.addTarget(node)
         Assertions.assertTrue(node in Configuration.targetNodes)
-        Assertions.assertEquals(1, Configuration.undoSteps())
     }
 
     @Test
@@ -63,7 +58,6 @@ class TestConfiguration {
         Configuration.addTarget(node)
         Configuration.removeTarget(node)
         Assertions.assertFalse(node in Configuration.targetNodes)
-        Assertions.assertEquals(2, Configuration.undoSteps())
     }
 
     @Test
@@ -90,7 +84,8 @@ class TestConfiguration {
     @Test
     fun `undo step`() {
         val tile = Tile(Node(-10, -5))
-        Configuration.addTile(tile)
+        Configuration.addTile(tile, addUndoStep = true)
+        Assertions.assertEquals(1, Configuration.undoSteps())
         Assertions.assertTrue(Configuration.undo())
         Assertions.assertFalse(tile.node in Configuration.tiles)
         Assertions.assertEquals(0, Configuration.undoSteps())
@@ -100,7 +95,8 @@ class TestConfiguration {
     @Test
     fun `redo step`() {
         val robot = Robot(Node(-5, -10))
-        Configuration.addRobot(robot)
+        Configuration.addRobot(robot, addUndoStep = true)
+        Assertions.assertEquals(1, Configuration.undoSteps())
         Assertions.assertTrue(Configuration.undo())
         Assertions.assertFalse(robot.node in Configuration.robots)
         Assertions.assertTrue(Configuration.redo())
@@ -111,10 +107,10 @@ class TestConfiguration {
 
     @Test
     fun `no redo after changing configuration`() {
-        Configuration.addTarget(Node(1024, 0))
+        Configuration.addTarget(Node(1024, 0), addUndoStep = true)
         Assertions.assertTrue(Configuration.undo())
         Assertions.assertEquals(1, Configuration.redoSteps())
-        Configuration.addTile(Tile(Node(0, -4096)))
+        Configuration.addTile(Tile(Node(0, -4096)), addUndoStep = true)
         Assertions.assertEquals(0, Configuration.redoSteps())
     }
 
