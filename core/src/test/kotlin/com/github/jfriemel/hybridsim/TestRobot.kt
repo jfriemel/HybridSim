@@ -16,6 +16,14 @@ private val targetTileNode = Node(8, -5)
 private val targetNode = Node(-22, -6)
 private val robotNode = Node(13, 27)
 
+/** Implementation of [Robot] for testing [Robot.triggerActivate]. */
+private class RobotTestImpl(node: Node, orientation: Int) : Robot(node, orientation) {
+    override fun activate() {
+        moveToLabel(3)
+    }
+}
+
+/** Test [Robot] functionality. */
 class TestRobot {
 
     @BeforeEach
@@ -286,6 +294,14 @@ class TestRobot {
         val tileLabel = robot.overhangTileNbrLabel()
         Assertions.assertEquals(label, tileLabel)
         Assertions.assertEquals(robot.tileAtLabel(label),robot.overhangTileNbr())
+    }
+
+    @Test
+    fun `triggerActivate() runs activate() and adds undo step`() {
+        val robot = RobotTestImpl(Node(335, -302), 3)
+        robot.triggerActivate()
+        Assertions.assertEquals(Node(335, -303), robot.node)
+        Assertions.assertEquals(1, Configuration.undoSteps())
     }
 
 }

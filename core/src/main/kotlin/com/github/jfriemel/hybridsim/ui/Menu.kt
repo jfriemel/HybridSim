@@ -1,6 +1,7 @@
 package com.github.jfriemel.hybridsim.ui
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -20,7 +21,6 @@ import ktx.actors.onClick
 import ktx.log.logger
 import ktx.scene2d.*
 import java.io.File
-import java.lang.Exception
 import javax.swing.JFileChooser
 import javax.swing.JFrame
 import javax.swing.UIManager
@@ -147,7 +147,7 @@ class Menu(batch: Batch) {
             logger.error { "Exception: $e" }
         }
         buttonLoadConfig.onClick { if (active) loadConfiguration() }
-        buttonSaveConfig.onClick { if (active) saveConfiguration() }
+        buttonSaveConfig.onClick { if (active) saveConfiguration(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) }
         buttonLoadAlgorithm.onClick { if (active) loadAlgorithm() }
 
         buttonPutTiles.onClick { if (active) togglePutTiles() }
@@ -248,14 +248,14 @@ class Menu(batch: Batch) {
     }
 
     /** Opens a file selector window. The user can select a file where the current [Configuration] is to be saved. */
-    fun saveConfiguration() {
+    fun saveConfiguration(prettyPrint: Boolean) {
         if (Gdx.graphics.isFullscreen) return
 
         var configFile = getFile(jsonFilter, true) ?: return
         if (configFile.extension != "json") {
             configFile = File(configFile.absolutePath.plus(".json"))
         }
-        configFile.writeText(Configuration.getJson())
+        configFile.writeText(Configuration.getJson(prettyPrint))
     }
 
     /** Opens a file selector window. The user can select an algorithm file (kts script) to be loaded. */
@@ -312,7 +312,7 @@ class Menu(batch: Batch) {
     private fun getFile(filter: FileNameExtensionFilter, save: Boolean = false): File? {
         val fileChooser = JFileChooser()
         fileChooser.fileFilter = filter
-        fileChooser.currentDirectory = File(System.getProperty("user.home"))
+        fileChooser.currentDirectory = File(System.getProperty("user.dir"))
 
         // Make sure the file chooser is always visible by creating a proxy frame
         val f = JFrame()

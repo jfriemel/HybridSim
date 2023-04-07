@@ -7,6 +7,7 @@ import com.github.jfriemel.hybridsim.system.Configuration
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
+/** Test [Tile] functionality. */
 class TestTile {
 
     @Test

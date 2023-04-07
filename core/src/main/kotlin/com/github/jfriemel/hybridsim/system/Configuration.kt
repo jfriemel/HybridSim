@@ -1,11 +1,12 @@
 package com.github.jfriemel.hybridsim.system
 
+import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
+import com.beust.klaxon.Parser.Companion.default
 import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
 import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
-import java.util.*
 
 private data class TimeState(
     val tiles: MutableMap<Node, Tile>,
@@ -23,8 +24,8 @@ object Configuration {
     var robots: MutableMap<Node, Robot> = HashMap()
     var targetNodes: MutableSet<Node> = HashSet()
 
-    private var undoQueue: Deque<TimeState> = LinkedList()
-    private var redoQueue: Deque<TimeState> = LinkedList()
+    private var undoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
+    private var redoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
 
     private val klaxon = Klaxon()
 
@@ -107,12 +108,12 @@ object Configuration {
      * For redo: [uq] := [redoQueue], [rq] := [undoQueue]
      * @return True if undo/redo was successful.
      */
-    private fun undo(uq: Deque<TimeState>, rq: Deque<TimeState>): Boolean {
+    private fun undo(uq: ArrayDeque<TimeState>, rq: ArrayDeque<TimeState>): Boolean {
         if (uq.size == 0) {
             return false
         }
         addToQueue(rq)
-        val undoState = uq.pollLast()
+        val undoState = uq.removeLast()
         tiles = undoState.tiles
         robots = undoState.robots
         targetNodes = undoState.targetNodes
@@ -136,7 +137,13 @@ object Configuration {
     }
 
     /** Convert the current [Configuration] string to a JSON string that can be saved to a file. */
-    fun getJson(): String = klaxon.toJsonString(Configuration)
+    fun getJson(prettyPrint: Boolean = false): String {
+        val jsonString = klaxon.toJsonString(Configuration)
+        if (!prettyPrint) {
+            return jsonString
+        }
+        return (default().parse(StringBuilder(jsonString)) as JsonObject).toJsonString(prettyPrint = true)
+    }
 
     /** To avoid unexpected behaviour, the undo/redo queues can be cleared when loading [Configuration]s/algorithms. */
     fun clearUndoQueues() {
@@ -158,7 +165,7 @@ object Configuration {
     }
 
     /** Add the current state of the [Configuration] to the given undo/redo [queue]. */
-    private fun addToQueue(queue: Deque<TimeState>) {
+    private fun addToQueue(queue: ArrayDeque<TimeState>) {
         if (queue.size == MAX_UNDO_STATES) {  // Keep memory consumption in check
             queue.removeFirst()
         }

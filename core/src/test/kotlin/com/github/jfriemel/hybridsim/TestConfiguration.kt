@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+/** Test [Configuration] functionality. */
 class TestConfiguration {
 
     @BeforeEach
@@ -93,6 +94,22 @@ class TestConfiguration {
     }
 
     @Test
+    fun `correct undo order`() {
+        val robot = Robot(Node(948, 611))
+        val targetNode = Node(-707, -697)
+        Configuration.addRobot(robot, addUndoStep = true)
+        Configuration.addTarget(targetNode, addUndoStep = true)
+        Assertions.assertEquals(2, Configuration.undoSteps())
+        Assertions.assertTrue(Configuration.undo())
+        Assertions.assertFalse(targetNode in Configuration.targetNodes)
+        Assertions.assertTrue(robot.node in Configuration.robots)
+        Assertions.assertTrue(Configuration.undo())
+        Assertions.assertFalse(targetNode in Configuration.targetNodes)
+        Assertions.assertFalse(robot.node in Configuration.robots)
+        Assertions.assertEquals(0, Configuration.undoSteps())
+    }
+
+    @Test
     fun `redo step`() {
         val robot = Robot(Node(-5, -10))
         Configuration.addRobot(robot, addUndoStep = true)
@@ -102,6 +119,27 @@ class TestConfiguration {
         Assertions.assertTrue(Configuration.redo())
         Assertions.assertTrue(robot.node in Configuration.robots)
         Assertions.assertEquals(1, Configuration.undoSteps())
+        Assertions.assertEquals(0, Configuration.redoSteps())
+    }
+
+    @Test
+    fun `correct redo order`() {
+        val targetNode = Node(807, -333)
+        val tile = Tile(Node(-602, -784))
+        Configuration.addTarget(targetNode, addUndoStep = true)
+        Configuration.addTile(tile, addUndoStep = true)
+        Assertions.assertEquals(2, Configuration.undoSteps())
+        Assertions.assertTrue(Configuration.undo())
+        Assertions.assertTrue(Configuration.undo())
+        Assertions.assertEquals(0, Configuration.undoSteps())
+        Assertions.assertEquals(2, Configuration.redoSteps())
+        Assertions.assertTrue(Configuration.redo())
+        Assertions.assertTrue(targetNode in Configuration.targetNodes)
+        Assertions.assertFalse(tile.node in Configuration.tiles)
+        Assertions.assertTrue(Configuration.redo())
+        Assertions.assertTrue(targetNode in Configuration.targetNodes)
+        Assertions.assertTrue(tile.node in Configuration.tiles)
+        Assertions.assertEquals(2, Configuration.undoSteps())
         Assertions.assertEquals(0, Configuration.redoSteps())
     }
 
@@ -116,14 +154,14 @@ class TestConfiguration {
 
     @Test
     fun `get empty configuration json`() {
-        val json = Configuration.getJson()
+        val json = Configuration.getJson().replace("\\s+".toRegex(), "")
         val validResponses = arrayOf(
-            "{\"robots\" : {}, \"targetNodes\" : [], \"tiles\" : {}}",
-            "{\"targetNodes\" : [], \"robots\" : {}, \"tiles\" : {}}",
-            "{\"targetNodes\" : [], \"tiles\" : {}, \"robots\" : {}}",
-            "{\"robots\" : {}, \"tiles\" : {}, \"targetNodes\" : []}",
-            "{\"tiles\" : {}, \"robots\" : {}, \"targetNodes\" : []}",
-            "{\"tiles\" : {}, \"targetNodes\" : [], \"robots\" : {}}",
+            "{\"robots\":{},\"targetNodes\":[],\"tiles\":{}}",
+            "{\"targetNodes\":[],\"robots\":{},\"tiles\":{}}",
+            "{\"targetNodes\":[],\"tiles\":{},\"robots\":{}}",
+            "{\"robots\":{},\"tiles\":{},\"targetNodes\":[]}",
+            "{\"tiles\":{},\"robots\":{},\"targetNodes\":[]}",
+            "{\"tiles\":{},\"targetNodes\":[],\"robots\":{}}",
         )
         Assertions.assertTrue(json in validResponses)
     }

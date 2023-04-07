@@ -13,6 +13,7 @@ private const val TEST_SCRIPT = """
     fun getRobot(node: Node, orientation: Int) = Robot(node, orientation = 5)
 """
 
+/** Test [AlgorithmLoader] functionality. */
 class TestAlgorithmLoader {
 
     @BeforeEach

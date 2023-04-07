@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import kotlin.random.Random
 
+/** Test [Node] functionality. */
 class TestNode {
 
     @ParameterizedTest(name = "direction {0}")
