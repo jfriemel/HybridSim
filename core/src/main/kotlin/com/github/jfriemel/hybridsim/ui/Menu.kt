@@ -273,9 +273,9 @@ class Menu(batch: Batch) {
     /** Toggles whether tiles should be placed by a mouse click. */
     fun togglePutTiles() {
         Scheduler.stop()
-        val nextBool = !putTiles
-        untoggleToggleButtons()
-        putTiles = nextBool
+        putRobots = false
+        buttonPutRobots.color = buttonColorDefault
+        putTiles = !putTiles
         buttonPutTiles.color = if (putTiles) buttonColorToggled else buttonColorDefault
     }
 
@@ -290,10 +290,10 @@ class Menu(batch: Batch) {
 
     /** Toggles whether nodes should be marked as target nodes by a mouse click. */
     fun toggleSelectTarget() {
-        val nextBool = !selectTarget
         Scheduler.stop()
-        untoggleToggleButtons()
-        selectTarget = nextBool
+        putRobots = false
+        buttonPutRobots.color = buttonColorDefault
+        selectTarget = !selectTarget
         buttonSelectTarget.color = if (selectTarget) buttonColorToggled else buttonColorDefault
     }
 

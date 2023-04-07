@@ -15,7 +15,8 @@ open class Robot(
     @Json(ignored = true) var carrySprite: Sprite? = null,
 ) : Entity(node, sprite) {
 
-    @Json(ignored = true) val labels = intArrayOf(0, 1, 2, 3, 4, 5)
+    @Json(ignored = true)
+    val labels = intArrayOf(0, 1, 2, 3, 4, 5)
 
     /**
      * The code executed by the robot when it is activated.
@@ -44,15 +45,42 @@ open class Robot(
      */
     open fun finished(): Boolean = false
 
+    /**
+     * Checks whether the robot can move to the given [label] without running into another robot or violating
+     * connectivity.
+     */
+    fun canMoveToLabel(label: Int): Boolean {
+        // Check whether node is occupied
+        if (nodeAtLabel(label) in Configuration.robots) {
+            return false
+        }
+
+        // Connectivity cannot be violated when robot moves from or to tile
+        if (isOnTile() || hasTileAtLabel(label)) {
+            return true
+        }
+
+        // Check whether node is reachable without violating connectivity
+        arrayOf(nodeAtLabel((label - 1).mod(6)), nodeAtLabel((label + 1).mod(6))).forEach { node ->
+            if (node in Configuration.tiles || Configuration.robots[node]?.carriesTile == true) {
+                return true
+            }
+        }
+        return false
+    }
+
     /** The robot tries to move to the node at the given [label]. Returns true if successful. */
     fun moveToLabel(label: Int): Boolean {
-        if (nodeAtLabel(label) in Configuration.robots) {
+        if (!canMoveToLabel(label)) {
             return false
         }
         Configuration.moveRobot(node, nodeAtLabel(label))
         node = nodeAtLabel(label)
         return true
     }
+
+    /** Checks whether the robot is at a boundary, i.e. it has a [Node] neighbour that is not occupied by a [Tile]. */
+    fun isAtBoundary(): Boolean = labels.any { label -> !hasTileAtLabel(label) }
 
     /** Checks whether the robot is on top of a [Tile]. */
     fun isOnTile(): Boolean = node in Configuration.tiles
@@ -115,25 +143,31 @@ open class Robot(
     /** @return The [Robot] neighbour at the given [label] of null if there is no such neighbour. */
     fun robotAtLabel(label: Int): Robot? = Configuration.robots[nodeAtLabel(label)]
 
-    /** @return True if the robot is on a target [Node]. */
+    /** Checks whether the robot is on a target [Node]. */
     fun isOnTarget(): Boolean = node in Configuration.targetNodes
 
-    /** @return True if the node at the [label] is a target [Node]. */
+    /** Checks whether the node at the [label] is a target [Node]. */
     fun labelIsTarget(label: Int): Boolean = nodeAtLabel(label) in Configuration.targetNodes
 
     /** @return Label of a [Tile] neighbour that is on a target [Node] or null if there is no such neighbour. */
     fun targetTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && labelIsTarget(label) }
 
-    /** @return True if the robot has a [Tile] neighbour that is on a target [Node]. */
+    /** Checks whether the robot has a [Tile] neighbour that is on a target [Node]. */
     fun hasTargetTileNbr(): Boolean = targetTileNbrLabel() != null
 
     /** @return A [Tile] neighbour that is on a target [Node] or null if there is no such neighbour. */
     fun targetTileNbr(): Tile? = targetTileNbrLabel()?.let { label -> tileAtLabel(label) }
 
+    /** @return Label of an empty [Node] neighbour that is a target or null if there is no such neighbour. */
+    fun emptyTargetNbrLabel(): Int? = labels.firstOrNull { label -> !hasTileAtLabel(label) && labelIsTarget(label) }
+
+    /** Checks whether the robot has an empty [Node] neighbour that is a target. */
+    fun hasEmptyTargetNbr(): Boolean = emptyTargetNbrLabel() != null
+
     /** @return Label of a [Tile] neighbour that is not on a target [Node] or null if there is no such neighbour. */
     fun overhangTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
 
-    /** @return True if the robot has a [Tile] neighbour that is not on a target [Node]. */
+    /** Checks whether the robot has a [Tile] neighbour that is not on a target [Node]. */
     fun hasOverhangTileNbr(): Boolean = overhangTileNbrLabel() != null
 
     /** @return A [Tile] neighbour that is not on a target [Node] or null if there is no such neighbour. */

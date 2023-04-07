@@ -40,8 +40,8 @@ class TestRobot {
         // Make a target at the empty node (-22, -6)
         Configuration.addTarget(targetNode)
 
-        // Place a robot at (13, 27)
-        Configuration.addRobot(Robot(robotNode))
+        // Place a robot with a tile at (13, 27)
+        Configuration.addRobot(Robot(robotNode).apply { carriesTile = true })
 
         // Place three boundary tiles around (256, 256)
         Configuration.addTile(Tile(Node(256, 255)))
@@ -58,18 +58,103 @@ class TestRobot {
 
     @ParameterizedTest(name = "movement label {0}")
     @CsvSource(
-        "0, 3, 5",
-        "1, 2, 4",
-        "2, 2, 3",
-        "3, 3, 3",
-        "4, 4, 3",
-        "5, 4, 4",
+        "0, -5, 3",
+        "1, -4, 3",
+        "2, -4, 4",
+        "3, -5, 5",
+        "4, -6, 4",
+        "5, -6, 3",
     )
-    fun `can move to free node`(label: Int, endNodeX: Int, endNodeY: Int) {
-        val robot = Robot(Node(3, 4), 3)
+    fun `can move to free node from tile`(label: Int, endNodeX: Int, endNodeY: Int) {
+        val robot = Robot(tileNode, orientation = 0)
         Assertions.assertFalse(robot.hasRobotAtLabel(label))
+        Assertions.assertTrue(robot.canMoveToLabel(label))
         Assertions.assertTrue(robot.moveToLabel(label))
         Assertions.assertEquals(Node(endNodeX, endNodeY), robot.node)
+    }
+
+    @ParameterizedTest(name = "movement label {2}")
+    @CsvSource(
+        "-5, 5, 0",
+        "-6, 4, 1",
+        "-6, 3, 2",
+        "-5, 3, 3",
+        "-4, 3, 4",
+        "-4, 4, 5",
+    )
+    fun `can move to tile`(startNodeX: Int, startNodeY: Int, label: Int) {
+        val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
+        Assertions.assertTrue(robot.hasTileAtLabel(label))
+        Assertions.assertTrue(robot.canMoveToLabel(label))
+        Assertions.assertTrue(robot.moveToLabel(label))
+        Assertions.assertEquals(tileNode, robot.node)
+    }
+
+    @ParameterizedTest(name = "movement label {2}")
+    @CsvSource(
+        "-6, 4, 0, -6, 3",
+        "-5, 5, 1, -4, 4",
+        "-5, 3, 2, -4, 3",
+        "-4, 3, 3, -4, 4",
+        "-5, 3, 4, -6, 3",
+        "-5, 5, 5, -6, 4",
+    )
+    fun `can move to empty node next to tile`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+        endNodeX: Int,
+        endNodeY: Int,
+    ) {
+        val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
+        Assertions.assertTrue(robot.canMoveToLabel(label))
+        Assertions.assertTrue(robot.moveToLabel(label))
+        Assertions.assertEquals(Node(endNodeX, endNodeY), robot.node)
+    }
+
+    @ParameterizedTest(name = "movement label {2}")
+    @CsvSource(
+        "14, 27, 0, 14, 26",
+        "12, 26, 1, 13, 26",
+        "12, 27, 2, 13, 28",
+        "12, 26, 3, 12, 27",
+        "13, 26, 4, 12, 26",
+        "13, 28, 5, 12, 27",
+    )
+    fun `can move to empty node next to robot carrying tile`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+        endNodeX: Int,
+        endNodeY: Int,
+    ) {
+        val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
+        Assertions.assertTrue(robot.canMoveToLabel(label))
+        Assertions.assertTrue(robot.moveToLabel(label))
+        Assertions.assertEquals(Node(endNodeX, endNodeY), robot.node)
+    }
+
+    @ParameterizedTest(name = "movement label {0}")
+    @ValueSource(ints = [0, 1, 2, 3, 4, 5])
+    fun `cannot move to disconnected free node`(label: Int) {
+        val startNode = Node(93, -668)
+        val robot = Robot(startNode)
+        Assertions.assertFalse(robot.hasRobotAtLabel(label))
+        Assertions.assertFalse(robot.canMoveToLabel(label))
+        Assertions.assertFalse(robot.moveToLabel(label))
+        Assertions.assertEquals(startNode, robot.node)
+    }
+
+    @Test
+    fun `is at a boundary`() {
+        val robot = Robot(Node(617, -966))
+        Assertions.assertTrue(robot.isAtBoundary())
+    }
+
+    @Test
+    fun `is not at a boundary`() {
+        val robot = Robot(Node(258, 257))
+        Assertions.assertFalse(robot.isAtBoundary())
     }
 
     @ParameterizedTest(name = "neighbour label {2}")
@@ -82,11 +167,9 @@ class TestRobot {
         "14, 27, 5",
     )
     fun `can interact with robot neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
-        val startNode = Node(startNodeX, startNodeY)
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertTrue(robot.hasRobotAtLabel(label))
-        // nodeInDir(label) works because orientation = 0, so label matches global direction
-        Assertions.assertEquals(Configuration.robots[startNode.nodeInDir(label)], robot.robotAtLabel(label))
+        Assertions.assertEquals(Configuration.robots[robotNode], robot.robotAtLabel(label))
     }
 
     @Test
@@ -273,9 +356,38 @@ class TestRobot {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasTargetTileNbr())
         Assertions.assertFalse(robot.hasOverhangTileNbr())
-        val tileLabel = robot.targetTileNbrLabel()
-        Assertions.assertEquals(label, tileLabel)
+        Assertions.assertEquals(label, robot.targetTileNbrLabel())
         Assertions.assertEquals(robot.tileAtLabel(label), robot.targetTileNbr())
+    }
+
+    @Test
+    fun `has no target tile neighbour`() {
+        val robot = Robot(Node(-135, -808))
+        Assertions.assertFalse(robot.hasTargetTileNbr())
+        Assertions.assertNull(robot.targetTileNbrLabel())
+        Assertions.assertNull(robot.targetTileNbr())
+    }
+
+    @ParameterizedTest(name = "empty target node at label {2}")
+    @CsvSource(
+        "-22, -5, 0",
+        "-23, -5, 1",
+        "-23, -6, 2",
+        "-22, -7, 3",
+        "-21, -6, 4",
+        "-21, -5, 5",
+    )
+    fun `has empty target node neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
+        val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
+        Assertions.assertTrue(robot.hasEmptyTargetNbr())
+        Assertions.assertEquals(label, robot.emptyTargetNbrLabel())
+    }
+
+    @Test
+    fun `has no empty target node neighbour`() {
+        val robot = Robot(Node(-236, 576))
+        Assertions.assertFalse(robot.hasEmptyTargetNbr())
+        Assertions.assertNull(robot.emptyTargetNbrLabel())
     }
 
     @ParameterizedTest(name = "overhang tile at label {2}")
@@ -291,16 +403,23 @@ class TestRobot {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasOverhangTileNbr())
         Assertions.assertFalse(robot.hasTargetTileNbr())
-        val tileLabel = robot.overhangTileNbrLabel()
-        Assertions.assertEquals(label, tileLabel)
-        Assertions.assertEquals(robot.tileAtLabel(label),robot.overhangTileNbr())
+        Assertions.assertEquals(label, robot.overhangTileNbrLabel())
+        Assertions.assertEquals(robot.tileAtLabel(label), robot.overhangTileNbr())
+    }
+
+    @Test
+    fun `has no overhang tile neighbour`() {
+        val robot = Robot(Node(520, 878))
+        Assertions.assertFalse(robot.hasOverhangTileNbr())
+        Assertions.assertNull(robot.overhangTileNbrLabel())
+        Assertions.assertNull(robot.overhangTileNbr())
     }
 
     @Test
     fun `triggerActivate() runs activate() and adds undo step`() {
-        val robot = RobotTestImpl(Node(335, -302), 3)
+        val robot = RobotTestImpl(Node(tileNode.x, tileNode.y + 1), 3)
         robot.triggerActivate()
-        Assertions.assertEquals(Node(335, -303), robot.node)
+        Assertions.assertEquals(tileNode, robot.node)
         Assertions.assertEquals(1, Configuration.undoSteps())
     }
 

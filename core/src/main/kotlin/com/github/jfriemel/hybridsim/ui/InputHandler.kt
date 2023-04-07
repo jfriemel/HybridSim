@@ -114,6 +114,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                         Scheduler.stop()
                     }
                 } else if (menu.putTiles && node !in Configuration.tiles) {
+                    if (menu.selectTarget) {  // Tile and target in one step
+                        Configuration.addTarget(node)
+                    }
                     Configuration.addTile(Tile(node), addUndoStep = true)
                 } else if (menu.putRobots && node !in Configuration.robots) {
                     val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
@@ -129,6 +132,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
 
             Input.Buttons.RIGHT -> {
                 if (menu.putTiles && node in Configuration.tiles) {
+                    if (menu.selectTarget) {  // Tile and target in one step
+                        Configuration.removeTarget(node)
+                    }
                     Configuration.removeTile(node, addUndoStep = true)
                 } else if (menu.putRobots && node in Configuration.robots) {
                     Configuration.removeRobot(node, addUndoStep = true)
@@ -160,6 +166,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             Configuration.robots[node]?.triggerActivate()
         } else if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (menu.putTiles && node !in Configuration.tiles) {
+                if (menu.selectTarget) {  // Tile and target in one step
+                    Configuration.addTarget(node)
+                }
                 Configuration.addTile(Tile(node), addUndoStep = true)
             } else if (menu.putRobots && node !in Configuration.robots) {
                 val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
@@ -169,6 +178,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             }
         } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             if (menu.putTiles && node in Configuration.tiles) {
+                if (menu.selectTarget) {  // Tile and target in one step
+                    Configuration.removeTarget(node)
+                }
                 Configuration.removeTile(node, addUndoStep = true)
             } else if (menu.putRobots && node in Configuration.robots) {
                 Configuration.removeRobot(node, addUndoStep = true)
