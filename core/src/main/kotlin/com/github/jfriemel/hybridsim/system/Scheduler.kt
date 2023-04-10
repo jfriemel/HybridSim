@@ -82,6 +82,7 @@ object Scheduler {
                     // Ensure Scheduler does not crash when Robot crashes due to faulty algorithm script
                     logger.error { "Robot at ${robot.node} crashed!" }
                     logger.error { e.toString() }
+                    logger.error { e.stackTraceToString() }
                     stop()
                     continue@schedulerLoop
                 }
@@ -96,6 +97,7 @@ object Scheduler {
                 // Ensure Scheduler does not crash when Robot crashes due to faulty algorithm script
                 logger.error { "Robot crashed during finished() call!" }
                 logger.error { e.toString() }
+                logger.error { e.stackTraceToString() }
                 stop()
                 continue@schedulerLoop
             }

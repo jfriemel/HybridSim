@@ -144,7 +144,8 @@ class Menu(batch: Batch) {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
         } catch (e: Exception) {
             logger.error { "Could not set UI look to system look" }
-            logger.error { "Exception: $e" }
+            logger.error { e.toString() }
+            logger.error { e.stackTraceToString() }
         }
         buttonLoadConfig.onClick { if (active) loadConfiguration() }
         buttonSaveConfig.onClick { if (active) saveConfiguration(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) }

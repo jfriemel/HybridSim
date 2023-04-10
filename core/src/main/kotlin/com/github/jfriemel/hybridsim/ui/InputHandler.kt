@@ -66,7 +66,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     takeScreenshot(FileHandle(path.toFile()))
                     logger.debug { "Screenshot: $path" }
                 } catch (e: Exception) {
-                    logger.error { "Screenshot failed! Exception: $e" }
+                    logger.error { "Screenshot failed!" }
+                    logger.error { e.toString() }
+                    logger.error { e.stackTraceToString() }
                 }
             }
         }
@@ -104,47 +106,22 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         val node = screen.screenCoordsToNodeCoords(screenX, screenY)
         when (button) {
             Input.Buttons.LEFT -> {
-                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-                    val robot = Configuration.robots[node]
-                    try {
-                        robot?.triggerActivate()
-                    } catch (e: Exception) {
-                        logger.error { "Robot at ${robot?.node} crashed!" }
-                        logger.error { e.toString() }
-                        Scheduler.stop()
-                    }
-                } else if (menu.putTiles && node !in Configuration.tiles) {
-                    if (menu.selectTarget) {  // Tile and target in one step
-                        Configuration.addTarget(node)
-                    }
-                    Configuration.addTile(Tile(node), addUndoStep = true)
-                } else if (menu.putRobots && node !in Configuration.robots) {
-                    val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
-                    Configuration.addRobot(robot, addUndoStep = true)
-                } else if (menu.selectTarget && node !in Configuration.targetNodes) {
-                    Configuration.addTarget(node, addUndoStep = true)
-                } else {
+                if (!menu.putTiles && !menu.putRobots && !menu.selectTarget) {
+                    mousePressed = true
                     mouseX = screenX
                     mouseY = screenY
-                    mousePressed = true
                 }
+                touchDragged(screenX, screenY, pointer)
             }
 
             Input.Buttons.RIGHT -> {
-                if (menu.putTiles && node in Configuration.tiles) {
-                    if (menu.selectTarget) {  // Tile and target in one step
-                        Configuration.removeTarget(node)
-                    }
-                    Configuration.removeTile(node, addUndoStep = true)
-                } else if (menu.putRobots && node in Configuration.robots) {
-                    Configuration.removeRobot(node, addUndoStep = true)
-                } else if (menu.selectTarget && node in Configuration.targetNodes) {
-                    Configuration.removeTarget(node, addUndoStep = true)
-                } else if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {  // Log coordinates, sometimes helpful
+                if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {  // Log coordinates, sometimes helpful
                     logger.debug { "Screen coordinates:     ($screenX, $screenY)" }
                     logger.debug { "Node coordinates:       (${node.x}, ${node.y})" }
                     val sciCoords = node.scientificCoordinates()
                     logger.debug { "Scientific coordinates: (${sciCoords.first}, ${sciCoords.second})" }
+                } else {
+                    touchDragged(screenX, screenY, pointer)
                 }
             }
         }
@@ -163,11 +140,18 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             mouseX = screenX
             mouseY = screenY
         } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-            Configuration.robots[node]?.triggerActivate()
+            try {
+                Configuration.robots[node]?.triggerActivate()
+            } catch (e: Exception) {
+                logger.error { "Robot at $node crashed!" }
+                logger.error { e.toString() }
+                logger.error { e.stackTraceToString() }
+                Scheduler.stop()
+            }
         } else if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (menu.putTiles && node !in Configuration.tiles) {
                 if (menu.selectTarget) {  // Tile and target in one step
-                    Configuration.addTarget(node)
+                    Configuration.addTarget(node, addUndoStep = false)
                 }
                 Configuration.addTile(Tile(node), addUndoStep = true)
             } else if (menu.putRobots && node !in Configuration.robots) {
@@ -179,7 +163,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             if (menu.putTiles && node in Configuration.tiles) {
                 if (menu.selectTarget) {  // Tile and target in one step
-                    Configuration.removeTarget(node)
+                    Configuration.removeTarget(node, addUndoStep = false)
                 }
                 Configuration.removeTile(node, addUndoStep = true)
             } else if (menu.putRobots && node in Configuration.robots) {
