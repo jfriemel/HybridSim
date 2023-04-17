@@ -3,7 +3,7 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
-    FindBoundary, FindTargetOnBoundary, FindOverhang, FindOverhangTile, FindEmptyTarget, PlaceTargetTile
+    FindBoundary, FindTargetOnBoundary, FindOverhang, FindRemovableOverhang, FindEmptyTarget, PlaceTargetTile
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -23,7 +23,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.FindBoundary -> findBoundary()
             Phase.FindTargetOnBoundary -> findTargetOnBoundary()
             Phase.FindOverhang -> findOverhang()
-            Phase.FindOverhangTile -> findOverhangTile()
+            Phase.FindRemovableOverhang -> findRemovableOverhang()
             Phase.FindEmptyTarget -> findEmptyTarget()
             Phase.PlaceTargetTile -> placeTargetTile()
         }
@@ -34,7 +34,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.FindBoundary -> Color.BLUE
             Phase.FindTargetOnBoundary -> Color.TEAL
             Phase.FindOverhang -> Color.ORANGE
-            Phase.FindOverhangTile -> Color.SCARLET
+            Phase.FindRemovableOverhang -> Color.SCARLET
             Phase.FindEmptyTarget -> Color.SKY
             Phase.PlaceTargetTile -> Color.WHITE
         }
@@ -78,13 +78,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * The robot traverses the target tile boundary until it encounters an overhang tile.
      * It moves to the tile and sets [entryTile] to true.
      *
-     * Exit phase: [Phase.FindOverhangTile]
+     * Exit phase: [Phase.FindRemovableOverhang]
      */
     private fun findOverhang() {
         if (hasOverhangTileNbr()) {
             moveToLabel(overhangTileNbrLabel()!!)
             entryTile = true
-            phase = Phase.FindOverhangTile
+            phase = Phase.FindRemovableOverhang
             return
         }
 
@@ -92,7 +92,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     /**
-     * Enter phase: [Phase.FindOverhangTile]
+     * Enter phase: [Phase.FindRemovableOverhang]
      *
      * The robot traverses the overhang tile boundary until it encounters a tile that can be removed without breaking
      * the connectivity of the component of overhang tiles (checked by [isAtOverhangEdge]).
@@ -100,9 +100,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * does not lift the first overhang tile it moved to (checked by [entryTile]) unless it is the only tile of the
      * component.
      *
-     * Exit phase: [Phase.FindOverhangTile]
+     * Exit phase: [Phase.FindRemovableOverhang]
      */
-    private fun findOverhangTile() {
+    private fun findRemovableOverhang() {
         if ((!entryTile && isAtOverhangEdge()) || !hasOverhangTileNbr()) {
             liftTile()
             phase = Phase.FindEmptyTarget
