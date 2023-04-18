@@ -106,7 +106,16 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         val node = screen.screenCoordsToNodeCoords(screenX, screenY)
         when (button) {
             Input.Buttons.LEFT -> {
-                if (!menu.putTiles && !menu.putRobots && !menu.selectTarget) {
+                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                    try {
+                        Configuration.robots[node]?.triggerActivate()
+                    } catch (e: Exception) {
+                        logger.error { "Robot at $node crashed!" }
+                        logger.error { e.toString() }
+                        logger.error { e.stackTraceToString() }
+                        Scheduler.stop()
+                    }
+                } else if (!menu.putTiles && !menu.putRobots && !menu.selectTarget) {
                     mousePressed = true
                     mouseX = screenX
                     mouseY = screenY
@@ -135,21 +144,12 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
 
     override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
         val node = screen.screenCoordsToNodeCoords(screenX, screenY)
-        if (mousePressed) {
-            screen.move(mouseX - screenX, mouseY - screenY)
-            mouseX = screenX
-            mouseY = screenY
-        } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-            try {
-                Configuration.robots[node]?.triggerActivate()
-            } catch (e: Exception) {
-                logger.error { "Robot at $node crashed!" }
-                logger.error { e.toString() }
-                logger.error { e.stackTraceToString() }
-                Scheduler.stop()
-            }
-        } else if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            if (menu.putTiles && node !in Configuration.tiles) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            if (mousePressed) {
+                screen.move(mouseX - screenX, mouseY - screenY)
+                mouseX = screenX
+                mouseY = screenY
+            } else if (menu.putTiles && node !in Configuration.tiles) {
                 if (menu.selectTarget) {  // Tile and target in one step
                     Configuration.addTarget(node, addUndoStep = false)
                 }
