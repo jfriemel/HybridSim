@@ -107,6 +107,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         when (button) {
             Input.Buttons.LEFT -> {
                 if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                    menu.untoggleToggleButtons()
                     try {
                         Configuration.robots[node]?.triggerActivate()
                     } catch (e: Exception) {
@@ -119,8 +120,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     mousePressed = true
                     mouseX = screenX
                     mouseY = screenY
+                } else {
+                    touchDragged(screenX, screenY, pointer)
                 }
-                touchDragged(screenX, screenY, pointer)
             }
 
             Input.Buttons.RIGHT -> {
