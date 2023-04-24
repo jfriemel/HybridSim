@@ -81,8 +81,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * Exit phase: [Phase.FindRemovableOverhang]
      */
     private fun findOverhang() {
-        if (hasOverhangTileNbr()) {
-            moveToLabel(overhangTileNbrLabel()!!)
+        if (hasOverhangNbr()) {
+            moveToLabel(overhangNbrLabel()!!)
             entryTile = true
             phase = Phase.FindRemovableOverhang
             return
@@ -94,23 +94,23 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Enter phase: [Phase.FindRemovableOverhang]
      *
-     * The robot traverses the overhang tile boundary until it encounters a tile that can be removed without breaking
-     * the connectivity of the component of overhang tiles (checked by [isAtOverhangEdge]).
+     * The robot traverses the overhang boundary until it encounters a tile that can be removed without breaking the
+     * connectivity of the overhang component (checked by [isAtOverhangEdge]).
      * To make sure that the robot does not disconnect the overhang component from the rest of the tile structure, it
      * does not lift the first overhang tile it moved to (checked by [entryTile]) unless it is the only tile of the
      * component.
      *
-     * Exit phase: [Phase.FindRemovableOverhang]
+     * Exit phase: [Phase.FindEmptyTarget]
      */
     private fun findRemovableOverhang() {
-        if ((!entryTile && isAtOverhangEdge()) || !hasOverhangTileNbr()) {
+        if ((!entryTile && isAtOverhangEdge()) || !hasOverhangNbr()) {
             liftTile()
             phase = Phase.FindEmptyTarget
             return
         }
 
         entryTile = false
-        traverseOverhangTileBoundary()
+        traverseOverhangBoundary()
     }
 
     /**
@@ -168,9 +168,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Helper function
      *
-     * The robot traverses the boundary of a connected component of overhang tiles.
+     * The robot traverses the boundary of an overhang component.
      */
-    private fun traverseOverhangTileBoundary() {
+    private fun traverseOverhangBoundary() {
         traverseBoundary { label: Int -> canMoveToLabel(label) && hasTileAtLabel(label) && !labelIsTarget(label) }
     }
 
@@ -198,8 +198,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Helper function
      *
-     * Checks whether the robot is at an edge of a connected component of overhang tiles where a tile can safely be
-     * removed.
+     * Checks whether the robot is at an edge of an overhang component where a tile can safely be removed.
      */
     private fun isAtOverhangEdge(): Boolean = isAtEdge { label -> labelIsTarget(label) || !hasTileAtLabel(label) }
 

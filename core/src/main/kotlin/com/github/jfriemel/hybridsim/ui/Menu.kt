@@ -155,8 +155,18 @@ class Menu(batch: Batch) {
         buttonPutRobots.onClick { if (active) togglePutRobots() }
         buttonSelectTarget.onClick { if (active) toggleSelectTarget() }
 
-        buttonUndo.onClick { if (active) Configuration.undo() }
-        buttonRedo.onClick { if (active) Configuration.redo() }
+        buttonUndo.onClick {
+            if (active) {
+                Scheduler.stop()
+                Configuration.undo()
+            }
+        }
+        buttonRedo.onClick {
+            if (active) {
+                Scheduler.stop()
+                Configuration.redo()
+            }
+        }
 
         buttonToggleScheduler.onClick {
             if (!active) return@onClick

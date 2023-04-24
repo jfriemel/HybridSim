@@ -164,14 +164,20 @@ open class Robot(
     /** Checks whether the robot has an empty [Node] neighbour that is a target. */
     fun hasEmptyTargetNbr(): Boolean = emptyTargetNbrLabel() != null
 
+    /** @return Label of an empty [Node] neighbour that is not a target or null if there is no such neighbour. */
+    fun emptyNonTargetNbrLabel(): Int? = labels.firstOrNull { label -> !hasTileAtLabel(label) && !labelIsTarget(label) }
+
+    /** Checks whether the robot has an empty [Node] neighbour that is not a target. */
+    fun hasEmptyNonTargetNbr(): Boolean = emptyNonTargetNbrLabel() != null
+
     /** @return Label of a [Tile] neighbour that is not on a target [Node] or null if there is no such neighbour. */
-    fun overhangTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+    fun overhangNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
 
     /** Checks whether the robot has a [Tile] neighbour that is not on a target [Node]. */
-    fun hasOverhangTileNbr(): Boolean = overhangTileNbrLabel() != null
+    fun hasOverhangNbr(): Boolean = overhangNbrLabel() != null
 
     /** @return A [Tile] neighbour that is not on a target [Node] or null if there is no such neighbour. */
-    fun overhangTileNbr(): Tile? = overhangTileNbrLabel()?.let { label -> tileAtLabel(label) }
+    fun overhangNbr(): Tile? = overhangNbrLabel()?.let { label -> tileAtLabel(label) }
 
     /**
      * By default, counts and returns the number of connected components of empty nodes adjacent to the robot.

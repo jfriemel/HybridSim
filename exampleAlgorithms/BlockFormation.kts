@@ -40,7 +40,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun findTile() {
-        for (label in arrayOf(5, 4, 0)) {
+        for (label in intArrayOf(5, 4, 0)) {
             if (hasTileAtLabel(label)) {
                 moveToLabel(label)
                 if (label == 4) {

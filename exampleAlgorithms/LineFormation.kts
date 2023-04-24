@@ -49,10 +49,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun findTile() {
-        for (label in arrayOf(0, 2, 3, 5)) {
+        for (label in intArrayOf(0, 2, 3, 5)) {
             tilesToSides = tilesToSides || hasTileAtLabel(label)
         }
-        for (label in arrayOf(0, 5, 4)) {
+        for (label in intArrayOf(0, 5, 4)) {
             if (hasTileAtLabel(label)) {
                 moveToLabel(label)
                 return

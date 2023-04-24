@@ -355,7 +355,7 @@ class TestRobot {
     fun `has target tile neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasTargetTileNbr())
-        Assertions.assertFalse(robot.hasOverhangTileNbr())
+        Assertions.assertFalse(robot.hasOverhangNbr())
         Assertions.assertEquals(label, robot.targetTileNbrLabel())
         Assertions.assertEquals(robot.tileAtLabel(label), robot.targetTileNbr())
     }
@@ -390,7 +390,7 @@ class TestRobot {
         Assertions.assertNull(robot.emptyTargetNbrLabel())
     }
 
-    @ParameterizedTest(name = "overhang tile at label {2}")
+    @ParameterizedTest(name = "overhang at label {2}")
     @CsvSource(
         "-5, 5, 0",
         "-6, 4, 1",
@@ -399,20 +399,20 @@ class TestRobot {
         "-4, 3, 4",
         "-4, 4, 5",
     )
-    fun `has overhang tile neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `has overhang neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
-        Assertions.assertTrue(robot.hasOverhangTileNbr())
+        Assertions.assertTrue(robot.hasOverhangNbr())
         Assertions.assertFalse(robot.hasTargetTileNbr())
-        Assertions.assertEquals(label, robot.overhangTileNbrLabel())
-        Assertions.assertEquals(robot.tileAtLabel(label), robot.overhangTileNbr())
+        Assertions.assertEquals(label, robot.overhangNbrLabel())
+        Assertions.assertEquals(robot.tileAtLabel(label), robot.overhangNbr())
     }
 
     @Test
-    fun `has no overhang tile neighbour`() {
+    fun `has no overhang neighbour`() {
         val robot = Robot(Node(520, 878))
-        Assertions.assertFalse(robot.hasOverhangTileNbr())
-        Assertions.assertNull(robot.overhangTileNbrLabel())
-        Assertions.assertNull(robot.overhangTileNbr())
+        Assertions.assertFalse(robot.hasOverhangNbr())
+        Assertions.assertNull(robot.overhangNbrLabel())
+        Assertions.assertNull(robot.overhangNbr())
     }
 
     @Test

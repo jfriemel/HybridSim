@@ -49,7 +49,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             moveAndUpdate(3)
             return
         }
-        for (label in arrayOf(4, 5, 0, 1, 2)) {
+        for (label in intArrayOf(4, 5, 0, 1, 2)) {
             if (hasTileAtLabel(label)) {
                 moveAndUpdate(label)
                 phase = Phase.TraverseBoundary
@@ -61,7 +61,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     private fun traverseBoundary() {
         if ((0 <= enterLabel && enterLabel <= 2 && !hasTileAtLabel(3) && (enterLabel == 2 || !hasTileAtLabel(2)))
-            || ((enterLabel == 4 || enterLabel == 5) && arrayOf(0, 1, 2, 3).all { !hasTileAtLabel(it) })
+            || ((enterLabel == 4 || enterLabel == 5) && intArrayOf(0, 1, 2, 3).all { !hasTileAtLabel(it) })
         ) {
             phase = Phase.TraverseColumn
             return
