@@ -3,7 +3,17 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
-    FindOverhang, BuildOverhangBlock, LeaveOverhang, ExploreColumn, ExploreBoundary, ReturnToColumnTop, ReturnToBoundary
+    FindOverhang,
+    FindRemovableOverhang,
+    LeaveOverhang,
+    PlaceTileOnTarget,
+}
+
+private enum class SubPhase {
+    ExploreColumn,
+    ReturnToColumnTop,
+    ExploreBoundary,
+    ReturnToBoundary,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -11,37 +21,42 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     orientation = orientation,
     carriesTile = false,
     numPebbles = 0,
-    maxPebbles = 0
+    maxPebbles = 0,
 ) {
     private var phase = Phase.FindOverhang
+    private var subPhase = SubPhase.ExploreColumn
 
     private var entryTile: Boolean = false
     private var moveLabel: Int = 0
     private var outerLabel: Int = -1
-    private var blockDir: Int = -1
-    private var enterLabel: Int = 0
+    private var enterAngle: Int = 0
     private var columnDir: Int = 0
 
     override fun activate() {
         when (phase) {
             Phase.FindOverhang -> findOverhang()
-            Phase.BuildOverhangBlock -> findRemovableOverhang()
+            Phase.FindRemovableOverhang -> findRemovableOverhang()
             Phase.LeaveOverhang -> leaveOverhang()
-            Phase.ExploreColumn -> exploreColumn()
-            Phase.ReturnToColumnTop -> returnToColumnTop()
-            Phase.ExploreBoundary -> exploreBoundary()
-            Phase.ReturnToBoundary -> returnToBoundary()
+            Phase.PlaceTileOnTarget -> when (subPhase) {
+                SubPhase.ExploreColumn -> exploreColumn()
+                SubPhase.ReturnToColumnTop -> returnToColumnTop()
+                SubPhase.ExploreBoundary -> exploreBoundary()
+                SubPhase.ReturnToBoundary -> returnToBoundary()
+            }
         }
     }
 
     override fun getColor(): Color {
-        return when (phase) {  // BLUE, TEAL
+        return when (phase) {
             Phase.FindOverhang -> Color.ORANGE
-            Phase.BuildOverhangBlock -> Color.SCARLET
-            Phase.ExploreColumn -> Color.BLUE
-            Phase.ReturnToColumnTop -> Color.TEAL
-            Phase.ExploreBoundary -> Color.BROWN
-            else -> Color.WHITE
+            Phase.FindRemovableOverhang -> Color.SCARLET
+            Phase.LeaveOverhang -> Color.BROWN
+            Phase.PlaceTileOnTarget -> when (subPhase) {
+                SubPhase.ExploreColumn -> Color.BLUE
+                SubPhase.ReturnToColumnTop -> Color.TEAL
+                SubPhase.ExploreBoundary -> Color.SKY
+                SubPhase.ReturnToBoundary -> Color.YELLOW
+            }
         }
     }
 
@@ -51,24 +66,179 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * The robot traverses the target tile boundary until it encounters an overhang tile.
      * It moves to the tile and sets [entryTile] to true.
      *
-     * Exit phase: [Phase.BuildOverhangBlock]
+     * Exit phase: [Phase.FindRemovableOverhang]
      */
     private fun findOverhang() {
         if (hasOverhangNbr()) {
             val moveLabel = overhangNbrLabel()!!
             moveToLabel(moveLabel)
             entryTile = true
-            phase = Phase.BuildOverhangBlock
-            outerLabel = -1
-            blockDir = (moveLabel + 3).mod(6)
+            phase = Phase.FindRemovableOverhang
             return
         }
 
         traverseTargetTileBoundary()
     }
 
-    private fun buildOverhangBlock() {
-        findRemovableOverhang()
+    /**
+     * Enter phase: [Phase.FindRemovableOverhang]
+     *
+     * The robot traverses the overhang boundary until it encounters a tile that can be removed without breaking the
+     * connectivity of the overhang component (checked by [isAtOverhangEdge]).
+     * To make sure that the robot does not disconnect the overhang component from the rest of the tile structure, it
+     * does not lift the first overhang tile it moved to (checked by [entryTile]) unless it is the only tile of the
+     * component.
+     *
+     * Exit phases:
+     *   [Phase.LeaveOverhang]
+     *   [Phase.ExploreColumn]
+     */
+    private fun findRemovableOverhang() {
+        if ((!entryTile && isAtOverhangEdge()) || !hasOverhangNbr()) {
+            liftTile()
+            phase = Phase.LeaveOverhang
+            return
+        }
+
+        entryTile = false
+        traverseOverhangBoundary()
+    }
+
+    /**
+     * Enter phase: [Phase.LeaveOverhang]
+     *
+     * The robot traverses the tile boundary until it enters a target tile.
+     *
+     * Exit phase: [Phase.PlaceTileOnTarget]:[SubPhase.ExploreColumn]
+     */
+    private fun leaveOverhang() {
+        if (isOnTarget()) {
+            phase = Phase.PlaceTileOnTarget
+            subPhase = SubPhase.ExploreColumn
+            return
+        }
+
+        traverseTargetTileBoundary()
+    }
+
+    /**
+     * Enter phase: [Phase.PlaceTileOnTarget]:[SubPhase.ExploreColumn]
+     *
+     * The robot moves along a column (direction specified by [columnDir]) of target nodes until it either reaches the
+     * column's end (a non-target node) or an empty target node where it can place the tile it is carrying.
+     *
+     * Exit phases:
+     *   [Phase.PlaceTileOnTarget]:[SubPhase.ReturnToBoundary]
+     *   [Phase.PlaceTileOnTarget]:[SubPhase.ReturnToColumnTop]
+     */
+    private fun exploreColumn() {
+        // Place tile if empty target node on column
+        if (carriesTile && !isOnTile()) {
+            placeTile()
+            subPhase = SubPhase.ReturnToBoundary
+            return
+        }
+
+        // Move along column as long as possible, then turn around
+        if (labelIsTarget(columnDir)) {
+            moveAndUpdate(columnDir)
+        } else {
+            subPhase = SubPhase.ReturnToColumnTop
+        }
+    }
+
+    /**
+     * Enter phase: [Phase.PlaceTileOnTarget]:[SubPhase.ReturnToColumnTop]
+     *
+     * The robot moves back up the column (opposite direction of [columnDir]) until it reaches the column's end.
+     * Then it moves to the next tile along the boundary (unless the target tile structure only consists of one column).
+     *
+     * Exit phases:
+     *   [Phase.PlaceTileOnTarget]:[SubPhase.ExploreBoundary]
+     *   [Phase.PlaceTileOnTarget]:[SubPhase.ExploreColumn]
+     */
+    private fun returnToColumnTop() {
+        val revColumnDir = (columnDir + 3).mod(6)
+        if (hasTileAtLabel(revColumnDir) && labelIsTarget(revColumnDir)) {
+            moveAndUpdate(revColumnDir)
+            return
+        }
+
+        outerLabel = revColumnDir
+        intArrayOf(1, 2, 3, 4, 5, 6).map { (outerLabel + it).mod(6) }.forEach { label ->
+            if (labelIsTarget(label)) {
+                moveAndUpdate(label)
+                subPhase = SubPhase.ExploreBoundary
+                return
+            }
+        }
+
+        subPhase = SubPhase.ExploreColumn
+    }
+
+    /**
+     * Enter phase: [Phase.PlaceTileOnTarget]:[SubPhase.ExploreBoundary]
+     *
+     * The robot moves along the boundary of the target shape and triggers column searches or places its tile when
+     * possible.
+     *
+     * Exit phases:
+     *   [Phase.FindOverhang]
+     *   [Phase.PlaceTileOnTarget]:[SubPhase.ExploreColumn]
+     */
+    private fun exploreBoundary() {
+        if (!isOnTile()) {
+            placeTile()
+            phase = Phase.FindOverhang
+            return
+        }
+
+        if ((0 <= enterAngle && enterAngle <= 2
+                && !labelIsTarget((columnDir + 3).mod(6))
+                && (enterAngle == 2 || !labelIsTarget((columnDir + 2).mod(6))))
+            || ((enterAngle == 4 || enterAngle == 5) && intArrayOf(0, 1, 2, 3).all { offset ->
+                !labelIsTarget((columnDir + offset).mod(6))
+            })
+        ) {
+            subPhase = SubPhase.ExploreColumn
+            return
+        }
+        var label = (enterAngle + columnDir).mod(6)
+        repeat(6) {
+            outerLabel = label
+            label = (label + 1).mod(6)
+            if (labelIsTarget(label)) {
+                moveAndUpdate(label)
+                outerLabel = (outerLabel - 1).mod(6)
+                return
+            }
+        }
+    }
+
+    /**
+     * Enter phase: [Phase.PlaceTileOnTarget]:[SubPhase.ReturnToBoundary]
+     *
+     * Exit phase: [Phase.FindOverhang]
+     */
+    private fun returnToBoundary() {
+        val revColumnDir = (columnDir + 3).mod(6)
+        if ((hasTileAtLabel(revColumnDir) && !labelIsTarget(revColumnDir)) || !hasTileAtLabel(revColumnDir)) {
+            outerLabel = revColumnDir
+            phase = Phase.FindOverhang
+            return
+        }
+        moveToLabel(revColumnDir)
+    }
+
+    /**
+     * Helper function
+     *
+     * Moves the robot to the given [label] and updates the [enterAngle] (label of entry relative to [columnDir]).
+     * Only used in [Phase.PlaceTileOnTarget].
+     */
+    private fun moveAndUpdate(label: Int) {
+        moveToLabel(label)
+        enterAngle = (label + 3 - columnDir).mod(6)
     }
 
     /**
@@ -78,6 +248,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * traverses the boundary of the entire tile structure until it encounters a target tile.
      */
     private fun traverseTargetTileBoundary() {
+        // Set label of the outer boundary if the variable is not set yet.
+        // This requires the robot to be positioned at a node where its only adjacent boundary is the outer boundary.
         if (outerLabel < 0) {
             if (hasOverhangNbr()) {
                 outerLabel = overhangNbrLabel()!!
@@ -94,13 +266,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        var moveLabel = (outerLabel + 1).mod(6)
-        while (!canMoveToLabel(moveLabel) || !hasTileAtLabel(moveLabel) || (isOnTarget() && !labelIsTarget(moveLabel))) {
-            outerLabel = moveLabel
-            moveLabel = (outerLabel + 1).mod(6)
-        }
+        val moveLabel = intArrayOf(1, 2, 3, 4, 5, 6).map { (outerLabel + it).mod(6) }
+            .firstOrNull { label ->
+                canMoveToLabel(label) && hasTileAtLabel(label) && (labelIsTarget(label) || !isOnTarget())
+            } ?: return
         moveToLabel(moveLabel)
-        outerLabel = (outerLabel - 1).mod(6)
+        outerLabel = (moveLabel - 2).mod(6)
     }
 
     /**
@@ -127,9 +298,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * The robot traverses the boundary of nodes whose labels are considered valid by [isLabelValid].
      */
     fun traverseBoundary(isLabelValid: (Int) -> Boolean) {
-        val firstInvalidLabel = (1..6).map { (moveLabel - it).mod(6) }
-            .firstOrNull { label -> !isLabelValid(label) } ?: (moveLabel - 1).mod(6)
-        moveLabel = (1..5).map { offset -> (firstInvalidLabel + offset).mod(6) }.first(isLabelValid)
+        val firstInvalidLabel =
+            (1..6).map { (moveLabel - it).mod(6) }
+                .firstOrNull { label -> !isLabelValid(label) } ?: (moveLabel - 1).mod(6)
+        moveLabel = (1..5).map { offset -> (firstInvalidLabel + offset).mod(6) }.firstOrNull(isLabelValid) ?: return
         moveToLabel(moveLabel)
     }
 
@@ -168,113 +340,5 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             }
         }
         return numBoundaries == 1
-    }
-
-    private fun exploreColumn() {
-        if (carriesTile && !isOnTile()) {
-            placeTile()
-            phase = Phase.ReturnToBoundary
-            return
-        }
-        if (labelIsTarget(columnDir)) {
-            moveAndUpdate(columnDir)
-        } else {
-            phase = Phase.ReturnToColumnTop
-        }
-    }
-
-    private fun returnToColumnTop() {
-        val revColumnDir = (columnDir + 3).mod(6)
-        if (hasTileAtLabel(revColumnDir) && labelIsTarget(revColumnDir)) {
-            moveAndUpdate(revColumnDir)
-            return
-        }
-        outerLabel = revColumnDir
-        if (!carriesTile) {
-            phase = Phase.FindOverhang
-            return
-        }
-        for (label in intArrayOf(1, 2, 3, 4, 5, 6).map { (outerLabel + it).mod(6) }) {
-            if (labelIsTarget(label)) {
-                moveAndUpdate(label)
-                phase = Phase.ExploreBoundary
-                return
-            }
-        }
-        phase = Phase.ExploreColumn
-    }
-
-    private fun exploreBoundary() {
-        if (!isOnTile()) {
-            placeTile()
-            phase = Phase.FindOverhang
-            return
-        }
-
-        if ((0 <= enterLabel && enterLabel <= 2
-                && !labelIsTarget((columnDir + 3).mod(6))
-                && (enterLabel == 2 || !labelIsTarget((columnDir + 2).mod(6))))
-            || ((enterLabel == 4 || enterLabel == 5) && intArrayOf(0, 1, 2, 3).all { offset ->
-                !labelIsTarget((columnDir + offset).mod(6))
-            })
-        ) {
-            phase = Phase.ExploreColumn
-            return
-        }
-        var label = (enterLabel + columnDir).mod(6)
-        repeat(6) {
-            outerLabel = label
-            label = (label + 1).mod(6)
-            if (labelIsTarget(label)) {
-                moveAndUpdate(label)
-                outerLabel = (outerLabel - 1).mod(6)
-                return
-            }
-        }
-    }
-
-    private fun returnToBoundary() {
-        val revColumnDir = (columnDir + 3).mod(6)
-        if ((hasTileAtLabel(revColumnDir) && !labelIsTarget(revColumnDir)) || !hasTileAtLabel(revColumnDir)) {
-            outerLabel = revColumnDir
-            phase = Phase.FindOverhang
-            return
-        }
-        moveToLabel(revColumnDir)
-    }
-
-    private fun moveAndUpdate(label: Int) {
-        moveToLabel(label)
-        enterLabel = (label + 3 - columnDir).mod(6)
-    }
-
-    /**
-     * Enter phase: [Phase.FindRemovableOverhang]
-     *
-     * The robot traverses the overhang boundary until it encounters a tile that can be removed without breaking the
-     * connectivity of the overhang component (checked by [isAtOverhangEdge]).
-     * To make sure that the robot does not disconnect the overhang component from the rest of the tile structure, it
-     * does not lift the first overhang tile it moved to (checked by [entryTile]) unless it is the only tile of the
-     * component.
-     *
-     * Exit phase: [Phase.LeaveOverhang] or [Phase.ExploreColumn]
-     */
-    private fun findRemovableOverhang() {
-        if ((!entryTile && isAtOverhangEdge()) || !hasOverhangNbr()) {
-            liftTile()
-            phase = Phase.LeaveOverhang
-            return
-        }
-
-        entryTile = false
-        traverseOverhangBoundary()
-    }
-
-    private fun leaveOverhang() {
-        if (isOnTarget()) {
-            phase = Phase.ExploreColumn
-            return
-        }
-        traverseTargetTileBoundary()
     }
 }

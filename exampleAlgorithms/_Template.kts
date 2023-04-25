@@ -35,7 +35,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     orientation = orientation,  // Replace with constant (0-5) if you want the robots to share a compass
     carriesTile = false,  // Change constants to fit your needs
     numPebbles = 2,  // Change constants to fit your needs
-    maxPebbles = 2  // Change constants to fit your needs
+    maxPebbles = 2,  // Change constants to fit your needs
 ) {
     // Put your robot's variables here, e.g.
     // private var phase = Phase.PhaseOne

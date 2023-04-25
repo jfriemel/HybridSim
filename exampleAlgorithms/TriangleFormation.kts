@@ -5,7 +5,14 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
-    FindBlockTile, MoveBlockTile, PlaceVertex, CarryTileToVertex, BuildTriangle, BuildNewColumn, ReturnToVertex, Finished
+    FindBlockTile,
+    MoveBlockTile,
+    PlaceVertex,
+    CarryTileToVertex,
+    BuildTriangle,
+    BuildNewColumn,
+    ReturnToVertex,
+    Finished,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -13,7 +20,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     orientation = orientation,
     carriesTile = false,
     numPebbles = 0,
-    maxPebbles = 0
+    maxPebbles = 0,
 ) {
     private var phase = Phase.FindBlockTile
 
@@ -50,7 +57,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun findBlockTile() {
-        for (label in arrayOf(5, 4, 0)) {
+        intArrayOf(5, 4, 0).forEach { label ->
             if (hasTileAtLabel(label)) {
                 moveToLabel(label)
                 if (label == 4) {
@@ -136,7 +143,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun buildTriangle() {
-        for (label in arrayOf(5, 3)) {
+        intArrayOf(5, 3).forEach { label ->
             if (hasTileAtLabel(label)) {
                 moveToLabel(label)
                 return

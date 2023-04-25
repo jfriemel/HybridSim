@@ -3,7 +3,12 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
-    FindBoundary, FindTargetOnBoundary, FindOverhang, FindRemovableOverhang, FindEmptyTarget, PlaceTargetTile
+    FindBoundary,
+    FindTargetOnBoundary,
+    FindOverhang,
+    FindRemovableOverhang,
+    FindEmptyTarget,
+    PlaceTargetTile,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -11,7 +16,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     orientation = orientation,
     carriesTile = false,
     numPebbles = 0,
-    maxPebbles = 0
+    maxPebbles = 0,
 ) {
     private var phase = Phase.FindBoundary
 
@@ -191,7 +196,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     fun traverseBoundary(isLabelValid: (Int) -> Boolean) {
         val firstInvalidLabel = (1..6).map { (moveLabel - it).mod(6) }
             .firstOrNull { label -> !isLabelValid(label) } ?: (moveLabel - 1).mod(6)
-        moveLabel = (1..5).map { offset -> (firstInvalidLabel + offset).mod(6) }.first(isLabelValid)
+        moveLabel = (1..5).map { offset -> (firstInvalidLabel + offset).mod(6) }.firstOrNull(isLabelValid) ?: return
         moveToLabel(moveLabel)
     }
 

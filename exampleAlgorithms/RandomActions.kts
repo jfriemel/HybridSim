@@ -9,7 +9,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     orientation = orientation,
     carriesTile = false,
     numPebbles = 2,
-    maxPebbles = 2
+    maxPebbles = 2,
 ) {
     private var color = Color.WHITE
 

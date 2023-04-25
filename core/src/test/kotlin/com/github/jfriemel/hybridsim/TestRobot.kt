@@ -54,6 +54,14 @@ class TestRobot {
         Configuration.addTile(Tile(Node(259, 258)))
         Configuration.addTile(Tile(Node(258, 258)))
         Configuration.addTile(Tile(Node(257, 258)))
+
+        // Enclose (364, 892) by empty target nodes
+        Configuration.addTarget(Node(364, 891))
+        Configuration.addTarget(Node(365, 892))
+        Configuration.addTarget(Node(365, 893))
+        Configuration.addTarget(Node(364, 893))
+        Configuration.addTarget(Node(363, 893))
+        Configuration.addTarget(Node(363, 892))
     }
 
     @ParameterizedTest(name = "movement label {0}")
@@ -388,6 +396,20 @@ class TestRobot {
         val robot = Robot(Node(-236, 576))
         Assertions.assertFalse(robot.hasEmptyTargetNbr())
         Assertions.assertNull(robot.emptyTargetNbrLabel())
+    }
+
+    @Test
+    fun `has empty non-target node neighbour`() {
+        val robot = Robot(Node(-121, -53))
+        Assertions.assertTrue(robot.hasEmptyNonTargetNbr())
+        Assertions.assertNotNull(robot.emptyNonTargetNbrLabel())
+    }
+
+    @Test
+    fun `has no empty non-target node neighbour`() {
+        val robot = Robot(Node(364, 892))
+        Assertions.assertFalse(robot.hasEmptyNonTargetNbr())
+        Assertions.assertNull(robot.emptyNonTargetNbrLabel())
     }
 
     @ParameterizedTest(name = "overhang at label {2}")

@@ -5,7 +5,9 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
-    TraverseColumn, ReturnSouth, TraverseBoundary
+    TraverseColumn,
+    ReturnSouth,
+    TraverseBoundary,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -13,7 +15,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     orientation = orientation,
     carriesTile = false,
     numPebbles = 0,
-    maxPebbles = 0
+    maxPebbles = 0,
 ) {
     private var phase = Phase.TraverseColumn
 
@@ -49,7 +51,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             moveAndUpdate(3)
             return
         }
-        for (label in intArrayOf(4, 5, 0, 1, 2)) {
+        intArrayOf(4, 5, 0, 1, 2).forEach { label ->
             if (hasTileAtLabel(label)) {
                 moveAndUpdate(label)
                 phase = Phase.TraverseBoundary

@@ -5,7 +5,9 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
-    FindTile, MoveTile, Finished
+    FindTile,
+    MoveTile,
+    Finished,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -13,7 +15,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     orientation = orientation,
     carriesTile = false,
     numPebbles = 0,
-    maxPebbles = 0
+    maxPebbles = 0,
 ) {
     private var phase = Phase.FindTile
 
@@ -40,7 +42,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun findTile() {
-        for (label in intArrayOf(5, 4, 0)) {
+        intArrayOf(5, 4, 0).forEach { label ->
             if (hasTileAtLabel(label)) {
                 moveToLabel(label)
                 if (label == 4) {
