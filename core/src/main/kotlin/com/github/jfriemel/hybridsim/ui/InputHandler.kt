@@ -152,11 +152,10 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 mouseX = screenX
                 mouseY = screenY
             } else if (menu.putTiles && node !in Configuration.tiles) {
-                // Place tile and target in one step
-                if (menu.selectTarget) {
-                    Configuration.addTarget(node, addUndoStep = true)
+                Configuration.addTile(Tile(node), addUndoStep = true)
+                if (menu.selectTarget) {  // Place tile and target in one step
+                    Configuration.addTarget(node, addUndoStep = false)
                 }
-                Configuration.addTile(Tile(node), addUndoStep = false)
             } else if (menu.putRobots && node !in Configuration.robots) {
                 val robot = AlgorithmLoader.getAlgorithmRobot(Robot(node))
                 Configuration.addRobot(robot, addUndoStep = true)
@@ -165,11 +164,10 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             }
         } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             if (menu.putTiles && node in Configuration.tiles) {
-                // Remove tile and target in one step
-                if (menu.selectTarget) {
-                    Configuration.removeTarget(node, addUndoStep = true)
+                Configuration.removeTile(node, addUndoStep = true)
+                if (menu.selectTarget) {  // Remove tile and target in one step
+                    Configuration.removeTarget(node, addUndoStep = false)
                 }
-                Configuration.removeTile(node, addUndoStep = false)
             } else if (menu.putRobots && node in Configuration.robots) {
                 Configuration.removeRobot(node, addUndoStep = true)
             } else if (menu.selectTarget && node in Configuration.targetNodes) {

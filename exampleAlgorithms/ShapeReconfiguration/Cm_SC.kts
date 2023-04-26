@@ -89,9 +89,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * does not lift the first overhang tile it moved to (checked by [entryTile]) unless it is the only tile of the
      * component.
      *
-     * Exit phases:
-     *   [Phase.LeaveOverhang]
-     *   [Phase.ExploreColumn]
+     * Exit phase: [Phase.LeaveOverhang]
      */
     private fun findRemovableOverhang() {
         if ((!entryTile && isAtOverhangEdge()) || !hasOverhangNbr()) {
@@ -193,7 +191,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        if ((0 <= enterAngle && enterAngle <= 2
+        if ((enterAngle in 0..2
                 && !labelIsTarget((columnDir + 3).mod(6))
                 && (enterAngle == 2 || !labelIsTarget((columnDir + 2).mod(6))))
             || ((enterAngle == 4 || enterAngle == 5) && intArrayOf(0, 1, 2, 3).all { offset ->
@@ -251,10 +249,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         // Set label of the outer boundary if the variable is not set yet.
         // This requires the robot to be positioned at a node where its only adjacent boundary is the outer boundary.
         if (outerLabel < 0) {
-            if (hasOverhangNbr()) {
-                outerLabel = overhangNbrLabel()!!
+            outerLabel = if (hasOverhangNbr()) {
+                overhangNbrLabel()!!
             } else if (hasEmptyNonTargetNbr()) {
-                outerLabel = emptyNonTargetNbrLabel()!!
+                emptyNonTargetNbrLabel()!!
             } else {
                 throw Exception("Robot at node $node is not at target tile boundary.")
             }
@@ -297,7 +295,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *
      * The robot traverses the boundary of nodes whose labels are considered valid by [isLabelValid].
      */
-    fun traverseBoundary(isLabelValid: (Int) -> Boolean) {
+    private fun traverseBoundary(isLabelValid: (Int) -> Boolean) {
         val firstInvalidLabel =
             (1..6).map { (moveLabel - it).mod(6) }
                 .firstOrNull { label -> !isLabelValid(label) } ?: (moveLabel - 1).mod(6)
