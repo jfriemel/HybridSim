@@ -1,4 +1,4 @@
-/* Single-robot line formation algorithm from https://doi.org/10.1007/s11047-019-09774-2 */
+/** Single-robot line formation algorithm from https://doi.org/10.1007/s11047-019-09774-2 */
 
 fun getRobot(node: Node, orientation: Int): Robot {
     return RobotImpl(node, orientation)

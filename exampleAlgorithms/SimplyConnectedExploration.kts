@@ -1,4 +1,4 @@
-/* Compact layer traversal algorithm from https://ris.uni-paderborn.de/record/25126 */
+/** Compact layer traversal algorithm from https://ris.uni-paderborn.de/record/25126 */
 
 fun getRobot(node: Node, orientation: Int): Robot {
     return RobotImpl(node, orientation)
