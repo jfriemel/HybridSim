@@ -11,7 +11,7 @@
 
 
 /*
-Add any imports you may need (e.g. import kotlin.random.Random)
+Add any imports you may need (e.g., import kotlin.random.Random)
 
 Default imports (no need to add them to the script):
 
@@ -27,7 +27,7 @@ fun getRobot(node: Node, orientation: Int): Robot {
     return RobotImpl(node, orientation)
 }
 
-// Put helper classes here, e.g.
+// Put helper classes here, e.g.,
 // private enum class Phase { PhaseOne, PhaseTwo, PhaseThree }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -37,7 +37,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     numPebbles = 2,  // Change constants to fit your needs
     maxPebbles = 2,  // Change constants to fit your needs
 ) {
-    // Put your robot's variables here, e.g.
+    // Put your robot's variables here, e.g.,
     // private var phase = Phase.PhaseOne
 
     /**
@@ -59,31 +59,31 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     /**
      * Indicate whether the robot is finished with executing its algorithm.
-     * When all robots are finished (i.e. every finished() call returns true), the Scheduler stops automatically.
-     * Remove this code if your robot cannot tell whether it is finished (e.g. in exploration algorithm).
+     * When all robots are finished (i.e., every finished() call returns true), the Scheduler stops automatically.
+     * Remove this code if your robot cannot tell whether it is finished (e.g., in exploration algorithm).
      */
     override fun finished(): Boolean {
         return super.finished()
     }
 
     /**
-     * Your particle's colour (e.g. based on the algorithm's execution phase).
-     * Reuturns Color.WHITE by default. Remove this code if you do not need any other colours.
-     * Constructors and default colours:
+     * Your particle's color (e.g., based on the algorithm's execution phase).
+     * Reuturns Color.WHITE by default. Remove this code if you do not need any other colors.
+     * Constructors and default colors:
      * https://github.com/libgdx/libgdx/blob/83e298085817e690492fe6f2bffa72fafe765d21/gdx/src/com/badlogic/gdx/graphics/Color.java
      *
-     * Palette used by example algorithms that should play well with common types of colourblindness
+     * Palette used by example algorithms that should play well with common types of colorblindness
      * (adapted from https://jfly.uni-koeln.de/color/):
      * Color.{ORANGE, TEAL, SKY, SCARLET, BLUE, YELLOW, BROWN, BLACK}
      *
-     * What this palette looks like to people with common types of colourblindness:
+     * What this palette looks like to people with common types of colorblindness:
      * https://davidmathlogic.com/colorblind/#%23FFA500-%23008888-%2387CEEB-%23FF341C-%230000FF-%23FFFF00-%238B4513-%23000000
      */
     override fun getColor(): Color {
         return super.getColor()
     }
 
-    // Put your helper functions here, e.g.
+    // Put your helper functions here, e.g.,
     // private fun phaseOne() { ... }
     // private fun phaseTwo() { ... }
     // private fun phaseThree() { ... }

@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.utils.viewport.ScreenViewport
-import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.entities.Entity
 import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
+import com.github.jfriemel.hybridsim.system.Configuration
 import ktx.app.KtxScreen
 import ktx.graphics.use
 import ktx.log.logger
@@ -209,7 +209,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
 
             if (entity.sprite == null) {
                 entity.sprite = Sprite(texture)
-            } else {  // Always update texture in case it changes (e.g. tile has a pebble now)
+            } else {  // Always update texture in case it changes (e.g., tile has a pebble now)
                 entity.sprite?.texture = texture
                 entity.sprite?.color = entity.getColor()
             }

@@ -184,7 +184,7 @@ class Menu(batch: Batch) {
         sliderScheduler.value = max(0f, 100f - sqrt(Scheduler.getIntervalTime().toFloat()))
     }
 
-    /** @return True if the menu is active (i.e. visible). */
+    /** @return True if the menu is active (i.e., visible). */
     fun isActive(): Boolean = active
 
     /** Toggles the visibility of the menu. */

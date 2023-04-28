@@ -165,7 +165,7 @@ class TestRobot {
         Assertions.assertFalse(robot.isAtBoundary())
     }
 
-    @ParameterizedTest(name = "neighbour label {2}")
+    @ParameterizedTest(name = "neighbor label {2}")
     @CsvSource(
         "13, 28, 0",
         "12, 27, 1",
@@ -174,14 +174,14 @@ class TestRobot {
         "14, 26, 4",
         "14, 27, 5",
     )
-    fun `can interact with robot neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can interact with robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertTrue(robot.hasRobotAtLabel(label))
         Assertions.assertEquals(Configuration.robots[robotNode], robot.robotAtLabel(label))
     }
 
     @Test
-    fun `cannot see non-existent neighbours`() {
+    fun `cannot see non-existent neighbors`() {
         val robot = Robot(Node(-536, 370))
         robot.labels.forEach {
             Assertions.assertFalse(robot.hasTileAtLabel(it))
@@ -214,7 +214,7 @@ class TestRobot {
         "-4, 3, 4",
         "-4, 4, 5",
     )
-    fun `can see tile neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can see tile neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertTrue(robot.hasTileAtLabel(label))
     }
@@ -227,7 +227,7 @@ class TestRobot {
     }
 
     @Test
-    fun `cannot interact with non-existent neighbour`() {
+    fun `cannot interact with non-existent neighbor`() {
         val robot = Robot(Node(-30, -60))
         robot.labels.forEach { label -> Assertions.assertNull(robot.robotAtLabel(label)) }
         robot.labels.forEach { label -> Assertions.assertNull(robot.tileAtLabel(label)) }
@@ -328,8 +328,8 @@ class TestRobot {
     @ParameterizedTest(name = "number of boundaries = {2}")
     @CsvSource(
         "258, 257, 0",
-        "254, 257, 1",  // one tile neighbour
-        "258, 254, 1",  // no tile neighbours
+        "254, 257, 1",  // one tile neighbor
+        "258, 254, 1",  // no tile neighbors
         "255, 256, 2",
         "256, 256, 3",
     )
@@ -341,7 +341,7 @@ class TestRobot {
     @ParameterizedTest(name = "number of boundaries = {2}")
     @CsvSource(
         "258, 254, 0",
-        "254, 257, 1",  // one tile neighbour
+        "254, 257, 1",  // one tile neighbor
         "258, 257, 1",  // surrounded by tiles
         "255, 256, 2",
         "256, 256, 3",
@@ -360,7 +360,7 @@ class TestRobot {
         "9, -5, 4",
         "9, -4, 5",
     )
-    fun `has target tile neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `has target tile neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasTargetTileNbr())
         Assertions.assertFalse(robot.hasOverhangNbr())
@@ -369,7 +369,7 @@ class TestRobot {
     }
 
     @Test
-    fun `has no target tile neighbour`() {
+    fun `has no target tile neighbor`() {
         val robot = Robot(Node(-135, -808))
         Assertions.assertFalse(robot.hasTargetTileNbr())
         Assertions.assertNull(robot.targetTileNbrLabel())
@@ -385,28 +385,28 @@ class TestRobot {
         "-21, -6, 4",
         "-21, -5, 5",
     )
-    fun `has empty target node neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `has empty target node neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasEmptyTargetNbr())
         Assertions.assertEquals(label, robot.emptyTargetNbrLabel())
     }
 
     @Test
-    fun `has no empty target node neighbour`() {
+    fun `has no empty target node neighbor`() {
         val robot = Robot(Node(-236, 576))
         Assertions.assertFalse(robot.hasEmptyTargetNbr())
         Assertions.assertNull(robot.emptyTargetNbrLabel())
     }
 
     @Test
-    fun `has empty non-target node neighbour`() {
+    fun `has empty non-target node neighbor`() {
         val robot = Robot(Node(-121, -53))
         Assertions.assertTrue(robot.hasEmptyNonTargetNbr())
         Assertions.assertNotNull(robot.emptyNonTargetNbrLabel())
     }
 
     @Test
-    fun `has no empty non-target node neighbour`() {
+    fun `has no empty non-target node neighbor`() {
         val robot = Robot(Node(364, 892))
         Assertions.assertFalse(robot.hasEmptyNonTargetNbr())
         Assertions.assertNull(robot.emptyNonTargetNbrLabel())
@@ -421,7 +421,7 @@ class TestRobot {
         "-4, 3, 4",
         "-4, 4, 5",
     )
-    fun `has overhang neighbour`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `has overhang neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasOverhangNbr())
         Assertions.assertFalse(robot.hasTargetTileNbr())
@@ -430,7 +430,7 @@ class TestRobot {
     }
 
     @Test
-    fun `has no overhang neighbour`() {
+    fun `has no overhang neighbor`() {
         val robot = Robot(Node(520, 878))
         Assertions.assertFalse(robot.hasOverhangNbr())
         Assertions.assertNull(robot.overhangNbrLabel())

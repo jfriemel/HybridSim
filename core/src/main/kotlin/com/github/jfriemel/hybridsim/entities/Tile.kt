@@ -12,7 +12,7 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
     private var tileColor: Color? = null
 
     /**
-     * Returns the tile's colour. If [tileColor] is not null, [tileColor] is returned.
+     * Returns the tile's color. If [tileColor] is not null, [tileColor] is returned.
      * Otherwise, if no target nodes exist, [colorDefault] is returned.
      * If the tile is at a target node, [colorTarget] is returned. If not, [colorOverhang] is returned.
      */

@@ -145,7 +145,7 @@ object Configuration {
         return (default().parse(StringBuilder(jsonString)) as JsonObject).toJsonString(prettyPrint = true)
     }
 
-    /** To avoid unexpected behaviour, the undo/redo queues can be cleared when loading [Configuration]s/algorithms. */
+    /** To avoid unexpected behavior, the undo/redo queues can be cleared when loading [Configuration]s/algorithms. */
     fun clearUndoQueues() {
         undoQueue.clear()
         redoQueue.clear()

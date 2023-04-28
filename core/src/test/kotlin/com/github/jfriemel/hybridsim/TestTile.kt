@@ -51,7 +51,7 @@ class TestTile {
     }
 
     @Test
-    fun `has default colours`() {
+    fun `has default colors`() {
         Configuration.clear()
         val tile = Tile(Node(Int.MAX_VALUE, Int.MIN_VALUE))
         Configuration.addTile(tile)
@@ -64,7 +64,7 @@ class TestTile {
     }
 
     @Test
-    fun `can set colour`() {
+    fun `can set color`() {
         val tile = Tile(Node(Int.MIN_VALUE, Int.MAX_VALUE))
         tile.setColor(Color.CHARTREUSE)
         Assertions.assertEquals(Color.CHARTREUSE, tile.getColor())
