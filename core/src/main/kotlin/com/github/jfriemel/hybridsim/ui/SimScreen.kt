@@ -61,7 +61,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     private var xPos = 0f
     private var yPos = 0f
 
-    // Keep track of window width and height to maintain the same centre point when resizing the window
+    // Keep track of window width and height to maintain the same center point when resizing the window
     private var width = 0
     private var height = 0
 
@@ -104,7 +104,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     override fun resize(width: Int, height: Int) {
         logger.debug { "Resized window: width = $width, height = $height" }
 
-        // Update viewport and move to maintain centre node
+        // Update viewport and move to maintain center node
         viewport.update(width, height, true)
         move((this.width - width) / 2, (this.height - height) / 2)
         this.width = width
@@ -125,7 +125,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     /**
-     * Zoom towards ([amount] < 0) or away from ([amount] > 0) the screen centre or the mouse if mouse coordinates
+     * Zoom towards ([amount] < 0) or away from ([amount] > 0) the screen center or the mouse if mouse coordinates
      * ([mouseX], [mouseY]) are given.
      */
     fun zoom(amount: Float, mouseX: Int = width / 2, mouseY: Int = height / 2) {
@@ -158,7 +158,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         return Node(x, y)
     }
 
-    /** Reset the zoom level and point the camera to the centre of the [Tile] configuration or the origin. */
+    /** Reset the zoom level and point the camera to the center of the [Tile] configuration or the origin. */
     fun resetCamera() {
         // Reset zoom level
         zoom(INITIAL_ZOOM - viewport.unitsPerPixel)
@@ -167,13 +167,13 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         xPos = 0f
         yPos = 0f
 
-        // Point camera to centre of tile configuration or origin if no tiles exist
-        val tileNodes = Configuration.tiles.keys
-        val centerNode = if (tileNodes.isEmpty()) {
+        // Point camera to center of tile configuration or origin if no tiles exist
+        val occupiedNodes = Configuration.tiles.keys.union(Configuration.targetNodes).union(Configuration.robots.keys)
+        val centerNode = if (occupiedNodes.isEmpty()) {
             Node.origin
         } else {
-            val centerX = (tileNodes.minOf { it.x } + tileNodes.maxOf { it.x }) / 2
-            val centerY = (tileNodes.minOf { it.y } + tileNodes.maxOf { it.y }) / 2
+            val centerX = (occupiedNodes.minOf { it.x } + occupiedNodes.maxOf { it.x }) / 2
+            val centerY = (occupiedNodes.minOf { it.y } + occupiedNodes.maxOf { it.y }) / 2
             Node(centerX, centerY)
         }
         val coords = nodeCoordsToScreenCoords(centerNode.x, centerNode.y)

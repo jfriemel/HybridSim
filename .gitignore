@@ -84,7 +84,6 @@ out/
 
 
 ## NetBeans:
-
 /nbproject/private/
 /android/nbproject/private/
 /core/nbproject/private/
@@ -144,6 +143,7 @@ Thumbs.db
 *~
 *.*#
 *#*#
+/META-INF/
 
 ## Screenshots:
 /screenshots/
