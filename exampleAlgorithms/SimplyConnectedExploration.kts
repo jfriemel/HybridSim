@@ -22,7 +22,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private var enterLabel = 0
 
     override fun activate() {
-        tileBelow()?.setColor(Color.SKY)
+        tileBelow()?.setColor(Color.SKY)  // Only a visual indicator for the user to see which tiles have been visited
         when (phase) {
             Phase.TraverseColumn -> traverseColumn()
             Phase.ReturnSouth -> returnSouth()

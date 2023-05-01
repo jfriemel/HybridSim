@@ -163,7 +163,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         outerLabel = revColumnDir
-        intArrayOf(1, 2, 3, 4, 5, 6).map { (outerLabel + it).mod(6) }.forEach { label ->
+        (1..6).map { (outerLabel + it).mod(6) }.forEach { label ->
             if (labelIsTarget(label)) {
                 moveAndUpdate(label)
                 subPhase = SubPhase.ExploreBoundary
@@ -194,7 +194,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         if ((enterAngle in 0..2
                 && !labelIsTarget((columnDir + 3).mod(6))
                 && (enterAngle == 2 || !labelIsTarget((columnDir + 2).mod(6))))
-            || ((enterAngle == 4 || enterAngle == 5) && intArrayOf(0, 1, 2, 3).all { offset ->
+            || ((enterAngle == 4 || enterAngle == 5) && (0..3).all { offset ->
                 !labelIsTarget((columnDir + offset).mod(6))
             })
         ) {
@@ -264,7 +264,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        val moveLabel = intArrayOf(1, 2, 3, 4, 5, 6).map { (outerLabel + it).mod(6) }
+        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }
             .firstOrNull { label ->
                 canMoveToLabel(label) && hasTileAtLabel(label) && (labelIsTarget(label) || !isOnTarget())
             } ?: return
