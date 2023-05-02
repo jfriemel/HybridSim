@@ -3,13 +3,19 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
+    FindOuterBoundary,
     FindOverhang,
     FindRemovableOverhang,
     PlaceTileOnTarget,
 }
 
 private enum class SubPhase {
-    // Block formation in overhang component
+    FindAnyBoundary,
+    TraverseHole,
+    ExpandHole,
+    MoveTileNorth,
+
+    // Compression and search for removable overhang tile
     SearchAndLiftOverhang,
     CompressOverhang,
     LeaveOverhang,
@@ -28,8 +34,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     numPebbles = 0,
     maxPebbles = 0,
 ) {
-    private var phase = Phase.FindOverhang
-    private var subPhase = SubPhase.ExploreColumn
+    private var phase = Phase.FindOuterBoundary
+    private var subPhase = SubPhase.FindAnyBoundary
 
     private var entryTile: Boolean = false
     private var outerLabel: Int = -1
@@ -41,6 +47,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     override fun activate() {
         when (phase) {
+            Phase.FindOuterBoundary -> when (subPhase) {
+                SubPhase.FindAnyBoundary -> findAnyBoundary()
+                SubPhase.TraverseHole -> traverseHole()
+                SubPhase.MoveTileNorth -> moveTileNorth()
+                SubPhase.ExpandHole -> expandHole()
+                else -> throw Exception("Incompatible phases: Phase $phase with sub-phase $subPhase")
+            }
             Phase.FindOverhang -> findOverhang()
             Phase.FindRemovableOverhang -> when (subPhase) {
                 SubPhase.SearchAndLiftOverhang -> searchAndLiftOverhang()
@@ -60,6 +73,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     override fun getColor(): Color {
         return when (phase) {  // Available: [Color.BROWN]
+            Phase.FindOuterBoundary -> Color.BROWN
             Phase.FindOverhang -> Color.ORANGE
             Phase.FindRemovableOverhang -> Color.SCARLET
             Phase.PlaceTileOnTarget -> when (subPhase) {
@@ -70,6 +84,84 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 else -> throw Exception("Incompatible phases: Phase $phase with sub-phase $subPhase")
             }
         }
+    }
+
+    private fun findAnyBoundary() {
+        if (outerBoundaryFound()) return
+
+        if (!hasTileAtLabel(3)) {
+            outerLabel = 3
+            subPhase = SubPhase.TraverseHole
+            return
+        }
+        moveToLabel(3)
+    }
+
+    private fun traverseHole() {
+        if (outerBoundaryFound()) return
+
+        if (isAtEdge()) {
+            liftTile()
+            hasMoved = false
+            subPhase = SubPhase.MoveTileNorth
+            return
+        }
+
+        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
+
+        if (
+            !hasTileAtLabel((moveLabel + 1).mod(6)) && hasTileAtLabel((moveLabel + 2).mod(6))
+            && (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6)))
+        ) {
+            liftTile()
+            compressDir = (moveLabel + 1).mod(6)
+            hasMoved = false
+            subPhase = SubPhase.ExpandHole
+            return
+        }
+        moveToLabel(moveLabel)
+        outerLabel = (moveLabel - 2).mod(6)
+    }
+
+    private fun expandHole() {
+        if (!hasMoved) {
+            moveToLabel(compressDir)
+            hasMoved = true
+            return
+        }
+        if (carriesTile) {
+            placeTile()
+            return
+        }
+        if (outerBoundaryFound()) return
+        moveToLabel((compressDir + 2).mod(6))
+        outerLabel = (compressDir + 4).mod(6)
+        subPhase = SubPhase.TraverseHole
+    }
+
+    private fun moveTileNorth() {
+        if (carriesTile) {
+            if (!isOnTile() && hasMoved) {
+                placeTile()
+                return
+            }
+            if (hasMoved || hasTileAtLabel(0)) {
+                moveToLabel(0)
+                hasMoved = true
+            } else {
+                val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
+                moveToLabel(moveLabel)
+                outerLabel = (moveLabel - 2).mod(6)
+            }
+            return
+        }
+        if (outerBoundaryFound()) return
+        if (!hasTileAtLabel(3)) {
+            outerLabel = 3
+            subPhase = SubPhase.TraverseHole
+            return
+        }
+        moveToLabel(3)
     }
 
     /**
@@ -105,7 +197,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *   [Phase.FindRemovableOverhang]:[SubPhase.CompressOverhang]
      */
     private fun searchAndLiftOverhang() {
-        if (!hasOverhangNbr() || ((!entryTile || !hasTargetTileNbr()) && isOnTile() && isAtOverhangEdge())) {
+        if (!hasOverhangNbr() || ((!entryTile || !hasTargetTileNbr()) && isOnTile() && isAtEdge())) {
             liftTile()
             subPhase = SubPhase.LeaveOverhang
             return
@@ -337,11 +429,11 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Helper function
      *
-     * Checks whether the robot is at an edge of a connected component of overhang tiles where a tile can safely be
-     * removed.
+     * Checks whether the robot is at an edge of a connected component of either overhang or targettiles where a tile
+     * can safely be removed.
      */
-    private fun isAtOverhangEdge(): Boolean {
-        val boundaryLabels = labels.filter { label -> labelIsTarget(label) || !hasTileAtLabel(label) }
+    private fun isAtEdge(): Boolean {
+        val boundaryLabels = labels.filter { label -> (labelIsTarget(label) != isOnTarget()) || !hasTileAtLabel(label) }
 
         if (boundaryLabels.size == 6) {
             return true
@@ -354,5 +446,20 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             }
         }
         return numBoundaries == 1
+    }
+
+    private fun outerBoundaryFound(): Boolean {
+        if (isOnTarget() && (hasOverhangNbr() || hasEmptyNonTargetNbr())) {
+            outerLabel = overhangNbrLabel() ?: emptyNonTargetNbrLabel()!!
+            phase = Phase.FindOverhang
+            return true
+        } else if (!isOnTarget() && (hasTargetTileNbr() || hasEmptyTargetNbr())) {
+            val moveLabel = targetTileNbrLabel() ?: emptyTargetNbrLabel()!!
+            moveToLabel(moveLabel)
+            outerLabel = (moveLabel + 3).mod(6)
+            phase = Phase.FindOverhang
+            return true
+        }
+        return false
     }
 }
