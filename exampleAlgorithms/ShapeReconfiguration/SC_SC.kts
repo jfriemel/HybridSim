@@ -4,10 +4,9 @@ fun getRobot(node: Node, orientation: Int): Robot {
 
 private enum class Phase {
     FindBoundary,
-    FindTargetOnBoundary,
     FindOverhang,
     FindRemovableOverhang,
-    FindEmptyTarget,
+    FindDemandComponent,
     PlaceTargetTile,
 }
 
@@ -26,21 +25,19 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     override fun activate() {
         when (phase) {
             Phase.FindBoundary -> findBoundary()
-            Phase.FindTargetOnBoundary -> findTargetOnBoundary()
             Phase.FindOverhang -> findOverhang()
             Phase.FindRemovableOverhang -> findRemovableOverhang()
-            Phase.FindEmptyTarget -> findEmptyTarget()
+            Phase.FindDemandComponent -> findDemandComponent()
             Phase.PlaceTargetTile -> placeTargetTile()
         }
     }
 
     override fun getColor(): Color {
         return when (phase) {
-            Phase.FindBoundary -> Color.BLUE
-            Phase.FindTargetOnBoundary -> Color.TEAL
+            Phase.FindBoundary -> Color.TEAL
             Phase.FindOverhang -> Color.ORANGE
             Phase.FindRemovableOverhang -> Color.SCARLET
-            Phase.FindEmptyTarget -> Color.SKY
+            Phase.FindDemandComponent -> Color.SKY
             Phase.PlaceTargetTile -> Color.WHITE
         }
     }
@@ -49,32 +46,18 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * Enter phase: [Phase.FindBoundary]
      *
      * The robot walks north until it reaches the boundary of the input shape.
-     *
-     * Exit phase: [Phase.FindTargetOnBoundary]
-     */
-    private fun findBoundary() {
-        if (isAtBoundary()) {
-            phase = Phase.FindTargetOnBoundary
-            return
-        }
-
-        moveToLabel(0)
-    }
-
-    /**
-     * Enter phase: [Phase.FindTargetOnBoundary]
-     *
-     * The robot traverses the boundary until it stands on a target tile.
+     * Then it traverses the boundary until it reaches a target tile.
      *
      * Exit phase: [Phase.FindOverhang]
      */
-    private fun findTargetOnBoundary() {
-        if (isOnTarget()) {
+    private fun findBoundary() {
+        if (!isAtBoundary()) {
+            moveToLabel(0)
+        } else if (isOnTarget()) {
             phase = Phase.FindOverhang
-            return
+        } else {
+            traverseTargetTileBoundary()
         }
-
-        traverseTargetTileBoundary()
     }
 
     /**
@@ -100,17 +83,17 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * Enter phase: [Phase.FindRemovableOverhang]
      *
      * The robot traverses the overhang boundary until it encounters a tile that can be removed without breaking the
-     * connectivity of the overhang component (checked by [isAtOverhangEdge]).
+     * connectivity of the overhang component (checked by [isAtOverhangBorder]).
      * To make sure that the robot does not disconnect the overhang component from the rest of the tile structure, it
      * does not lift the first overhang tile it moved to (checked by [entryTile]) unless it is the only tile of the
      * component.
      *
-     * Exit phase: [Phase.FindEmptyTarget]
+     * Exit phase: [Phase.FindDemandComponent]
      */
     private fun findRemovableOverhang() {
-        if ((!entryTile && isAtOverhangEdge()) || !hasOverhangNbr()) {
+        if ((!entryTile && isAtOverhangBorder()) || !hasOverhangNbr()) {
             liftTile()
-            phase = Phase.FindEmptyTarget
+            phase = Phase.FindDemandComponent
             return
         }
 
@@ -119,13 +102,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     /**
-     * Enter phase: [Phase.FindEmptyTarget]
+     * Enter phase: [Phase.FindDemandComponent]
      *
-     * The robot traverses the target tile boundary until it can move to an empty target node.
+     * The robot traverses the target tile boundary until it can move to demand node.
      *
      * Exit phase: [Phase.PlaceTargetTile]
      */
-    private fun findEmptyTarget() {
+    private fun findDemandComponent() {
         if (isOnTile() && isOnTarget() && hasEmptyTargetNbr()) {
             moveToLabel(emptyTargetNbrLabel()!!)
             phase = Phase.PlaceTargetTile
@@ -138,13 +121,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Enter phase: [Phase.PlaceTargetTile]
      *
-     * The robot traverses the boundary of the connected component of empty target nodes until it reaches an edge where
-     * it places the tile it is carrying without creating a hole in the intermediate target shape.
+     * The robot traverses the boundary of the connected component of demand nodes until it reaches a border where it
+     * places the tile it is carrying without creating a hole in the intermediate target shape.
      *
      * Exit phase: [Phase.FindOverhang]
      */
     private fun placeTargetTile() {
-        if (isAtEmptyTargetEdge()) {
+        if (isAtDemandBorder()) {
             placeTile()
             phase = Phase.FindOverhang
             return
@@ -182,7 +165,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Helper function
      *
-     * The robot traverses the boundary of a connected component of empty target nodes.
+     * The robot traverses the boundary of a connected component of demand nodes.
      */
     private fun traverseEmptyTargetBoundary() {
         traverseBoundary { label: Int -> canMoveToLabel(label) && !hasTileAtLabel(label) && labelIsTarget(label) }
@@ -203,24 +186,24 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Helper function
      *
-     * Checks whether the robot is at an edge of an overhang component where a tile can safely be removed.
+     * Checks whether the robot is at a border of an overhang component where a tile can safely be removed.
      */
-    private fun isAtOverhangEdge(): Boolean = isAtEdge { label -> labelIsTarget(label) || !hasTileAtLabel(label) }
+    private fun isAtOverhangBorder(): Boolean = isAtBorder { label -> labelIsTarget(label) || !hasTileAtLabel(label) }
 
     /**
      * Helper function
      *
-     * Checks whether the robot is at an edge of a connected component of empty target nodes where a tile can safely be
+     * Checks whether the robot is at a border of a connected component of demand nodes where a tile can safely be
      * placed.
      */
-    private fun isAtEmptyTargetEdge(): Boolean = isAtEdge { label -> !(hasTileAtLabel(label) && labelIsTarget(label)) }
+    private fun isAtDemandBorder(): Boolean = isAtBorder { label -> !(hasTileAtLabel(label) && labelIsTarget(label)) }
 
     /**
      * Helper function
      *
-     * Checks whether the robot is at an edge of a structure whose boundary labels are induced by [isLabelBoundary].
+     * Checks whether the robot is at a border of a structure whose boundary labels are induced by [isLabelBoundary].
      */
-    private fun isAtEdge(isLabelBoundary: (Int) -> Boolean): Boolean {
+    private fun isAtBorder(isLabelBoundary: (Int) -> Boolean): Boolean {
         val boundaryLabels = labels.filter(isLabelBoundary)
 
         if (boundaryLabels.size == 6) {

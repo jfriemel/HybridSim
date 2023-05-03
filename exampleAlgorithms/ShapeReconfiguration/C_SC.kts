@@ -99,7 +99,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private fun traverseHole() {
         if (outerBoundaryFound()) return
 
-        if (isAtEdge()) {
+        if (isAtBorder()) {
             liftTile()
             hasMoved = false
             phase = Phase.MoveTileNorth
@@ -205,7 +205,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
          *   [Phase.LeaveOverhang]
          *   [Phase.CompressOverhang]
          */
-        if (!hasOverhangNbr() || ((!entryTile || !hasTargetTileNbr()) && isOnTile() && isAtEdge())) {
+        if (!hasOverhangNbr() || ((!entryTile || !hasTargetTileNbr()) && isOnTile() && isAtBorder())) {
             liftTile()
             phase = Phase.LeaveOverhang
             return
@@ -286,14 +286,14 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * Enter phase: [Phase.ExploreColumn]
      *
      * The robot moves along a column (direction specified by [columnDir]) of target nodes until it either reaches the
-     * column's end (a non-target node) or an empty target node where it can place the tile it is carrying.
+     * column's end (a non-target node) or a demand node where it can place the tile it is carrying.
      *
      * Exit phases:
      *   [Phase.ReturnToBoundary]
      *   [Phase.ReturnToColumnTop]
      */
     private fun exploreColumn() {
-        // Place tile if empty target node on column
+        // Place tile if demand node on column
         if (carriesTile && !isOnTile()) {
             placeTile()
             phase = Phase.ReturnToBoundary
@@ -424,10 +424,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Helper function
      *
-     * Checks whether the robot is at an edge of a connected component of either overhang or targettiles where a tile
+     * Checks whether the robot is at a border of a connected component of either overhang or targettiles where a tile
      * can safely be removed.
      */
-    private fun isAtEdge(): Boolean {
+    private fun isAtBorder(): Boolean {
         val boundaryLabels = labels.filter { label -> (labelIsTarget(label) != isOnTarget()) || !hasTileAtLabel(label) }
 
         if (boundaryLabels.size == 6) {
