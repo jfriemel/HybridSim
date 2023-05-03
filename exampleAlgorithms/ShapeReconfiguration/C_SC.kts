@@ -36,8 +36,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private var enterAngle: Int = 0
     private var columnDir: Int = 0
 
-    private var compressDir: Int = -1
+    private var compressExpandDir: Int = -1
     private var hasMoved: Boolean = false
+    private var boundaryIsSouth: Boolean = false
 
     override fun activate() {
         when (phase) {
@@ -102,6 +103,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         if (isAtBorder()) {
             liftTile()
             hasMoved = false
+            boundaryIsSouth = true
             phase = Phase.MoveTileNorth
             return
         }
@@ -109,11 +111,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
 
         if (
-            !hasTileAtLabel((moveLabel + 1).mod(6)) && hasTileAtLabel((moveLabel + 2).mod(6))
-            && (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6)))
+            (!hasTileAtLabel((moveLabel + 1).mod(6)) && hasTileAtLabel((moveLabel + 2).mod(6))
+                && (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6))))
+            || (hasTileAtLabel((moveLabel + 1).mod(6)) && !hasTileAtLabel((moveLabel + 2).mod(6))
+                && hasTileAtLabel((moveLabel + 3).mod(6)))
         ) {
             liftTile()
-            compressDir = (moveLabel + 1).mod(6)
+            compressExpandDir = intArrayOf(1, 2).map { (moveLabel + it).mod(6) }.first { label -> !hasTileAtLabel(label) }
             hasMoved = false
             phase = Phase.ExpandHole
             return
@@ -124,7 +128,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     private fun expandHole() {
         if (!hasMoved) {
-            moveToLabel(compressDir)
+            moveToLabel(compressExpandDir)
             hasMoved = true
             return
         }
@@ -133,8 +137,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
         if (outerBoundaryFound()) return
-        moveToLabel((compressDir + 2).mod(6))
-        outerLabel = (compressDir + 4).mod(6)
+        moveToLabel((compressExpandDir + 2).mod(6))
+        outerLabel = (compressExpandDir + 4).mod(6)
         phase = Phase.TraverseHole
     }
 
@@ -154,13 +158,15 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 placeTile()
                 return
             }
-            if (hasMoved || hasTileAtLabel(0)) {
+            if (boundaryIsSouth && canMoveToLabel(0)) {
                 moveToLabel(0)
                 hasMoved = true
             } else {
                 val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
                 moveToLabel(moveLabel)
                 outerLabel = (moveLabel - 2).mod(6)
+                hasMoved = true
+                boundaryIsSouth = (outerLabel - 3) in -1..1 && !hasTileAtLabel(3)
             }
             return
         }
@@ -222,7 +228,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 || !hasTileAtLabel((moveLabel + 4).mod(6)) && !labelIsTarget((moveLabel + 4).mod(6)))
         ) {
             liftTile()
-            compressDir = (moveLabel + 1).mod(6)
+            compressExpandDir = (moveLabel + 1).mod(6)
             hasMoved = false
             phase = Phase.CompressOverhang
             return
@@ -246,7 +252,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      */
     private fun compressOverhang() {
         if (!hasMoved) {
-            moveToLabel(compressDir)
+            moveToLabel(compressExpandDir)
             hasMoved = true
             return
         }
@@ -254,8 +260,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             placeTile()
             return
         }
-        moveToLabel((compressDir + 2).mod(6))
-        outerLabel = (compressDir + 4).mod(6)
+        moveToLabel((compressExpandDir + 2).mod(6))
+        outerLabel = (compressExpandDir + 4).mod(6)
         entryTile = true
         phase = Phase.SearchAndLiftOverhang
     }
