@@ -42,8 +42,9 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     menu.toggleActive()
                 }
                 if (Gdx.graphics.isFullscreen) {
-                    Gdx.graphics.setWindowedMode(1024, 768)
+                    toggleFullscreen()
                 }
+                screen.resetCamera()
             }
 
             Input.Keys.Y, Input.Keys.Z -> {

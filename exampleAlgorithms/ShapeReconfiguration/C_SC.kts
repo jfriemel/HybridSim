@@ -55,6 +55,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.ExploreBoundary -> exploreBoundary()
             Phase.ReturnToBoundary -> returnToBoundary()
         }
+        println("outerLabel: $outerLabel")
     }
 
     override fun getColor(): Color = when (phase) {
@@ -103,7 +104,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         if (isAtBorder()) {
             liftTile()
             hasMoved = false
-            boundaryIsSouth = true
+            boundaryIsSouth = outerLabel in 2..4 && !hasTileAtLabel(3)
             phase = Phase.MoveTileNorth
             return
         }
@@ -449,6 +450,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         return numBoundaries == 1
     }
 
+    /**
+     * Helper function
+     *
+     * Checks whether the robot is at the outer boundary (is on target and has non-target neighbors or is not on target
+     * and has target neighbors). If it is, moves to the target, enters phase [Phase.FindOverhang] and returns true.
+     * Otherwise, returns false.
+     */
     private fun outerBoundaryFound(): Boolean {
         if (isOnTarget() && (hasOverhangNbr() || hasEmptyNonTargetNbr())) {
             outerLabel = overhangNbrLabel() ?: emptyNonTargetNbrLabel()!!
