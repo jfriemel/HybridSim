@@ -55,7 +55,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.ExploreBoundary -> exploreBoundary()
             Phase.ReturnToBoundary -> returnToBoundary()
         }
-        println("outerLabel: $outerLabel")
     }
 
     override fun getColor(): Color = when (phase) {
@@ -127,6 +126,14 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         outerLabel = (moveLabel - 2).mod(6)
     }
 
+    /**
+     * Enter phase: [Phase.ExpandHole]
+     *
+     * The robot moves the carried tile towards the boundary in direction [compressExpandDir], places it, and returns
+     * to its previous boundary.
+     *
+     * Exit phase: [Phase.TraverseHole]
+     */
     private fun expandHole() {
         if (!hasMoved) {
             moveToLabel(compressExpandDir)
@@ -138,8 +145,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
         if (outerBoundaryFound()) return
-        moveToLabel((compressExpandDir + 2).mod(6))
-        outerLabel = (compressExpandDir + 4).mod(6)
+        moveToLabel((compressExpandDir + 4).mod(6))
+        outerLabel = (compressExpandDir + 2).mod(6)
         phase = Phase.TraverseHole
     }
 
@@ -261,8 +268,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             placeTile()
             return
         }
-        moveToLabel((compressExpandDir + 2).mod(6))
-        outerLabel = (compressExpandDir + 4).mod(6)
+        moveToLabel((compressExpandDir + 4).mod(6))
+        outerLabel = (compressExpandDir + 2).mod(6)
         entryTile = true
         phase = Phase.SearchAndLiftOverhang
     }

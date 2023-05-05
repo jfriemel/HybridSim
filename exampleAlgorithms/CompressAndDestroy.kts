@@ -123,8 +123,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             placeTile()
             return
         }
-        moveToLabel((compressDir + 2).mod(6))
-        outerLabel = (compressDir + 4).mod(6)
+        moveToLabel((compressDir + 4).mod(6))
+        outerLabel = (compressDir + 2).mod(6)
         phase = Phase.SearchAndDestroy
     }
 
