@@ -84,13 +84,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Configuration.removeTile(node)
             return
         }
-        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label ->
-            hasTileAtLabel(label)
-        }
+
+        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label -> hasTileAtLabel(label) }
         if (moveLabel == null) {
             phase = Phase.Finished
             return
         }
+
         if (
             !hasTileAtLabel((moveLabel + 1).mod(6)) && hasTileAtLabel((moveLabel + 2).mod(6))
             && (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6)))
@@ -101,6 +101,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             phase = Phase.Compress
             return
         }
+
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
     }
@@ -119,10 +120,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             hasMoved = true
             return
         }
+
         if (carriesTile) {
             placeTile()
             return
         }
+
         moveToLabel((compressDir + 4).mod(6))
         outerLabel = (compressDir + 2).mod(6)
         phase = Phase.SearchAndDestroy

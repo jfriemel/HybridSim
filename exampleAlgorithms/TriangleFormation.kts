@@ -57,15 +57,14 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun findBlockTile() {
-        intArrayOf(5, 4, 0).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveToLabel(label)
-                if (label == 4) {
-                    numMovementsSW++
-                }
-                return
+        intArrayOf(5, 4, 0).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            if (label == 4) {
+                numMovementsSW++
             }
+            return
         }
+
         liftTile()
         if (!hasTileAtLabel(1) && !testActive) {
             testActive = true
@@ -143,18 +142,18 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun buildTriangle() {
-        intArrayOf(5, 3).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveToLabel(label)
-                return
-            }
+        intArrayOf(5, 3).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            return
         }
+
         if (hasTileAtLabel(2)) {
             moveToLabel(3)
             placeTile()
             phase = Phase.ReturnToVertex
             return
         }
+
         moveToLabel(5)
         phase = Phase.BuildNewColumn
     }

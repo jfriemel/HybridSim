@@ -55,16 +55,16 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         intArrayOf(0, 2, 3, 5).forEach { label ->
             tilesToSides = tilesToSides || hasTileAtLabel(label)
         }
-        intArrayOf(0, 5, 4).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveToLabel(label)
-                return
-            }
+        intArrayOf(0, 5, 4).firstOrNull() { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            return
         }
+
         if (!tilesToSides) {
             phase = Phase.Finished
             return
         }
+
         tilesToSides = false
         liftTile()
         moveToLabel(2)

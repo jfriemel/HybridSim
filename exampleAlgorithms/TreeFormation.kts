@@ -67,23 +67,20 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun initialize() {
-        intArrayOf(1, 2, 0).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveToLabel(label)
-                return
-            }
+        intArrayOf(1, 2, 0).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            return
         }
         phase = Phase.SearchNextBranch
     }
 
     private fun searchNextBranch() {
-        intArrayOf(5, 4).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveToLabel(label)
-                phase = Phase.SearchNextBranchMoveN
-                return
-            }
+        intArrayOf(5, 4).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            phase = Phase.SearchNextBranchMoveN
+            return
         }
+
         if (hasTileAtLabel(3)) {
             moveToLabel(3)
         } else {
@@ -123,13 +120,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun moveE() {
-        intArrayOf(2, 1).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveToLabel(label)
-                phase = Phase.HasMovedE
-                return
-            }
+        intArrayOf(2, 1).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            phase = Phase.HasMovedE
+            return
         }
+
         if (hasTileAtLabel(0)) {
             moveToLabel(0)
         } else {
@@ -194,12 +190,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             phase = Phase.BringTileMoveS
             return
         }
-        intArrayOf(3, 2).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveToLabel(label)
-                return
-            }
-        }
+        val moveLabel = intArrayOf(3, 2).first { label -> hasTileAtLabel(label) }
+        moveToLabel(moveLabel)
     }
 
     private fun bringTileMoveS() {

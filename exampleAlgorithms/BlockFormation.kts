@@ -42,15 +42,14 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun findTile() {
-        intArrayOf(5, 4, 0).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveToLabel(label)
-                if (label == 4) {
-                    numMovementsSW++
-                }
-                return
+        intArrayOf(5, 4, 0).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            if (label == 4) {
+                numMovementsSW++
             }
+            return
         }
+
         liftTile()
         if (!hasTileAtLabel(1) && !testActive) {
             testActive = true

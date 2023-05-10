@@ -51,13 +51,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             moveAndUpdate(3)
             return
         }
-        intArrayOf(4, 5, 0, 1, 2).forEach { label ->
-            if (hasTileAtLabel(label)) {
-                moveAndUpdate(label)
-                phase = Phase.TraverseBoundary
-                return
-            }
+
+        intArrayOf(4, 5, 0, 1, 2).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveAndUpdate(label)
+            phase = Phase.TraverseBoundary
+            return
         }
+
         phase = Phase.TraverseColumn
     }
 
@@ -68,14 +68,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             phase = Phase.TraverseColumn
             return
         }
-        var label = enterLabel
-        repeat(6) {
-            label = (label + 1).mod(6)
-            if (hasTileAtLabel(label)) {
-                moveAndUpdate(label)
-                return
-            }
-        }
+
+        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
+        moveAndUpdate(moveLabel)
     }
 
     private fun moveAndUpdate(label: Int) {

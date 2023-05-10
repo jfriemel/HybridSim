@@ -3,11 +3,9 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
-    // Hole expansion for finding outer boundary
-    FindAnyBoundary,
-    TraverseHole,
-    ExpandHole,
-    MoveTileNorth,
+    // Block formation for finding outer boundary
+    FindBlockTile,
+    MoveBlockTile,
 
     // Compression and search for removable overhang tile
     FindOverhang,
@@ -29,23 +27,20 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     numPebbles = 0,
     maxPebbles = 0,
 ) {
-    private var phase = Phase.FindAnyBoundary
+    private var phase = Phase.FindBlockTile
 
     private var entryTile: Boolean = false
     private var outerLabel: Int = -1
     private var enterAngle: Int = 0
     private var columnDir: Int = 0
 
-    private var compressExpandDir: Int = -1
+    private var compressDir: Int = -1
     private var hasMoved: Boolean = false
-    private var boundaryIsSouth: Boolean = false
 
     override fun activate() {
         when (phase) {
-            Phase.FindAnyBoundary -> findAnyBoundary()
-            Phase.TraverseHole -> traverseHole()
-            Phase.MoveTileNorth -> moveTileNorth()
-            Phase.ExpandHole -> expandHole()
+            Phase.FindBlockTile -> findBlockTile()
+            Phase.MoveBlockTile -> moveBlockTile()
             Phase.FindOverhang -> findOverhang()
             Phase.SearchAndLiftOverhang -> searchAndLiftOverhang()
             Phase.CompressOverhang -> compressOverhang()
@@ -58,7 +53,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     override fun getColor(): Color = when (phase) {
-        Phase.FindAnyBoundary, Phase.TraverseHole, Phase.MoveTileNorth, Phase.ExpandHole
+        Phase.FindBlockTile, Phase.MoveBlockTile
             -> Color.ORANGE
         Phase.FindOverhang, Phase.SearchAndLiftOverhang, Phase.CompressOverhang, Phase.LeaveOverhang
             -> Color.SCARLET
@@ -67,124 +62,52 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     /**
-     * Enter phase: [Phase.FindAnyBoundary]
+     * Enter phase: [Phase.FindBlockTile]
      *
-     * The robot moves in direction 3 until it either finds the outer boundary or a boundary in direction 3.
-     *
-     * Exit phases:
-     *   [Phase.FindOverhang]
-     *   [Phase.TraverseHole]
-     */
-    private fun findAnyBoundary() {
-        if (outerBoundaryFound()) return
-
-        if (!hasTileAtLabel(3)) {
-            outerLabel = 3
-            phase = Phase.TraverseHole
-            return
-        }
-        moveToLabel(3)
-    }
-
-    /**
-     * Enter phase: [Phase.TraverseHole]
-     *
-     * The robot traverses the boundary and expands it whenever possible (without violating connectivity).
-     * When tiles can be safely removed, they are carried in direction 0.
+     * Forms a block until it finds the outer boundary of the target shape.
      *
      * Exit phases:
      *   [Phase.FindOverhang]
-     *   [Phase.MoveTileNorth]
-     *   [Phase.ExpandHole]
+     *   [Phase.MoveBlockTile]
      */
-    private fun traverseHole() {
-        if (outerBoundaryFound()) return
-
-        if (isAtBorder()) {
-            liftTile()
-            hasMoved = false
-            boundaryIsSouth = outerLabel in 2..4 && !hasTileAtLabel(3)
-            phase = Phase.MoveTileNorth
+    private fun findBlockTile() {
+        // If at outer boundary, move to target tile and enter [Phase.FindOverhang]
+        if (isOnTarget() && (hasOverhangNbr() || hasEmptyNonTargetNbr())) {
+            outerLabel = overhangNbrLabel() ?: emptyNonTargetNbrLabel()!!
+            phase = Phase.FindOverhang
+            return
+        } else if (!isOnTarget() && hasTargetTileNbr()) {
+            val moveLabel = targetTileNbrLabel()!!
+            moveToLabel(moveLabel)
+            outerLabel = (moveLabel + 3).mod(6)
+            phase = Phase.FindOverhang
             return
         }
 
-        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
-
-        if (
-            (!hasTileAtLabel((moveLabel + 1).mod(6)) && hasTileAtLabel((moveLabel + 2).mod(6))
-                && (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6))))
-            || (hasTileAtLabel((moveLabel + 1).mod(6)) && !hasTileAtLabel((moveLabel + 2).mod(6))
-                && hasTileAtLabel((moveLabel + 3).mod(6)))
-        ) {
-            liftTile()
-            compressExpandDir = intArrayOf(1, 2).map { (moveLabel + it).mod(6) }.first { label -> !hasTileAtLabel(label) }
-            hasMoved = false
-            phase = Phase.ExpandHole
+        // If possible, move in direction 5, 4, or 0
+        intArrayOf(5, 4, 0).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
             return
         }
-        moveToLabel(moveLabel)
-        outerLabel = (moveLabel - 2).mod(6)
+
+        // Cannot move further, lift tile and enter [Phase.BlockMoveTile]
+        liftTile()
+        phase = Phase.MoveBlockTile
     }
 
     /**
-     * Enter phase: [Phase.ExpandHole]
+     * Enter phase: [Phase.MoveBlockTile]
      *
-     * The robot moves the carried tile towards the boundary in direction [compressExpandDir], places it, and returns
-     * to its previous boundary.
+     * Moves a tile southeast until it encounters an empty node in the block formation algorithm.
      *
-     * Exit phase: [Phase.TraverseHole]
+     * Exit phase: [Phase.FindBlockTile]
      */
-    private fun expandHole() {
-        if (!hasMoved) {
-            moveToLabel(compressExpandDir)
-            hasMoved = true
-            return
-        }
-        if (carriesTile) {
+    private fun moveBlockTile() {
+        moveToLabel(2)
+        if (!isOnTile()) {
             placeTile()
-            return
+            phase = Phase.FindBlockTile
         }
-        if (outerBoundaryFound()) return
-        moveToLabel((compressExpandDir + 4).mod(6))
-        outerLabel = (compressExpandDir + 2).mod(6)
-        phase = Phase.TraverseHole
-    }
-
-    /**
-     * Enter phase: [Phase.MoveTileNorth]
-     *
-     * The robot moves its carried tile in direction 0 and then returns to its previous boundary by moving in
-     * direction 3. If it finds the outer boundary on the way back, it enters the next stage of the algorithm.
-     *
-     * Exit phases:
-     *   [Phase.FindOverhang]
-     *   [Phase.TraverseHole]
-     */
-    private fun moveTileNorth() {
-        if (carriesTile) {
-            if (!isOnTile() && hasMoved) {
-                placeTile()
-                return
-            }
-            if (boundaryIsSouth && canMoveToLabel(0)) {
-                moveToLabel(0)
-                hasMoved = true
-            } else {
-                val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
-                moveToLabel(moveLabel)
-                outerLabel = (moveLabel - 2).mod(6)
-                hasMoved = true
-                boundaryIsSouth = (outerLabel - 3) in -1..1 && !hasTileAtLabel(3)
-            }
-            return
-        }
-        if (outerBoundaryFound()) return
-        if (!hasTileAtLabel(3)) {
-            outerLabel = 3
-            phase = Phase.TraverseHole
-            return
-        }
-        moveToLabel(3)
     }
 
     /**
@@ -208,17 +131,17 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         traverseTargetTileBoundary()
     }
 
+    /**
+     * Enter phase: [Phase.SearchAndLiftOverhang]
+     *
+     * The robot moves along the outer overhang boundary (induced by [outerLabel]) and moves tiles towards the inner
+     * boundary, if one exists, or picks up safely removable tiles.
+     *
+     * Exit phases:
+     *   [Phase.LeaveOverhang]
+     *   [Phase.CompressOverhang]
+     */
     private fun searchAndLiftOverhang() {
-        /**
-         * Enter phase: [Phase.SearchAndLiftOverhang]
-         *
-         * The robot moves along the outer overhang boundary (induced by [outerLabel]) and moves tiles towards the inner
-         * boundary, if one exists, or picks up safely removable tiles.
-         *
-         * Exit phases:
-         *   [Phase.LeaveOverhang]
-         *   [Phase.CompressOverhang]
-         */
         if (!hasOverhangNbr() || ((!entryTile || !hasTargetTileNbr()) && isOnTile() && isAtBorder())) {
             liftTile()
             phase = Phase.LeaveOverhang
@@ -236,7 +159,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 || !hasTileAtLabel((moveLabel + 4).mod(6)) && !labelIsTarget((moveLabel + 4).mod(6)))
         ) {
             liftTile()
-            compressExpandDir = (moveLabel + 1).mod(6)
+            compressDir = (moveLabel + 1).mod(6)
             hasMoved = false
             phase = Phase.CompressOverhang
             return
@@ -260,7 +183,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      */
     private fun compressOverhang() {
         if (!hasMoved) {
-            moveToLabel(compressExpandDir)
+            moveToLabel(compressDir)
             hasMoved = true
             return
         }
@@ -268,8 +191,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             placeTile()
             return
         }
-        moveToLabel((compressExpandDir + 4).mod(6))
-        outerLabel = (compressExpandDir + 2).mod(6)
+        moveToLabel((compressDir + 4).mod(6))
+        outerLabel = (compressDir + 2).mod(6)
         entryTile = true
         phase = Phase.SearchAndLiftOverhang
     }
@@ -340,13 +263,11 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         outerLabel = revColumnDir
-        (1..6).map { (outerLabel + it).mod(6) }.forEach { label ->
-            if (labelIsTarget(label)) {
-                moveAndUpdate(label)
-                outerLabel = (label - 2).mod(6)
-                phase = Phase.ExploreBoundary
-                return
-            }
+        (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label -> labelIsTarget(label) }?.let { label ->
+            moveAndUpdate(label)
+            outerLabel = (label - 2).mod(6)
+            phase = Phase.ExploreBoundary
+            return
         }
 
         phase = Phase.ExploreColumn
@@ -379,13 +300,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             phase = Phase.ExploreColumn
             return
         }
-        (1..6).map { (outerLabel + it).mod(6) }.forEach { label ->
-            if (labelIsTarget(label)) {
-                moveAndUpdate(label)
-                outerLabel = (label - 2).mod(6)
-                return
-            }
-        }
+
+        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
+        moveAndUpdate(moveLabel)
+        outerLabel = (moveLabel - 2).mod(6)
     }
 
     /**
@@ -455,27 +373,5 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             }
         }
         return numBoundaries == 1
-    }
-
-    /**
-     * Helper function
-     *
-     * Checks whether the robot is at the outer boundary (is on target and has non-target neighbors or is not on target
-     * and has target neighbors). If it is, moves to the target, enters phase [Phase.FindOverhang] and returns true.
-     * Otherwise, returns false.
-     */
-    private fun outerBoundaryFound(): Boolean {
-        if (isOnTarget() && (hasOverhangNbr() || hasEmptyNonTargetNbr())) {
-            outerLabel = overhangNbrLabel() ?: emptyNonTargetNbrLabel()!!
-            phase = Phase.FindOverhang
-            return true
-        } else if (!isOnTarget() && hasTargetTileNbr()) {
-            val moveLabel = targetTileNbrLabel()!!
-            moveToLabel(moveLabel)
-            outerLabel = (moveLabel + 3).mod(6)
-            phase = Phase.FindOverhang
-            return true
-        }
-        return false
     }
 }
