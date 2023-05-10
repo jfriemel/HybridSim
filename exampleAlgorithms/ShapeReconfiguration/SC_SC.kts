@@ -210,12 +210,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return true
         }
 
-        var numBoundaries = 0
-        boundaryLabels.forEach { label ->
-            if ((label + 1).mod(6) !in boundaryLabels) {
-                numBoundaries++
-            }
-        }
-        return numBoundaries == 1
+        return boundaryLabels.filter { label -> (label + 1).mod(6) !in boundaryLabels }.size == 1
     }
 }

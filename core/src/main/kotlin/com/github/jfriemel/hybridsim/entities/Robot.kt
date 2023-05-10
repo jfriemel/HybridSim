@@ -50,7 +50,7 @@ open class Robot(
      * connectivity.
      */
     fun canMoveToLabel(label: Int): Boolean {
-        // Check whether node is occupied
+        // Check whether node at label is occupied by robot
         if (nodeAtLabel(label) in Configuration.robots) {
             return false
         }
@@ -61,12 +61,9 @@ open class Robot(
         }
 
         // Check whether node is reachable without violating connectivity
-        arrayOf(nodeAtLabel((label - 1).mod(6)), nodeAtLabel((label + 1).mod(6))).forEach { node ->
-            if (node in Configuration.tiles || Configuration.robots[node]?.carriesTile == true) {
-                return true
-            }
+        return intArrayOf((label - 1).mod(6), (label + 1).mod(6)).any { nbrLabel ->
+            nodeAtLabel(nbrLabel) in Configuration.tiles || robotAtLabel(nbrLabel)?.carriesTile == true
         }
-        return false
     }
 
     /** The robot tries to move to the node at the given [label]. Returns true if successful. */
@@ -184,24 +181,13 @@ open class Robot(
      * If [tileBoundaries] is true, counts the number of connected components of tile nodes adjacent to the robot.
      */
     fun numBoundaries(tileBoundaries: Boolean = false): Int {
-        val boundaryLabels = if (tileBoundaries) {
-            labels.filter { label -> hasTileAtLabel(label) }
-        } else {
-            labels.filter { label -> !hasTileAtLabel(label) }
-        }
+        val boundaryLabels = labels.filter { label -> hasTileAtLabel(label) == tileBoundaries }
 
         if (boundaryLabels.size == 6) {  // Completely surrounded by boundary
             return 1
         }
 
-        var numBoundaries = 0
-        boundaryLabels.forEach { label ->
-            if ((label + 1).mod(6) !in boundaryLabels) {
-                numBoundaries++
-            }
-        }
-
-        return numBoundaries
+        return boundaryLabels.filter { label -> (label + 1).mod(6) !in boundaryLabels }.size
     }
 
     /** @return The [Node] at the given [label]. */

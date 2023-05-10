@@ -80,7 +80,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *   [Phase.Finished]
      */
     private fun searchAndDestroy() {
-        if (isOnTile() && isAtEdge()) {
+        if (isOnTile() && numBoundaries() == 1) {
             Configuration.removeTile(node)
             return
         }
@@ -129,26 +129,5 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         moveToLabel((compressDir + 4).mod(6))
         outerLabel = (compressDir + 2).mod(6)
         phase = Phase.SearchAndDestroy
-    }
-
-    /**
-     * Helper function
-     *
-     * Checks whether the robot is at an edge of the tile structure.
-     */
-    private fun isAtEdge(): Boolean {
-        val boundaryLabels = labels.filter { label -> !hasTileAtLabel(label) }
-
-        if (boundaryLabels.size == 6) {
-            return true
-        }
-
-        var numBoundaries = 0
-        boundaryLabels.forEach { label ->
-            if ((label + 1).mod(6) !in boundaryLabels) {
-                numBoundaries++
-            }
-        }
-        return numBoundaries == 1
     }
 }
