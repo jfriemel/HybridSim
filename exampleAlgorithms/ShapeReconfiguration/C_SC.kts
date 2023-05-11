@@ -165,12 +165,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        if (hasTargetTileNbr()) {
-            entryTile = false
-        }
-
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
+        entryTile = false
     }
 
     /**
@@ -193,7 +190,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
         moveToLabel((compressDir + 4).mod(6))
         outerLabel = (compressDir + 2).mod(6)
-        entryTile = true
         phase = Phase.SearchAndLiftOverhang
     }
 
