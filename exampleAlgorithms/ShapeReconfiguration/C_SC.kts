@@ -17,7 +17,6 @@ private enum class Phase {
     ExploreColumn,
     ReturnToColumnTop,
     ExploreBoundary,
-    ReturnToBoundary,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -48,7 +47,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.ExploreColumn -> exploreColumn()
             Phase.ReturnToColumnTop -> returnToColumnTop()
             Phase.ExploreBoundary -> exploreBoundary()
-            Phase.ReturnToBoundary -> returnToBoundary()
         }
     }
 
@@ -57,7 +55,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             -> Color.ORANGE
         Phase.FindOverhang, Phase.SearchAndLiftOverhang, Phase.CompressOverhang, Phase.LeaveOverhang
             -> Color.SCARLET
-        Phase.ExploreColumn, Phase.ReturnToColumnTop, Phase.ExploreBoundary, Phase.ReturnToBoundary
+        Phase.ExploreColumn, Phase.ReturnToColumnTop, Phase.ExploreBoundary
             -> Color.SKY
     }
 
@@ -221,15 +219,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * The robot moves along a column (direction specified by [columnDir]) of target nodes until it either reaches the
      * column's end (a non-target node) or a demand node where it can place the tile it is carrying.
      *
-     * Exit phases:
-     *   [Phase.ReturnToBoundary]
-     *   [Phase.ReturnToColumnTop]
+     * Exit phase: [Phase.ReturnToColumnTop]
      */
     private fun exploreColumn() {
         // Place tile if demand node on column
         if (carriesTile && !isOnTile()) {
             placeTile()
-            phase = Phase.ReturnToBoundary
+            phase = Phase.ReturnToColumnTop
             return
         }
 
@@ -250,6 +246,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * Exit phases:
      *   [Phase.ExploreBoundary]
      *   [Phase.ExploreColumn]
+     *   [Phase.FindOverhang]
      */
     private fun returnToColumnTop() {
         val revColumnDir = (columnDir + 3).mod(6)
@@ -259,6 +256,11 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         outerLabel = revColumnDir
+        if (!carriesTile) {
+            phase = Phase.FindOverhang
+            return
+        }
+
         (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label -> labelIsTarget(label) }?.let { label ->
             moveAndUpdate(label)
             outerLabel = (label - 2).mod(6)
@@ -300,21 +302,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
         moveAndUpdate(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
-    }
-
-    /**
-     * Enter phase: [Phase.ReturnToBoundary]
-     *
-     * Exit phase: [Phase.FindOverhang]
-     */
-    private fun returnToBoundary() {
-        val revColumnDir = (columnDir + 3).mod(6)
-        if ((hasTileAtLabel(revColumnDir) && !labelIsTarget(revColumnDir)) || !hasTileAtLabel(revColumnDir)) {
-            outerLabel = revColumnDir
-            phase = Phase.FindOverhang
-            return
-        }
-        moveToLabel(revColumnDir)
     }
 
     /**
