@@ -13,7 +13,7 @@ private enum class Phase {
     CompressOverhang,
     LeaveOverhang,
 
-    // Exploration for finding target tile
+    // Exploration for finding demand node
     ExploreColumn,
     ReturnToColumnTop,
     ExploreBoundary,
@@ -30,7 +30,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     private var entryTile: Boolean = false
     private var outerLabel: Int = -1
-    private var enterAngle: Int = 0
     private var columnDir: Int = 0
 
     private var compressDir: Int = -1
@@ -231,7 +230,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
         // Move along column as long as possible, then turn around
         if (labelIsTarget(columnDir)) {
-            moveAndUpdate(columnDir)
+            moveToLabel(columnDir)
         } else {
             phase = Phase.ReturnToColumnTop
         }
@@ -245,30 +244,26 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *
      * Exit phases:
      *   [Phase.ExploreBoundary]
-     *   [Phase.ExploreColumn]
      *   [Phase.FindOverhang]
      */
     private fun returnToColumnTop() {
         val revColumnDir = (columnDir + 3).mod(6)
         if (hasTileAtLabel(revColumnDir) && labelIsTarget(revColumnDir)) {
-            moveAndUpdate(revColumnDir)
+            moveToLabel(revColumnDir)
             return
         }
 
-        outerLabel = revColumnDir
         if (!carriesTile) {
             phase = Phase.FindOverhang
             return
         }
 
         (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label -> labelIsTarget(label) }?.let { label ->
-            moveAndUpdate(label)
+            moveToLabel(label)
             outerLabel = (label - 2).mod(6)
-            phase = Phase.ExploreBoundary
-            return
         }
 
-        phase = Phase.ExploreColumn
+        phase = Phase.ExploreBoundary
     }
 
     /**
@@ -288,31 +283,14 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        if ((enterAngle in 0..2
-                && !labelIsTarget((columnDir + 3).mod(6))
-                && (enterAngle == 2 || !labelIsTarget((columnDir + 2).mod(6))))
-            || ((enterAngle == 4 || enterAngle == 5) && (0..3).all { offset ->
-                !labelIsTarget((columnDir + offset).mod(6))
-            })
-        ) {
+        if (!labelIsTarget((columnDir + 3).mod(6))) {
             phase = Phase.ExploreColumn
             return
         }
 
         val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
-        moveAndUpdate(moveLabel)
+        moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
-    }
-
-    /**
-     * Helper function
-     *
-     * Moves the robot to the given [label] and updates the [enterAngle] (label of entry relative to [columnDir]).
-     * Only used in [Phase.PlaceTileOnTarget].
-     */
-    private fun moveAndUpdate(label: Int) {
-        moveToLabel(label)
-        enterAngle = (label + 3 - columnDir).mod(6)
     }
 
     /**
