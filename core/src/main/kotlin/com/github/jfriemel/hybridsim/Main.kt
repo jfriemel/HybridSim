@@ -6,6 +6,7 @@ import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
+import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.Scheduler
 import com.github.jfriemel.hybridsim.ui.InputHandler
 import com.github.jfriemel.hybridsim.ui.Menu
@@ -33,6 +34,8 @@ class Main : KtxGame<KtxScreen>() {
         inputMultiplexer.addProcessor(menu.menuStage)
         inputMultiplexer.addProcessor(InputHandler(screen, menu))
         Gdx.input.inputProcessor = inputMultiplexer
+        Configuration.generate(50, 1)
+        screen.resetCamera()
 
         // Start a new coroutine for the scheduler
         KtxAsync.initiate()

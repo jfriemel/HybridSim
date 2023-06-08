@@ -13,6 +13,9 @@ data class Node(val x: Int, val y: Int) {
         return Node(x + xOffsets[dir], y + yOffsets[dir])
     }
 
+    /** All six neighbors of the current [Node]. */
+    fun neighbors(): Collection<Node> = (0..5).map { dir -> nodeInDir(dir) }
+
     /**
      * Converts the node's internal integer coordinates to scientific coordinates as used in the hybrid model
      * literature. Returns scientific coordinates as a [Pair] (x, y).

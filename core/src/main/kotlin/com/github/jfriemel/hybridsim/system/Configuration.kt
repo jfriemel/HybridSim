@@ -22,13 +22,20 @@ object Configuration {
     var robots: MutableMap<Node, Robot> = HashMap()
     var targetNodes: MutableSet<Node> = HashSet()
 
+    var generator = Generator()
+
     private var undoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
     private var redoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
 
     private val klaxon = Klaxon()
 
-    init {
-        loadConfiguration("{\"robots\" : {\"Node(x=0, y=0)\": {\"orientation\" : 4, \"node\" : {\"x\" : 0, \"y\" : 0}}}, \"targetNodes\" : [], \"tiles\" : {\"Node(x=0, y=-1)\": {\"node\" : {\"x\" : 0, \"y\" : -1}}, \"Node(x=0, y=0)\": {\"node\" : {\"x\" : 0, \"y\" : 0}}, \"Node(x=1, y=1)\": {\"node\" : {\"x\" : 1, \"y\" : 1}}, \"Node(x=0, y=1)\": {\"node\" : {\"x\" : 0, \"y\" : 1}}, \"Node(x=-1, y=1)\": {\"node\" : {\"x\" : -1, \"y\" : 1}}, \"Node(x=-1, y=0)\": {\"node\" : {\"x\" : -1, \"y\" : 0}}, \"Node(x=1, y=-1)\": {\"node\" : {\"x\" : 1, \"y\" : -1}}, \"Node(x=-1, y=-1)\": {\"node\" : {\"x\" : -1, \"y\" : -1}}}}\n")
+    /**
+     * Generate a configuration with the specified number of [Tile]s ([numTiles]), [Robot]s ([numRobots]),
+     * and overhang tiles ([numOverhang]).
+     * Does not generate target nodes if [numOverhang] < 0.
+     */
+    fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1) {
+        generator.generate(numTiles, numRobots, numOverhang)
     }
 
     /** Add a [tile] to the configuration at the [tile]'s node. */

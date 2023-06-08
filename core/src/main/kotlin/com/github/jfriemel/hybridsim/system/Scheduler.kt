@@ -10,7 +10,7 @@ private val logger = logger<Scheduler>()
 object Scheduler {
 
     private var active = false
-    private var cycleDelay = 100L  // Delay after completion of each activation cycle in ms
+    private var cycleDelay = 120L  // Delay after completion of each activation cycle in ms
     private var activationsPerCycle = 1  // Number of activations per scheduler cycle
 
     /** @return True if the scheduler is running. */
