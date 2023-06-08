@@ -22,7 +22,7 @@ private enum class Phase {
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
-    orientation = 0, // orientation,
+    orientation = orientation,
     carriesTile = false,
     numPebbles = 2,
     maxPebbles = 2,
