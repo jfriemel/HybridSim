@@ -25,9 +25,9 @@ import javax.swing.JFileChooser
 import javax.swing.JFrame
 import javax.swing.UIManager
 import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.math.cbrt
 import kotlin.math.max
 import kotlin.math.pow
-import kotlin.math.sqrt
 
 private val logger = logger<Menu>()
 
@@ -118,7 +118,7 @@ class Menu(batch: Batch) {
                     cell(colspan = 1, width = redoButtonImage.width)
                 }
                 row()
-                sliderScheduler = slider(0f, 100f, 0.5f)
+                sliderScheduler = slider(0f, 44f, 0.1f)
             }
         }
     }
@@ -175,13 +175,13 @@ class Menu(batch: Batch) {
         }
         sliderScheduler.onChange {
             if (!active) {
-                sliderScheduler.value = max(0f, 100f - sqrt(Scheduler.getIntervalTime().toFloat()))
+                sliderScheduler.value = max(0f, 45f - cbrt(Scheduler.getIntervalTime().toFloat()))
                 return@onChange
             }
-            Scheduler.setIntervalTime((100f - sliderScheduler.value).pow(2).toLong())
+            Scheduler.setIntervalTime((45f - sliderScheduler.value).pow(3).toLong())
         }
 
-        sliderScheduler.value = max(0f, 100f - sqrt(Scheduler.getIntervalTime().toFloat()))
+        sliderScheduler.value = max(0f, 45f - cbrt(Scheduler.getIntervalTime().toFloat()))
     }
 
     /** @return True if the menu is active (i.e., visible). */

@@ -16,8 +16,6 @@ private data class TimeState(
 
 private const val MAX_UNDO_STATES = 1000
 
-// Make sure
-
 object Configuration {
 
     var tiles: MutableMap<Node, Tile> = HashMap()
@@ -125,9 +123,11 @@ object Configuration {
         Scheduler.stop()
         klaxon.parse<Configuration>(json = json)
 
-//      Klaxon converts the keys of Maps to Strings. To get our Node keys back, we create temporary Maps, fill them
-//      with the values parsed by Klaxon and then replace the Klaxon Maps with our temporary Maps.
-//      There is probably a much cleaner way to do this (with Klaxon Converters), but I don't really care right now.
+        /*
+         * Klaxon converts the keys of Maps to Strings. To get our Node keys back, we associate the Map entries (tiles
+         * or robots) by their nodes. Also, the collections created by Klaxon are immutable, so we make them mutable.
+         * There is probably a much cleaner way to do this (with Klaxon Converters), but this works well enough.
+         */
         tiles = tiles.values.associateBy { it.node }.toMutableMap()
         robots = robots.values.associateBy { it.node }.toMutableMap()
         robots.values.forEach { AlgorithmLoader.replaceRobot(it.node) }

@@ -42,20 +42,23 @@ object Scheduler {
         }
     }
 
-    /** Sets the (expected) interval time between robot activations to [intervalTime] * 0.1ms. */
+    /** Sets the (expected) interval time between robot activations to [intervalTime] * 0.01ms. */
     fun setIntervalTime(intervalTime: Long) {
         val iTime = max(1L, intervalTime)
         if (iTime < 10L) {
             cycleDelay = iTime
+            activationsPerCycle = 100
+        } else if (iTime < 100L) {
+            cycleDelay = iTime / 10L
             activationsPerCycle = 10
         } else {
-            cycleDelay = iTime / 10L
+            cycleDelay = iTime / 100L
             activationsPerCycle = 1
         }
     }
 
-    /** @return The (expected) interval time between robot activations in 0.1ms. */
-    fun getIntervalTime(): Long = cycleDelay * 10 / activationsPerCycle
+    /** @return The (expected) interval time between robot activations in 0.01ms. */
+    fun getIntervalTime(): Long = cycleDelay * 100L / activationsPerCycle
 
     /** Infinite loop running in a separate coroutine, performs the actual scheduling. */
     suspend fun run() {
