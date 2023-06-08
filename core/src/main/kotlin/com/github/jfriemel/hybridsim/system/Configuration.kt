@@ -1,5 +1,6 @@
 package com.github.jfriemel.hybridsim.system
 
+import com.beust.klaxon.Json
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser.Companion.default
@@ -22,6 +23,7 @@ object Configuration {
     var robots: MutableMap<Node, Robot> = HashMap()
     var targetNodes: MutableSet<Node> = HashSet()
 
+    @Json(ignored = true)
     var generator = Generator()
 
     private var undoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
