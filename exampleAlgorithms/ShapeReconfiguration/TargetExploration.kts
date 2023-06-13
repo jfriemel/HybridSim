@@ -1,7 +1,8 @@
 /**
- * Modification of arbitrary layer traversal algorithm from https://ris.uni-paderborn.de/record/25126
+ * Exploration algorithm for target tile shape with holes without using pebbles
+ * Partially based on arbitrary layer traversal algorithm from https://ris.uni-paderborn.de/record/25126
  * Based on maze exploration algorithm from https://doi.org/10.1109/SFCS.1978.30
- * Modification: Using O(log n) height counter instead of pebbles for simplicity
+ * Pebbles are simulated by moving tiles from target nodes to non-target nodes at boundaries.
  */
 
 fun getRobot(node: Node, orientation: Int): Robot {
@@ -24,23 +25,25 @@ private enum class Phase {
 class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
     orientation = orientation,
-    carriesTile = true,
+    carriesTile = false,
     numPebbles = 0,
     maxPebbles = 0,
 ) {
     private var phase = Phase.TraverseColumn
     private var prevPhase = Phase.ReturnSouth
 
-    private var delta = 0
-    private var height = 0
-    private var enterLabel = 0
+    private var delta = 0  // Acceptable values: {0, 1, 2, 3, 4}
+    private var height = 0  // Acceptable values: {-1, 0, 1}
+    private var enterLabel = 0  // Acceptable values: {0, 1, 2, 3, 4, 5}
 
-    private var numPebbleTiles = 2
-    private var pebbleMoveDir = 0
+    private var numPebbleTiles = 2  // Acceptable values: {0, 1, 2}
+    private var pebbleMoveDir = 0  // Acceptable values: {0, 1, 2, 3, 4, 5}
 
+    private var withTile = carriesTile
     private var hasMoved = false
     private var hasResult = false
     private var result = false
+    private var prevLhr = true
 
     override fun activate() {
         if (phase in arrayOf(Phase.TraverseColumn, Phase.ReturnSouth, Phase.TraverseBoundary)) {
@@ -137,8 +140,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         // Move around the boundary by LHR
-        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
-        moveAndUpdate(moveLabel)
+        moveBoundary(lhr = true)
     }
 
     private fun detectUniquePoint() {
@@ -149,28 +151,43 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        if (numPebbleTiles == 2) {
-            if (isOnTarget()) {
-                pebbleMoveDir = labels.first { label -> !labelIsTarget(label) }
-                moveToLabel(pebbleMoveDir)
+        if (withTile) {  // Robot is initially equipped with tile
+            if (numPebbleTiles == 2) {
+                if (isOnTarget()) {
+                    pebbleMoveDir = labels.first { label -> !labelIsTarget(label) }
+                    moveToLabel(pebbleMoveDir)
+                } else {
+                    placeTile()
+                    numPebbleTiles--
+                }
+                return
+            } else if (!isOnTarget()) {
+                moveToLabel((pebbleMoveDir + 3).mod(6))
+                return
+            } else if (!carriesTile) {
+                liftTile()
                 return
             }
-            placeTile()
-            numPebbleTiles--
-            return
-        }
-
-        if (!isOnTarget()) {
-            moveToLabel((pebbleMoveDir + 3).mod(6))
-            return
-        }
-
-        if (!carriesTile) {
-            liftTile()
-            return
+        } else {  // Robot is initially not equipped with tile
+            if (numPebbleTiles == 2) {
+                if (!carriesTile) {
+                    liftTile()
+                } else if (isOnTarget()) {
+                    pebbleMoveDir = labels.first { label -> !labelIsTarget(label) }
+                    moveToLabel(pebbleMoveDir)
+                } else {
+                    placeTile()
+                    numPebbleTiles--
+                }
+                return
+            } else if (!isOnTarget()) {
+                moveToLabel((pebbleMoveDir + 3).mod(6))
+                return
+            }
         }
 
         moveAndUpdate(5)
+        prevLhr = false
         delta = 0
         height = 1
         phase = Phase.FindFirstCandidate
@@ -190,12 +207,11 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         // Move around the boundary by RHR
-        val moveLabel = (1..6).map { (enterLabel - it).mod(6) }.first { label -> labelIsTarget(label) }
-        moveAndUpdate(moveLabel)
+        moveBoundary(lhr = false)
     }
 
     private fun findLoop() {
-        if (height <= 0 && hasMoved) {
+        if (hasMoved && height <= 0) {
             hasMoved = false
             if (enterLabel != 1 || height < 0) {
                 phase = Phase.Backtrack
@@ -207,8 +223,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         // Move around the boundary by RHR
-        val moveLabel = (1..6).map { (enterLabel - it).mod(6) }.first { label -> labelIsTarget(label) }
-        moveAndUpdate(moveLabel)
+        moveBoundary(lhr = false)
     }
 
     private fun backtrack() {
@@ -218,23 +233,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        if (!hasMoved) {  // Move back once before switching to LHR
-            moveAndUpdate(enterLabel)
-            return
-        }
-
         // Move around the boundary by LHR
-        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
-        moveAndUpdate(moveLabel)
+        moveBoundary(lhr = true)
     }
 
     private fun backtrackFurther() {
-        if (!hasMoved) {  // Move back once before switching to LHR
-            moveAndUpdate(enterLabel)
-            return
-        }
-
-        if (height <= 0 && enterLabel == 5 && delta == 0) {
+        if (hasMoved && height <= 0 && enterLabel == 5 && delta == 0) {
             result = false
             hasResult = true
             phase = Phase.LiftLastPebble
@@ -242,46 +246,69 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         // Move around the boundary by LHR
-        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
-        moveAndUpdate(moveLabel)
+        moveBoundary(lhr = true)
     }
 
     private fun returnWithResult() {
-        if (!hasMoved) {  // Move back once before switching to LHR
-            moveAndUpdate(enterLabel)
-            return
-        }
-
-        if (height <= 0) {
+        if (hasMoved && height <= 0) {
             hasResult = true
             phase = Phase.LiftLastPebble
             return
         }
 
         // Move around the boundary by LHR
-        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
-        moveAndUpdate(moveLabel)
+        moveBoundary(lhr = true)
     }
 
     private fun liftLastPebble() {
-        if (numPebbleTiles < 2) {
-            if (carriesTile) {
+        if (withTile) {  // Robot is initially equipped with tile
+            if (numPebbleTiles < 2) {
+                if (carriesTile) {
+                    placeTile()
+                } else if (isOnTarget()) {
+                    pebbleMoveDir = labels.first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+                    moveToLabel(pebbleMoveDir)
+                } else {
+                    liftTile()
+                    numPebbleTiles++
+                }
+                return
+            } else if (!isOnTarget()) {
+                moveToLabel((pebbleMoveDir + 3).mod(6))
+                return
+            }
+        } else {  // Robot is initially not equipped with tile
+            if (numPebbleTiles < 2) {
+                if (isOnTarget()) {
+                    pebbleMoveDir = labels.first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+                    moveToLabel(pebbleMoveDir)
+                } else {
+                    liftTile()
+                    numPebbleTiles++
+                }
+                return
+            } else if (!isOnTarget()) {
+                moveToLabel((pebbleMoveDir + 3).mod(6))
+                return
+            } else if (carriesTile) {
                 placeTile()
                 return
             }
-            if (isOnTarget()) {
-                pebbleMoveDir = labels.first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
-                moveToLabel(pebbleMoveDir)
-                return
-            }
-            liftTile()
-            numPebbleTiles++
-            return
         }
 
-        moveToLabel((pebbleMoveDir + 3).mod(6))
         phase = prevPhase
-        return
+    }
+
+    private fun moveBoundary(lhr: Boolean) {
+        val moveLabel = if (lhr && prevLhr) {
+            (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
+        } else if (!lhr && !prevLhr) {
+            (1..6).map { (enterLabel - it).mod(6) }.first { label -> labelIsTarget(label) }
+        } else {
+            enterLabel
+        }
+        moveAndUpdate(moveLabel)
+        prevLhr = lhr
     }
 
     private fun moveAndUpdate(label: Int) {
