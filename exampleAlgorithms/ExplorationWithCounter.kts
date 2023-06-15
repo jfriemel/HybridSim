@@ -226,7 +226,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        if (height <= 0) {
+        if (height == 0) {
             hasResult = true
             phase = prevPhase
             return

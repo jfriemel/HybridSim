@@ -19,29 +19,38 @@ private enum class Phase {
     Backtrack,
     BacktrackFurther,
     ReturnWithResult,
+    MoveEmulatedPebbles,
     PlaceEmulatedPebble,
     LiftEmulatedPebble,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
-    orientation = orientation,
-    carriesTile = true,
+    orientation = 0, // orientation,
+    carriesTile = false,
     numPebbles = 0,
     maxPebbles = 0,
 ) {
     private var phase = Phase.TraverseColumn
     private var preDetectionPhase = Phase.ReturnSouth
-    private var prePebblePhase = Phase.DetectUniquePoint
+    private var prePebbleMovePhase = Phase.FindFirstCandidate
+    private var prePebbleTogglePhase = Phase.DetectUniquePoint
 
     private var delta = 0  // Acceptable values: {0, 1, 2, 3, 4}
     private var heightSign = 0  // Acceptable values: {-1, 0, 1}
     private var enterLabel = 0  // Acceptable values: {0, 1, 2, 3, 4, 5}
 
+    private var preEnterLabel = 0
+
     private var numEmulatedPebbles = 2  // Acceptable values: {0, 1, 2}
-    private var pebbleMoveDir = 0  // Acceptable values: {0, 1, 2, 3, 4, 5}
-    private var pebbleStep = 0  // Acceptable values (depends on context): {0, 1, 2, 3, 4}
     private var pebbleNbr = -1  // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
+    private var pebbleOverhangNbr = -1  // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
+    private var pebbleToggleDir = 0  // Acceptable values: {0, 1, 2, 3, 4, 5}
+    private var pebbleMoveDist = 0
+    private var pebbleMoveRHR = false
+
+    private var pebbleMoveStep = 0
+    private var pebbleToggleStep = 0  // Acceptable values (depends on context): {0, 1, 2, 3, 4}
 
     private var withTile = carriesTile
     private var hasMoved = false
@@ -65,10 +74,11 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.Backtrack -> backtrack()
             Phase.BacktrackFurther -> backtrackFurther()
             Phase.ReturnWithResult -> returnWithResult()
+            Phase.MoveEmulatedPebbles -> moveEmulatedPebbles()
             Phase.PlaceEmulatedPebble -> placeEmulatedPebble()
             Phase.LiftEmulatedPebble -> liftEmulatedPebble()
         }
-        println("$numEmulatedPebbles  $pebbleStep  $pebbleNbr")
+        println("p=$phase  d=$pebbleMoveDist  m=$pebbleMoveStep  t=$pebbleToggleStep  h=$heightSign  n=$numEmulatedPebbles  e=$enterLabel  del=$delta")
     }
 
     override fun getColor(): Color {
@@ -76,7 +86,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.TraverseColumn -> Color.ORANGE
             Phase.ReturnSouth -> Color.TEAL
             Phase.TraverseBoundary -> Color.BROWN
-            Phase.DetectUniquePoint, Phase.PlaceEmulatedPebble, Phase.LiftEmulatedPebble -> Color.PINK
+            Phase.DetectUniquePoint, Phase.PlaceEmulatedPebble, Phase.LiftEmulatedPebble, Phase.MoveEmulatedPebbles
+                -> Color.PINK
             Phase.FindFirstCandidate -> Color.SCARLET
             Phase.FindLoop -> Color.YELLOW
             Phase.Backtrack, Phase.BacktrackFurther -> Color.BLUE
@@ -158,8 +169,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         if (numEmulatedPebbles == 2) {
-            pebbleStep = 0
-            prePebblePhase = Phase.DetectUniquePoint
+            pebbleToggleStep = 0
+            prePebbleTogglePhase = Phase.DetectUniquePoint
             phase = Phase.PlaceEmulatedPebble
             return
         }
@@ -185,7 +196,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         // Move around the boundary by RHR
-        moveBoundary(lhr = false)
+        moveBoundary(lhr = false, updateHeight = true, currentPhase = Phase.FindFirstCandidate)
     }
 
     private fun findLoop() {
@@ -201,7 +212,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         // Move around the boundary by RHR
-        moveBoundary(lhr = false)
+        moveBoundary(lhr = false, updateHeight = true, currentPhase = Phase.FindLoop)
     }
 
     private fun backtrack() {
@@ -212,49 +223,163 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         // Move around the boundary by LHR
-        moveBoundary(lhr = true)
+        moveBoundary(lhr = true, updateHeight = true, currentPhase = Phase.Backtrack)
     }
 
     private fun backtrackFurther() {
         if (hasMoved && heightSign <= 0 && enterLabel == 5 && delta == 0) {
             result = false
             hasResult = true
-            pebbleStep = 0
-            prePebblePhase = preDetectionPhase
+            pebbleToggleStep = 0
+            prePebbleTogglePhase = preDetectionPhase
             phase = Phase.LiftEmulatedPebble
             return
         }
 
         // Move around the boundary by LHR
-        moveBoundary(lhr = true)
+        moveBoundary(lhr = true, updateHeight = true, currentPhase = Phase.BacktrackFurther)
     }
 
     private fun returnWithResult() {
-        if (hasMoved && heightSign <= 0) {
+        if (hasMoved && heightSign == 0) {
             hasResult = true
-            pebbleStep = 0
-            prePebblePhase = preDetectionPhase
+            pebbleToggleStep = 0
+            prePebbleTogglePhase = preDetectionPhase
             phase = Phase.LiftEmulatedPebble
             return
         }
 
         // Move around the boundary by LHR
-        moveBoundary(lhr = true)
+        moveBoundary(lhr = true, updateHeight = true, currentPhase = Phase.ReturnWithResult)
+    }
+
+    private fun moveEmulatedPebbles() {
+        when (pebbleMoveStep) {
+            0 -> {
+                pebbleMoveRHR = prePebbleMovePhase in arrayOf(Phase.FindFirstCandidate, Phase.FindLoop)
+                if (pebbleMoveRHR) {
+                    when ((enterLabel + 3).mod(6)) {  // determine how far pebble needs to be moved in RHR direction
+                        0 -> pebbleMoveDist = -1
+                        1, 5 -> pebbleMoveDist = 0
+                        2, 4 -> pebbleMoveDist = 2
+                        3 -> pebbleMoveDist = 3
+                    }
+                } else {
+                    when ((enterLabel + 3).mod(6)) {  // determine how far pebble needs to be moved in RHR direction
+                        0 -> pebbleMoveDist = -1
+                        1, 5 -> pebbleMoveDist = 0
+                        2, 4 -> pebbleMoveDist = 2
+                        3 -> pebbleMoveDist = 3
+                    }
+                }
+
+                if (isOnEmulatedPebble()) {
+                    heightSign = 0
+                    pebbleMoveStep = 3
+                    return
+                }
+                if (heightSign == 0) {
+                    heightSign = if (pebbleMoveDist <= 0) 1 else -1
+                }
+
+                if (pebbleMoveDist == 0) {
+                    enterLabel = preEnterLabel
+                    phase = prePebbleMovePhase
+                } else {
+                    pebbleToggleStep = 0
+                    prePebbleTogglePhase = Phase.MoveEmulatedPebbles
+                    phase = Phase.PlaceEmulatedPebble
+                    pebbleMoveStep++
+                }
+            }
+
+            1 -> {
+                moveBoundary(lhr = pebbleMoveRHR)
+                if (isOnEmulatedPebble()) {
+                    pebbleMoveStep++
+                }
+            }
+
+            2 -> {
+                pebbleToggleStep = 0
+                prePebbleTogglePhase = Phase.MoveEmulatedPebbles
+                phase = Phase.LiftEmulatedPebble
+                pebbleMoveStep++
+            }
+
+            3 -> {
+                if (isOnEmulatedPebble()) {
+                    heightSign = - heightSign
+                    pebbleMoveDist = - pebbleMoveDist
+                }
+                if (pebbleMoveDist < 0) {
+                    moveBoundary(lhr = pebbleMoveRHR)
+                    pebbleMoveDist++
+                } else if (pebbleMoveDist > 0) {
+                    moveBoundary(lhr = !pebbleMoveRHR)
+                    pebbleMoveDist--
+                }
+                if (pebbleMoveDist == 0) {
+                    pebbleMoveStep++
+                }
+            }
+
+            4 -> {
+                if (isOnEmulatedPebble()) {
+                    heightSign = 0
+                    phase = prePebbleMovePhase
+                } else {
+                    pebbleToggleStep = 0
+                    prePebbleTogglePhase = Phase.MoveEmulatedPebbles
+                    phase = Phase.PlaceEmulatedPebble
+                }
+                pebbleMoveStep++
+            }
+
+            5 -> {
+                moveBoundary(lhr = !pebbleMoveRHR)
+                pebbleMoveStep++
+            }
+
+            6 -> {
+                if (isOnEmulatedPebble()) {
+                    pebbleToggleStep = 0
+                    enterLabel = preEnterLabel
+                    prePebbleTogglePhase = prePebbleMovePhase
+                    phase = Phase.LiftEmulatedPebble
+                } else {
+                    moveBoundary(lhr = !pebbleMoveRHR)
+                }
+            }
+        }
     }
 
     private fun placeEmulatedPebble() {
-        when (pebbleStep) {
+        when (pebbleToggleStep) {
             0 -> {
-                val pebbleNbrCandidate = labels.filter {
-                        label -> labelIsTarget(label) && !hasTileAtLabel(label)
-                }.firstOrNull()
+                val pebbleNbrCandidate = labels.firstOrNull { label ->
+                    labelIsTarget(label) && !hasTileAtLabel(label) && canMoveToLabel(label)
+                }
                 if (pebbleNbrCandidate != null) {
                     pebbleNbr = pebbleNbrCandidate
                     numEmulatedPebbles--
-                    phase = prePebblePhase
+                    phase = prePebbleTogglePhase
+                    tileBelow()?.setColor(Color.RED)
                 } else if (withTile) {
-                    pebbleMoveDir = labels.first { label -> !labelIsTarget(label) }
-                    moveToLabel(pebbleMoveDir)
+                    val tmp = labels.firstOrNull { label ->
+                        !labelIsTarget(label) && !hasTileAtLabel(label)
+                            && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
+                    }
+                    if (tmp == null) {
+                        pebbleToggleDir = labels.first { label ->
+                            !labelIsTarget(label)
+                                && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
+                        }
+                        pebbleToggleStep = 19
+                    } else {
+                        pebbleToggleDir = tmp!!
+                    }
+                    moveToLabel(pebbleToggleDir)
                 } else {
                     liftTile()
                 }
@@ -262,18 +387,42 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
             1 -> {
                 if (withTile) {
-                    placeTile()
+                    if (labels.filter { label -> !labelIsTarget(label) }.isEmpty()) {
+                        moveToLabel((pebbleToggleDir + 3).mod(6))
+                        result = true
+                        hasResult = true
+                        phase = preDetectionPhase
+                    } else {
+                        placeTile()
+                    }
                 } else {
-                    pebbleMoveDir = labels.first { label -> !labelIsTarget(label) }
-                    moveToLabel(pebbleMoveDir)
+                    val tmp = labels.firstOrNull { label ->
+                        !labelIsTarget(label) && !hasTileAtLabel(label)
+                            && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
+                    }
+                    if (tmp == null) {
+                        pebbleToggleDir = labels.first { label ->
+                            !labelIsTarget(label)
+                                && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
+                        }
+                        pebbleToggleStep = 19
+                    } else {
+                        pebbleToggleDir = tmp!!
+                    }
+                    moveToLabel(pebbleToggleDir)
                 }
             }
 
             2 -> {
                 if (withTile) {
-                    moveToLabel((pebbleMoveDir + 3).mod(6))
+                    moveToLabel((pebbleToggleDir + 3).mod(6))
                 } else {
-                    placeTile()
+                    if (labels.filter { label -> !labelIsTarget(label) }.isEmpty()) {
+                        moveToLabel((pebbleToggleDir + 3).mod(6))
+                        pebbleToggleStep = 9
+                    } else {
+                        placeTile()
+                    }
                 }
             }
 
@@ -281,75 +430,169 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 if (withTile) {
                     liftTile()
                 } else {
-                    moveToLabel((pebbleMoveDir + 3).mod(6))
+                    moveToLabel((pebbleToggleDir + 3).mod(6))
                 }
                 numEmulatedPebbles--
-                phase = prePebblePhase
+                phase = prePebbleTogglePhase
             }
 
-            else -> throw Exception("Step $pebbleStep invalid in phase $phase")
+            10 -> {
+                placeTile()
+                result = true
+                hasResult = true
+                phase = preDetectionPhase
+            }
+
+            20 -> {
+                pebbleOverhangNbr = labels.first { label ->
+                    !labelIsTarget(label)
+                        && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
+                }
+                moveToLabel(pebbleOverhangNbr)
+            }
+
+            21 -> {
+                placeTile()
+            }
+
+            22 -> {
+                moveToLabel((pebbleOverhangNbr + 3).mod(6))
+                pebbleToggleStep = if (withTile) 1 else 2
+            }
+
+            else -> throw Exception("Step $pebbleToggleStep invalid in phase $phase")
         }
 
-        pebbleStep++
+        pebbleToggleStep++
     }
 
     private fun liftEmulatedPebble() {
-        when (pebbleStep) {
+        when (pebbleToggleStep) {
             0 -> {
                 if (isOnTile() && pebbleNbr >= 0 && labelIsTarget(pebbleNbr) && !hasTileAtLabel(pebbleNbr)) {
                     pebbleNbr = -1
                     numEmulatedPebbles++
-                    phase = prePebblePhase
+                    phase = prePebbleTogglePhase
                 } else if (withTile) {
                     placeTile()
                 } else {
-                    pebbleMoveDir = labels.first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
-                    moveToLabel(pebbleMoveDir)
+                    pebbleToggleDir = labels.first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+                    moveToLabel(pebbleToggleDir)
                 }
             }
 
             1 -> {
                 if (withTile) {
-                    pebbleMoveDir = labels.first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
-                    moveToLabel(pebbleMoveDir)
+                    pebbleToggleDir = labels.first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+                    moveToLabel(pebbleToggleDir)
                 } else {
-                    liftTile()
+                    if (
+                        pebbleOverhangNbr >= 0 && !labelIsTarget(pebbleOverhangNbr) && hasTileAtLabel(pebbleOverhangNbr)
+                    ) {
+                        moveToLabel(pebbleOverhangNbr)
+                        pebbleToggleStep = 9
+                    } else {
+                        liftTile()
+                    }
                 }
             }
 
             2 -> {
                 if (withTile) {
-                    liftTile()
+                    if (
+                        pebbleOverhangNbr >= 0 && !labelIsTarget(pebbleOverhangNbr) && hasTileAtLabel(pebbleOverhangNbr)
+                    ) {
+                        moveToLabel(pebbleOverhangNbr)
+                        pebbleToggleStep = 9
+                    } else {
+                        liftTile()
+                    }
                 } else {
-                    moveToLabel((pebbleMoveDir + 3).mod(6))
+                    moveToLabel((pebbleToggleDir + 3).mod(6))
                 }
             }
 
             3 -> {
                 if (withTile) {
-                    moveToLabel((pebbleMoveDir + 3).mod(6))
+                    moveToLabel((pebbleToggleDir + 3).mod(6))
                 } else {
                     placeTile()
                 }
                 if (pebbleNbr < 0) {
                     numEmulatedPebbles++
-                    phase = prePebblePhase
+                    phase = prePebbleTogglePhase
                 }
             }
 
             4 -> {
                 moveToLabel((pebbleNbr + 3).mod(6))
-                pebbleStep = -1
-                phase = Phase.PlaceEmulatedPebble
             }
 
-            else -> throw Exception("Step $pebbleStep invalid in phase $phase")
+            5 -> {
+                if (withTile) {
+                    pebbleToggleDir = labels.first {
+                        label -> hasTileAtLabel(label) && !labelIsTarget(label)
+                    }
+                    moveToLabel(pebbleToggleDir)
+                } else {
+                    liftTile()
+                }
+            }
+
+            6 -> {
+                if (withTile) {
+                    placeTile()
+                } else {
+                    pebbleToggleDir = labels.first { label ->
+                        !hasTileAtLabel(label) && !labelIsTarget(label) && canMoveToLabel(label)
+                    }
+                    moveToLabel(pebbleToggleDir)
+                }
+            }
+
+            7 -> {
+                if (withTile) {
+                    moveToLabel((pebbleToggleDir + 3).mod(6))
+                } else {
+                    placeTile()
+                }
+            }
+
+            8 -> {
+                if (withTile) {
+                    liftTile()
+                } else {
+                    moveToLabel((pebbleToggleDir + 3).mod(6))
+                }
+            }
+
+            9 -> {
+                moveToLabel(pebbleNbr)
+                pebbleNbr = -1
+                numEmulatedPebbles++
+                phase = prePebbleTogglePhase
+            }
+
+            10 -> {
+                liftTile()
+            }
+
+            11 -> {
+                moveToLabel(((pebbleOverhangNbr) + 3).mod(6))
+                pebbleOverhangNbr = -1
+                pebbleToggleStep = if (withTile) 2 else 1
+            }
+
+            else -> throw Exception("Step $pebbleToggleStep invalid in phase $phase")
         }
 
-        pebbleStep++
+        pebbleToggleStep++
     }
 
-    private fun moveBoundary(lhr: Boolean) {
+    private fun isOnEmulatedPebble(): Boolean =
+        !isOnTile() || (pebbleNbr >= 0 && labelIsTarget(pebbleNbr) && !hasTileAtLabel(pebbleNbr))
+
+    private fun moveBoundary(lhr: Boolean, updateHeight: Boolean = false, currentPhase: Phase = Phase.FindLoop) {
         val moveLabel = if (lhr && prevLhr) {
             (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
         } else if (!lhr && !prevLhr) {
@@ -357,34 +600,36 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         } else {
             enterLabel
         }
-        moveAndUpdate(moveLabel)
+        moveAndUpdate(moveLabel, updateDelta = updateHeight)
         prevLhr = lhr
+
+        if (updateHeight) {
+            preEnterLabel = enterLabel
+            prePebbleMovePhase = currentPhase
+            pebbleMoveStep = 0
+            phase = Phase.MoveEmulatedPebbles
+        }
     }
 
-    private fun moveAndUpdate(label: Int) {
+    private fun moveAndUpdate(label: Int, updateDelta: Boolean = true) {
         val turnDegree = (label - (enterLabel + 3)).mod(6)
         // Update turn-delta
         if (phase in arrayOf(Phase.FindFirstCandidate, Phase.FindLoop)) {  // RHR traversal
-            if (turnDegree in 3..5) {
-                delta = (delta - (6 - turnDegree)).mod(5)
-            } else if (turnDegree == 1) {
-                delta = (delta + 1).mod(5)
+            if (updateDelta) {
+                if (turnDegree in 3..5) {
+                    delta = (delta - (6 - turnDegree)).mod(5)
+                } else if (turnDegree == 1) {
+                    delta = (delta + 1).mod(5)
+                }
             }
         } else {  // LHR traversal
-            if (turnDegree in 1..3) {
-                delta = (delta - turnDegree).mod(5)
-            } else if (turnDegree == 5) {
-                delta = (delta + 1).mod(5)
+            if (updateDelta) {
+                if (turnDegree in 1..3) {
+                    delta = (delta - turnDegree).mod(5)
+                } else if (turnDegree == 5) {
+                    delta = (delta + 1).mod(5)
+                }
             }
-        }
-
-        // Update height
-        heightSign += when (label) {
-            0 -> 2  // north
-            1, 5 -> 1  // north-east, north-west
-            2, 4 -> -1  // south-east, south-west
-            3 -> -2  // south
-            else -> 0  // impossible direction
         }
 
         // Move and update enter label
