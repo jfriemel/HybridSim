@@ -95,6 +95,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.PlaceEmulatedPebble -> placeEmulatedPebble()
             Phase.LiftEmulatedPebble -> liftEmulatedPebble()
         }
+        println("p=$phase  d=$pebbleMoveDist  m=$pebbleMoveStep  t=$pebbleToggleStep  h=$heightSign  n=$numEmulatedPebbles  e=$enterLabel  del=$delta  o=$pebbleOverhangNbr  dirs=[$pebbleADir,$pebbleBDir]")
     }
 
     override fun getColor(): Color {
@@ -244,7 +245,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun backtrackFurther() {
-        if (hasMoved && heightSign <= 0 && enterLabel == 5 && delta == 0) {
+        if (hasMoved && heightSign == 0 && enterLabel == 5 && delta == 0) {
             result = false
             hasResult = true
             pebbleToggleStep = 0
@@ -292,7 +293,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     return
                 }
                 if (heightSign == 0) {
-                    heightSign = if (pebbleMoveDist <= 0) 1 else -1
+                    heightSign = 1
                 }
 
                 if (pebbleMoveDist == 0) {
