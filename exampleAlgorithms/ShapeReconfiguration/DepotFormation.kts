@@ -5,15 +5,22 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
+    // Form line
     MoveSouth,
     FindTile,
     MoveTile,
+
+    // Move line to southern tip of target shape
+    MoveLineNorthWest,
+    MoveLineSouth,
+
+    // Finished
     Finished,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
-    orientation = orientation,
+    orientation = 0,//orientation,
     carriesTile = false,
     numPebbles = 0,
     maxPebbles = 0,
@@ -21,12 +28,15 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private var phase = Phase.MoveSouth
 
     private var tilesToSides = false
+    private var containsTarget = false
 
     override fun activate() {
         when (phase) {
             Phase.MoveSouth -> moveSouth()
             Phase.FindTile -> findTile()
             Phase.MoveTile -> moveTile()
+            Phase.MoveLineNorthWest -> moveLineNorthWest()
+            Phase.MoveLineSouth -> moveLineSouth()
             Phase.Finished -> return
         }
     }
@@ -38,6 +48,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.MoveSouth -> Color.ORANGE
             Phase.FindTile -> Color.TEAL
             Phase.MoveTile -> Color.SKY
+            Phase.MoveLineNorthWest -> Color.YELLOW
+            Phase.MoveLineSouth -> Color.SCARLET
             Phase.Finished -> Color.BLACK
         }
     }
@@ -53,21 +65,19 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     private fun findTile() {
         tilesToSides = tilesToSides || intArrayOf(1, 2, 4, 5).any { label -> hasTileAtLabel(label) }
+        containsTarget = containsTarget || isOnTarget()
         intArrayOf(5, 4, 0).firstOrNull() { label -> hasTileAtLabel(label) }?.let { label ->
-            // Note: In the tile shape formation paper mentioned above, the precedence of movement directions in the
-            // tile searching phase is given as N, NW, SW (0, 5, 4) instead of NW, SW, N (5, 4, 0).
-            // This is a mistake. In the proof of Theorem 3, it becomes clear that the authors mean NW, SW, N, i.e.,
-            // they want the robot to move as far west as possible before moving north.
             moveToLabel(label)
             return
         }
 
         if (!tilesToSides) {
-            phase = Phase.Finished
+            phase = if (containsTarget) Phase.MoveLineSouth else Phase.MoveLineNorthWest
             return
         }
 
         tilesToSides = false
+        containsTarget = false
         liftTile()
         moveToLabel(2)
         phase = Phase.MoveTile
@@ -80,5 +90,55 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
         moveToLabel(3)
+    }
+
+    private fun moveLineNorthWest() {
+        if (!carriesTile) {
+            if (hasTileAtLabel(1)) {
+                moveToLabel(1)
+            } else if (hasTileAtLabel(3)) {
+                moveToLabel(3)
+            } else {
+                liftTile()
+            }
+            return
+        }
+
+        if (!hasTileAtLabel(1) && !hasTileAtLabel(2) && !hasTileAtLabel(3)) {
+            moveToLabel(5)
+            return
+        }
+
+        containsTarget = containsTarget || isOnTarget()
+        if (isOnTile()) {
+            moveToLabel(0)
+            return
+        }
+        placeTile()
+        if (!hasTileAtLabel(1) && containsTarget) {
+            phase = Phase.MoveLineSouth
+        }
+    }
+
+    private fun moveLineSouth() {
+        if (!carriesTile) {
+            if (hasTileAtLabel(0)) {
+                moveToLabel(0)
+            } else {
+                liftTile()
+                containsTarget = false
+            }
+            return
+        }
+        if (isOnTile() || hasTileAtLabel(3)) {
+            moveToLabel(3)
+            containsTarget = containsTarget || isOnTarget()
+            return
+        }
+        placeTile()
+        if (!containsTarget) {
+            phase = Phase.Finished
+        }
+        containsTarget = false
     }
 }
