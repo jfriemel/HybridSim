@@ -15,6 +15,7 @@ private val tileNode = Node(-5, 4)
 private val targetTileNode = Node(8, -5)
 private val targetNode = Node(-22, -6)
 private val robotNode = Node(13, 27)
+private val tileRobotNode = Node(69, 46)
 
 /** Implementation of [Robot] for testing [Robot.triggerActivate]. */
 private class RobotTestImpl(node: Node, orientation: Int) : Robot(node, orientation) {
@@ -42,6 +43,10 @@ class TestRobot {
 
         // Place a robot with a tile at (13, 27)
         Configuration.addRobot(Robot(robotNode).apply { carriesTile = true })
+
+        // Place a robot on a tile at (69, 46)
+        Configuration.addTile(Tile(tileRobotNode))
+        Configuration.addRobot(Robot(tileRobotNode))
 
         // Place three boundary tiles around (256, 256)
         Configuration.addTile(Tile(Node(256, 255)))
@@ -178,6 +183,50 @@ class TestRobot {
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertTrue(robot.hasRobotAtLabel(label))
         Assertions.assertEquals(Configuration.robots[robotNode], robot.robotAtLabel(label))
+        Assertions.assertTrue(robot.hasRobotNbr())
+        Assertions.assertEquals(label, robot.robotNbrLabel())
+        Assertions.assertEquals(Configuration.robots[robotNode], robot.robotNbr())
+    }
+
+    @ParameterizedTest(name = "neighbor label {2}")
+    @CsvSource(
+        "13, 28, 0",
+        "12, 27, 1",
+        "12, 26, 2",
+        "13, 26, 3",
+        "14, 26, 4",
+        "14, 27, 5",
+    )
+    fun `can interact with hanging robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+        val robot = Robot(Node(startNodeX, startNodeY), 0)
+        Assertions.assertTrue(robot.hasHangingRobotNbr())
+        Assertions.assertEquals(label, robot.hangingRobotNbrLabel())
+        Assertions.assertEquals(Configuration.robots[robotNode], robot.hangingRobotNbr())
+    }
+
+    @ParameterizedTest(name = "neighbor label {2}")
+    @CsvSource(
+        "69, 47, 0",
+        "68, 46, 1",
+        "68, 45, 2",
+        "69, 45, 3",
+        "70, 45, 4",
+        "70, 46, 5",
+    )
+    fun `can distinguish non-hanging robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+        val robot = Robot(Node(startNodeX, startNodeY), 0)
+
+        // Checks for robot neighbor
+        Assertions.assertTrue(robot.hasRobotAtLabel(label))
+        Assertions.assertEquals(Configuration.robots[tileRobotNode], robot.robotAtLabel(label))
+        Assertions.assertTrue(robot.hasRobotNbr())
+        Assertions.assertEquals(label, robot.robotNbrLabel())
+        Assertions.assertEquals(Configuration.robots[tileRobotNode], robot.robotNbr())
+
+        // Checks for hanging robot neighbor
+        Assertions.assertFalse(robot.hasHangingRobotNbr())
+        Assertions.assertNull(robot.hangingRobotNbrLabel())
+        Assertions.assertNull(robot.hangingRobotNbr())
     }
 
     @Test
@@ -187,6 +236,12 @@ class TestRobot {
             Assertions.assertFalse(robot.hasTileAtLabel(it))
             Assertions.assertFalse(robot.hasRobotAtLabel(it))
         }
+        Assertions.assertFalse(robot.hasTileNbr())
+        Assertions.assertNull(robot.tileNbrLabel())
+        Assertions.assertNull(robot.tileNbr())
+        Assertions.assertFalse(robot.hasRobotNbr())
+        Assertions.assertNull(robot.robotNbrLabel())
+        Assertions.assertNull(robot.robotNbr())
     }
 
     @ParameterizedTest(name = "movement label {2}")
@@ -217,6 +272,10 @@ class TestRobot {
     fun `can see tile neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertTrue(robot.hasTileAtLabel(label))
+        Assertions.assertEquals(Configuration.tiles[tileNode], robot.tileAtLabel(label))
+        Assertions.assertTrue(robot.hasTileNbr())
+        Assertions.assertEquals(label, robot.tileNbrLabel())
+        Assertions.assertEquals(Configuration.tiles[tileNode], robot.tileNbr())
     }
 
     @Test

@@ -5,12 +5,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.Scheduler
 import com.github.jfriemel.hybridsim.ui.InputHandler
 import com.github.jfriemel.hybridsim.ui.Menu
 import com.github.jfriemel.hybridsim.ui.SimScreen
+import com.kotcrab.vis.ui.VisUI
 import kotlinx.coroutines.launch
 import ktx.app.KtxGame
 import ktx.app.KtxScreen
@@ -25,7 +25,8 @@ class Main : KtxGame<KtxScreen>() {
         val batch: Batch = SpriteBatch()
         Gdx.app.logLevel = LOG_DEBUG
         logger.debug { "HybridSim started" }
-        Scene2DSkin.defaultSkin = Skin(Gdx.files.internal("ui/uiskin.json"))
+        VisUI.load()
+        Scene2DSkin.defaultSkin = VisUI.getSkin()
         val menu = Menu(batch)
         val screen = SimScreen(batch, menu)
         addScreen(screen)

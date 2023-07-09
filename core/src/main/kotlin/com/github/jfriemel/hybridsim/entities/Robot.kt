@@ -134,11 +134,40 @@ open class Robot(
     /** @return The [Tile] at the robot's given [label] or null if there is no such tile. */
     fun tileAtLabel(label: Int): Tile? = Configuration.tiles[nodeAtLabel(label)]
 
+    /** @return Label of a [Tile] neighbor or null if there is no tile neighbor. */
+    fun tileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) }
+
+    /** Checks whether the robot has a neighboring [Tile] at any label. */
+    fun hasTileNbr(): Boolean = tileNbrLabel() != null
+
+    /** @return A [Tile] neighbor or null if there is no tile neighbor. */
+    fun tileNbr(): Tile? = tileNbrLabel()?.let { label -> tileAtLabel(label) }
+
     /** Checks whether the robot has a [Robot] neighbor at the given [label]. */
     fun hasRobotAtLabel(label: Int): Boolean = nodeAtLabel(label) in Configuration.robots
 
     /** @return The [Robot] neighbor at the given [label] of null if there is no such neighbor. */
     fun robotAtLabel(label: Int): Robot? = Configuration.robots[nodeAtLabel(label)]
+
+    /** @return Label of a [Robot] neighbor or null if there is no robot neighbor. */
+    fun robotNbrLabel(): Int? = labels.firstOrNull { label -> hasRobotAtLabel(label) }
+
+    /** Checks whether the robot is neighbor to another [Robot]. */
+    fun hasRobotNbr(): Boolean = labels.any { label -> hasRobotAtLabel(label) }
+
+    /** @return A [Robot] neighbor or null if there is no robot neighbor. */
+    fun robotNbr(): Robot? = robotNbrLabel()?.let { label -> robotAtLabel(label) }
+
+    /** @return Label of a [Robot] neighbor that is not on a tile (i.e., "hanging"). */
+    fun hangingRobotNbrLabel(): Int? = labels.firstOrNull { label ->
+        hasRobotAtLabel(label) && !robotAtLabel(label)!!.isOnTile()
+    }
+
+    /** Checks whether the robot has a [Robot] neighbor that is not on a tile (i.e., "hanging"). */
+    fun hasHangingRobotNbr(): Boolean = hangingRobotNbrLabel() != null
+
+    /** @return [Robot] neighbor that is not on a tile (i.e., "hanging"). */
+    fun hangingRobotNbr(): Robot? = hangingRobotNbrLabel()?.let { label -> robotAtLabel(label) }
 
     /** Checks whether the robot is on a target [Node]. */
     fun isOnTarget(): Boolean = node in Configuration.targetNodes

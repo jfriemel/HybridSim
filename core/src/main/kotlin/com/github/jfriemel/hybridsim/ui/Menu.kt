@@ -9,17 +9,18 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.badlogic.gdx.scenes.scene2d.ui.Slider
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.Scheduler
+import com.kotcrab.vis.ui.widget.VisImage
+import com.kotcrab.vis.ui.widget.VisSlider
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.log.logger
-import ktx.scene2d.*
+import ktx.scene2d.actors
+import ktx.scene2d.vis.*
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.JFrame
@@ -50,16 +51,16 @@ class Menu(batch: Batch) {
     private var active = true
 
     // All menu buttons
-    private var buttonLoadConfig: KTextButton
-    private var buttonSaveConfig: KTextButton
-    private var buttonLoadAlgorithm: KTextButton
-    private var buttonPutTiles: KTextButton
-    private var buttonPutRobots: KTextButton
-    private var buttonSelectTarget: KTextButton
-    private var buttonToggleScheduler: KTextButton
-    private var buttonUndo: KTextButton
-    private var buttonRedo: KTextButton
-    private var sliderScheduler: Slider
+    private var buttonLoadConfig: KVisTextButton
+    private var buttonSaveConfig: KVisTextButton
+    private var buttonLoadAlgorithm: KVisTextButton
+    private var buttonPutTiles: KVisTextButton
+    private var buttonPutRobots: KVisTextButton
+    private var buttonSelectTarget: KVisTextButton
+    private var buttonToggleScheduler: KVisTextButton
+    private var buttonUndo: KVisTextButton
+    private var buttonRedo: KVisTextButton
+    private var sliderScheduler: VisSlider
 
     // Textures for the scheduler and undo/redo buttons
     private val schedulerOnDrawable =
@@ -75,9 +76,9 @@ class Menu(batch: Batch) {
     }
     private var undoDrawable = TextureRegionDrawable(undoTexture)
     private var redoDrawable = TextureRegionDrawable(undoTexture).apply { region.flip(true, false) }
-    private var schedulerButtonImage: Image
-    private var undoButtonImage: Image
-    private var redoButtonImage: Image
+    private var schedulerButtonImage: VisImage
+    private var undoButtonImage: VisImage
+    private var redoButtonImage: VisImage
 
     // File extension filters for the files used by the simulator
     private val jsonFilter = FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
@@ -85,40 +86,40 @@ class Menu(batch: Batch) {
 
     val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
         actors {
-            table {
+            visTable {
                 setFillParent(true)
                 defaults().pad(2f).colspan(3).width(BUTTON_WIDTH)
-                label("Menu (M)") {
+                visLabel("Menu (M)") {
                     color = Color.BLACK
                     setAlignment(Align.center)
                 }
                 row()
-                buttonLoadConfig = textButton("Load Configuration (L)")
+                buttonLoadConfig = visTextButton("Load Configuration (L)")
                 row()
-                buttonSaveConfig = textButton("Save Configuration (S)")
+                buttonSaveConfig = visTextButton("Save Configuration (S)")
                 row()
-                buttonLoadAlgorithm = textButton("Load Algorithm (A)")
+                buttonLoadAlgorithm = visTextButton("Load Algorithm (A)")
                 row()
-                buttonPutTiles = textButton("Put Tiles (T)")
+                buttonPutTiles = visTextButton("Put Tiles (T)")
                 row()
-                buttonPutRobots = textButton("Put Robots (R)")
+                buttonPutRobots = visTextButton("Put Robots (R)")
                 row()
-                buttonSelectTarget = textButton("Select Target Nodes (Z)")
+                buttonSelectTarget = visTextButton("Select Target Nodes (Z)")
                 row()
-                buttonUndo = textButton("") {
-                    undoButtonImage = image(undoDrawable)
+                buttonUndo = visTextButton("") {
+                    undoButtonImage = visImage(undoDrawable)
                     cell(colspan = 1, width = undoButtonImage.width)
                 }
-                buttonToggleScheduler = textButton("") {
-                    schedulerButtonImage = image(schedulerOnDrawable)
+                buttonToggleScheduler = visTextButton("") {
+                    schedulerButtonImage = visImage(schedulerOnDrawable)
                     cell(colspan = 1, width = schedulerButtonImage.width)
                 }
-                buttonRedo = textButton("") {
-                    redoButtonImage = image(redoDrawable)
+                buttonRedo = visTextButton("") {
+                    redoButtonImage = visImage(redoDrawable)
                     cell(colspan = 1, width = redoButtonImage.width)
                 }
                 row()
-                sliderScheduler = slider(0f, 44f, 0.1f)
+                sliderScheduler = visSlider(0f, 44f, 0.1f)
             }
         }
     }
