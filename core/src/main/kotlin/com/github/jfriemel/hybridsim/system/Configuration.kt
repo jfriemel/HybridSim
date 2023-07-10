@@ -15,6 +15,12 @@ private data class TimeState(
     val targetNodes: MutableSet<Node>,
 )
 
+data class ConfigurationDescriptor(
+    val tileNodes: MutableSet<Node>,
+    val robotNodes: MutableSet<Node>,
+    val targetNodes: MutableSet<Node>,
+)
+
 private const val MAX_UNDO_STATES = 1000
 
 object Configuration {
@@ -37,7 +43,11 @@ object Configuration {
      * Does not generate target nodes if [numOverhang] < 0.
      */
     fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1) {
-        generator.generate(numTiles, numRobots, numOverhang)
+        val descriptor = generator.generate(numTiles, numRobots, numOverhang)
+        clear()
+        descriptor.tileNodes.forEach { tileNode -> addTile(Tile(tileNode)) }
+        descriptor.robotNodes.forEach { robotNode -> addRobot(AlgorithmLoader.getAlgorithmRobot(Robot(robotNode))) }
+        targetNodes = descriptor.targetNodes
     }
 
     /** Add a [tile] to the configuration at the [tile]'s node. */

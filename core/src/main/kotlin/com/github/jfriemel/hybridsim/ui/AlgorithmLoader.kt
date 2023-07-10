@@ -1,9 +1,9 @@
 package com.github.jfriemel.hybridsim.ui
 
-import com.github.jfriemel.hybridsim.system.Configuration
-import com.github.jfriemel.hybridsim.system.Scheduler
 import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
+import com.github.jfriemel.hybridsim.system.Configuration
+import com.github.jfriemel.hybridsim.system.Scheduler
 import java.io.File
 import javax.script.Compilable
 import javax.script.Invocable
@@ -22,7 +22,7 @@ object AlgorithmLoader {
      * Important: The script needs to have a getRobot() function of the following form:
      *     fun getRobot(node: Node, orientation: Int): Robot
      *
-     * If this function is absent, or there is a syntax error in the script or the script could not be loaded for any
+     * If this function is absent, or there is a syntax error in the script, or the script could not be loaded for any
      * other reason, the program crashes.
      */
     fun loadAlgorithm(scriptFile: File? = null, scriptString: String? = null) {
@@ -37,7 +37,9 @@ object AlgorithmLoader {
 
         // Compile the script
         val engine = ScriptEngineManager().getEngineByExtension("kts") as Compilable
-        engine.compile("import com.github.jfriemel.hybridsim.entities.*; import com.badlogic.gdx.graphics.Color").eval()
+        engine.compile(
+            "import com.github.jfriemel.hybridsim.entities.*; import com.badlogic.gdx.graphics.Color"
+        ).eval()
         engine.compile(script).eval()
 
         // Replace robots in the configuration with robots from the loaded script

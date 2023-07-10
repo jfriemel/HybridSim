@@ -13,13 +13,17 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.Configuration
+import com.github.jfriemel.hybridsim.system.GeneratorLoader
 import com.github.jfriemel.hybridsim.system.Scheduler
 import com.github.tommyettinger.textra.KnownFonts
 import com.github.tommyettinger.textra.TextraLabel
+import com.kotcrab.vis.ui.widget.VisCheckBox
 import com.kotcrab.vis.ui.widget.VisImage
 import com.kotcrab.vis.ui.widget.VisSlider
+import com.kotcrab.vis.ui.widget.VisTextField
 import ktx.actors.onChange
 import ktx.actors.onClick
+import ktx.actors.onKeyUp
 import ktx.log.logger
 import ktx.scene2d.actors
 import ktx.scene2d.vis.*
@@ -64,6 +68,12 @@ class Menu(batch: Batch) {
     private var buttonUndo: KVisTextButton
     private var buttonRedo: KVisTextButton
     private var sliderScheduler: VisSlider
+    private var buttonLoadGenerator: KVisTextButton
+    private var textFieldTiles: VisTextField
+    private var textFieldRobots: VisTextField
+    private var checkBoxOverhang: VisCheckBox
+    private var textFieldOverhang: VisTextField
+    private var buttonGenerate: KVisTextButton
 
     // Textures for the scheduler and undo/redo buttons
     private val schedulerOnDrawable =
@@ -86,6 +96,7 @@ class Menu(batch: Batch) {
     // File extension filters for the files used by the simulator
     private val jsonFilter = FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
     private val algoFilter = FileNameExtensionFilter("HybridSim algorithm scripts (.kts)", "kts")
+    private val genFilter = FileNameExtensionFilter("HybridSim configuration generator scripts (.kts)", "kts")
 
     val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
         actors {
@@ -123,6 +134,42 @@ class Menu(batch: Batch) {
                 }
                 row()
                 sliderScheduler = visSlider(0f, 44f, 0.1f)
+                row()
+                buttonLoadGenerator = visTextButton("Load Generator (H)")
+                row()
+                visLabel("# tiles:").apply {
+                    cell(colspan = 1, width = BUTTON_WIDTH / 3, align = Align.left)
+                    color = Color.BLACK
+                }
+                textFieldTiles = visTextField("50").apply {
+                    cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
+                }
+                row()
+                visLabel("# robots:").apply {
+                    cell(colspan = 1, width = BUTTON_WIDTH / 3, align = Align.left)
+                    color = Color.BLACK
+                }
+                textFieldRobots = visTextField("1").apply {
+                    cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
+                }
+                row()
+                visLabel("Generate target shape:").apply {
+                    cell(colspan = 2, width = 0.7f * BUTTON_WIDTH, align = Align.left)
+                    color = Color.BLACK
+                }
+                checkBoxOverhang = visCheckBox("").apply {
+                    cell(colspan = 1, width = 0.1f * BUTTON_WIDTH, align = Align.right)
+                }
+                row()
+                visLabel("# overhang:").apply {
+                    cell(colspan = 1, width = BUTTON_WIDTH / 3, align = Align.left)
+                    color = Color.BLACK
+                }
+                textFieldOverhang = visTextField("15").apply {
+                    cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
+                }
+                row()
+                buttonGenerate = visTextButton("Generate (G)")
             }
         }
     }
@@ -139,8 +186,16 @@ class Menu(batch: Batch) {
         buttonUndo,
         buttonRedo,
         sliderScheduler,
+        buttonLoadGenerator,
+        textFieldTiles,
+        textFieldRobots,
+        checkBoxOverhang,
+        textFieldOverhang,
+        buttonGenerate,
     )
-    private val fileChooserButtons = arrayOf(buttonLoadConfig, buttonSaveConfig, buttonLoadAlgorithm)
+    private val fileChooserButtons = arrayOf(
+        buttonLoadConfig, buttonSaveConfig, buttonLoadAlgorithm, buttonLoadGenerator
+    )
     private val toggleButtons = arrayOf(buttonPutTiles, buttonPutRobots, buttonSelectTarget)
 
     init {
@@ -186,6 +241,26 @@ class Menu(batch: Batch) {
         }
 
         sliderScheduler.value = max(0f, 45f - cbrt(Scheduler.getIntervalTime().toFloat()))
+
+        buttonLoadGenerator.onChange { if (active) loadGenerator() }
+
+        textFieldTiles.onKeyUp {
+            if (text.any { !it.isDigit() }) {
+                clearText()
+            }
+        }
+        textFieldRobots.onKeyUp {
+            if (text.any { !it.isDigit() }) {
+                clearText()
+            }
+        }
+        textFieldOverhang.onKeyUp {
+            if (text.any { !it.isDigit() }) {
+                clearText()
+            }
+        }
+
+        buttonGenerate.onChange { if (active) generateConfiguration() }
     }
 
     /** @return True if the menu is active (i.e., visible). */
@@ -283,6 +358,33 @@ class Menu(batch: Batch) {
             return
         }
         AlgorithmLoader.loadAlgorithm(scriptFile = algorithmFile)
+    }
+
+    /** Opens a file selector window. The user can select a configuration generator file (kts script) to be loaded. */
+    fun loadGenerator() {
+        if (Gdx.graphics.isFullscreen) return
+
+        val generatorFile = getFile(genFilter) ?: return
+        if (!generatorFile.exists()) {
+            logger.error { "Cannot load generator, selected file $generatorFile does not exist" }
+            return
+        }
+        GeneratorLoader.loadGenerator(scriptFile = generatorFile)
+    }
+
+    /** Generates a new configuration. */
+    fun generateConfiguration() {
+        val numTiles = if (textFieldTiles.isEmpty) 0 else textFieldTiles.text.toInt()
+        val numRobots = if (textFieldRobots.isEmpty) 0 else textFieldRobots.text.toInt()
+        val numOverhang = if (textFieldOverhang.isEmpty) 0 else textFieldOverhang.text.toInt()
+        Configuration.generate(numTiles, numRobots, numOverhang)
+
+        if (checkBoxOverhang.isChecked) {
+            Configuration.generate(numTiles, numRobots, numOverhang)
+        } else {
+            Configuration.generate(numTiles, numRobots)
+        }
+        screen?.resetCamera()
     }
 
     /** Toggles whether tiles should be placed by a mouse click. */

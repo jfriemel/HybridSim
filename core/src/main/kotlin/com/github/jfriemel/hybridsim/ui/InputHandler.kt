@@ -99,6 +99,8 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             't', 'T' -> menu.togglePutTiles()
             'r', 'R' -> menu.togglePutRobots()
             'z', 'Z' -> menu.toggleSelectTarget()
+            'h', 'H' -> menu.loadGenerator()
+            'g', 'G' -> menu.generateConfiguration()
             '<', '>' -> Configuration.targetNodes.addAll(Configuration.tiles.keys)  // Sometimes helpful for testing
         }
         return true

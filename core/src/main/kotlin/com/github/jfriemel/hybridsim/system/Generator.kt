@@ -1,82 +1,82 @@
 package com.github.jfriemel.hybridsim.system
 
 import com.github.jfriemel.hybridsim.entities.Node
-import com.github.jfriemel.hybridsim.entities.Robot
-import com.github.jfriemel.hybridsim.entities.Tile
 import kotlin.math.min
 
 open class Generator {
 
-    open fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1) {
-        Configuration.clear()
+    open fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1): ConfigurationDescriptor {
+        val descriptor = ConfigurationDescriptor(mutableSetOf(), mutableSetOf(), mutableSetOf())
 
         if (numTiles <= 0) {
-            return
+            return descriptor
         }
 
         // Tiles
-        Configuration.addTile(Tile(Node.origin))
+        descriptor.tileNodes.add(Node.origin)
         val tileCandidates = Node.origin.neighbors().toMutableSet()
         repeat(numTiles - 1) {
             val nextNode = tileCandidates.random()
-            Configuration.addTile(Tile(nextNode))
+            descriptor.tileNodes.add(nextNode)
             tileCandidates.addAll(
-                nextNode.neighbors().minus(Configuration.tiles.keys)
+                nextNode.neighbors().minus(descriptor.tileNodes)
             )
             tileCandidates.remove(nextNode)
         }
 
         // Robots
-        val robotCandidates = Configuration.tiles.keys.toMutableSet()
+        val robotCandidates = descriptor.tileNodes.toMutableSet()
         repeat(min(numRobots, numTiles)) {
             val nextNode = robotCandidates.random()
-            Configuration.addRobot(Robot(nextNode))
+            descriptor.robotNodes.add(nextNode)
             robotCandidates.remove(nextNode)
         }
 
         if (numOverhang < 0) {
-            return
+            return descriptor
         } else if (numOverhang == 0) {
-            Configuration.tiles.keys.forEach { node -> Configuration.addTarget(node) }
-            return
+            descriptor.targetNodes.addAll(descriptor.tileNodes)
+            return descriptor
         }
 
         // Target tiles
-        val targetTileOrigin = Configuration.tiles.keys.filter { node ->  // Pick node at boundary of tile configuration
-            isAtOuterBoundary(node, numTiles)
+        val targetTileOrigin = descriptor.tileNodes.filter { node ->  // Pick node at boundary of tile configuration
+            isAtOuterBoundary(node, numTiles, descriptor)
         }.random()
-        Configuration.addTarget(targetTileOrigin)
-        val targetTileCandidates = targetTileOrigin.neighbors().intersect(Configuration.tiles.keys).toMutableSet()
+        descriptor.targetNodes.add(targetTileOrigin)
+        val targetTileCandidates = targetTileOrigin.neighbors().intersect(descriptor.tileNodes).toMutableSet()
         repeat(numTiles - min(numOverhang, numTiles - 1) - 1) {
             val nextNode = targetTileCandidates.random()
-            Configuration.addTarget(nextNode)
+            descriptor.targetNodes.add(nextNode)
             targetTileCandidates.addAll(
                 nextNode.neighbors()
-                    .intersect(Configuration.tiles.keys)
-                    .minus(Configuration.targetNodes)
+                    .intersect(descriptor.tileNodes)
+                    .minus(descriptor.targetNodes)
             )
             targetTileCandidates.remove(nextNode)
         }
 
         // Demand nodes
-        val demandCandidates = Configuration.targetNodes
+        val demandCandidates = descriptor.targetNodes
             .flatMap { node -> node.neighbors() }
-            .minus(Configuration.tiles.keys)
+            .minus(descriptor.tileNodes)
             .toMutableSet()
         repeat(min(numOverhang, numTiles - 1)) {
             val nextNode = demandCandidates.random()
-            Configuration.addTarget(nextNode)
+            descriptor.targetNodes.add(nextNode)
             demandCandidates.addAll(
                 nextNode.neighbors()
-                    .minus(Configuration.tiles.keys)
-                    .minus(Configuration.targetNodes)
+                    .minus(descriptor.tileNodes)
+                    .minus(descriptor.targetNodes)
             )
             demandCandidates.remove(nextNode)
         }
+
+        return descriptor
     }
 
-    private fun isAtOuterBoundary(node: Node, numTiles: Int): Boolean {
-        val boundary = node.neighbors().filter { nbr -> nbr !in Configuration.tiles }.toMutableSet()
+    private fun isAtOuterBoundary(node: Node, numTiles: Int, descriptor: ConfigurationDescriptor): Boolean {
+        val boundary = node.neighbors().filter { nbr -> nbr !in descriptor.tileNodes }.toMutableSet()
         if (boundary.isEmpty()) {
             return false
         }
@@ -85,7 +85,7 @@ open class Generator {
         while (boundary.size <= numTiles) {
             toAdd.clear()
             for (bnode in boundary) {
-                toAdd.addAll(bnode.neighbors().filter { nbr -> nbr !in Configuration.tiles })
+                toAdd.addAll(bnode.neighbors().filter { nbr -> nbr !in descriptor.tileNodes })
             }
             val prevSize = boundary.size
             boundary.addAll(toAdd)
