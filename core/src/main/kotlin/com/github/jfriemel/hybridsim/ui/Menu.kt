@@ -14,6 +14,8 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.Scheduler
+import com.github.tommyettinger.textra.KnownFonts
+import com.github.tommyettinger.textra.TextraLabel
 import com.kotcrab.vis.ui.widget.VisImage
 import com.kotcrab.vis.ui.widget.VisSlider
 import ktx.actors.onChange
@@ -33,6 +35,7 @@ import kotlin.math.pow
 private val logger = logger<Menu>()
 
 private const val BUTTON_WIDTH = 190f
+private const val BUTTON_HEIGHT = 30f
 
 private val buttonColorDefault = Color.WHITE
 private val buttonColorToggled = Color.GRAY
@@ -88,11 +91,11 @@ class Menu(batch: Batch) {
         actors {
             visTable {
                 setFillParent(true)
-                defaults().pad(2f).colspan(3).width(BUTTON_WIDTH)
-                visLabel("Menu (M)") {
+                defaults().pad(2f).colspan(3).width(BUTTON_WIDTH).minHeight(BUTTON_HEIGHT)
+                add(TextraLabel("[*]Menu (M)", KnownFonts.getGoNotoUniversalSDF()).apply {
                     color = Color.BLACK
-                    setAlignment(Align.center)
-                }
+                    alignment = Align.center
+                })
                 row()
                 buttonLoadConfig = visTextButton("Load Configuration (L)")
                 row()
