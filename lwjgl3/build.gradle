@@ -17,9 +17,11 @@ else {
   apply plugin: 'application'
 }
 
-sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
-mainClassName = 'com.github.jfriemel.hybridsim.Lwjgl3LauncherKt'
-eclipse.project.name = appName + '-lwjgl3'
+application {
+  sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
+  mainClass.set('com.github.jfriemel.hybridsim.Lwjgl3LauncherKt')
+  eclipse.project.name = appName + '-lwjgl3'
+}
 
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
@@ -56,7 +58,7 @@ jar {
   }
 // setting the manifest makes the JAR runnable.
   manifest {
-    attributes 'Main-Class': project.mainClassName
+    attributes 'Main-Class': application.mainClass
   }
 // this last step may help on some OSes that need extra instruction to make runnable JARs.
   doLast {
