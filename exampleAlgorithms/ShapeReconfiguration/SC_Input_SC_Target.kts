@@ -193,10 +193,11 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Helper function
      *
-     * Checks whether the robot is at a border of a connected component of demand nodes where a tile can safely be
-     * placed.
+     * Checks whether the robot is next to the target tile shape and at a border of a connected component of demand
+     * nodes where a tile can safely be placed.
      */
-    private fun isAtDemandBorder(): Boolean = isAtBorder { label -> !(hasTileAtLabel(label) && labelIsTarget(label)) }
+    private fun isAtDemandBorder(): Boolean =
+        hasTargetTileNbr() && isAtBorder { label -> !(hasTileAtLabel(label) && labelIsTarget(label)) }
 
     /**
      * Helper function

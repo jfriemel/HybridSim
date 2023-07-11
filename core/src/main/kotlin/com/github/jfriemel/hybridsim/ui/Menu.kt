@@ -38,8 +38,9 @@ import kotlin.math.pow
 
 private val logger = logger<Menu>()
 
-private const val BUTTON_WIDTH = 190f
-private const val BUTTON_HEIGHT = 30f
+private const val BUTTON_WIDTH = 192f
+private const val BUTTON_HEIGHT = 32f
+private const val BUTTON_PAD = 2f
 
 private val buttonColorDefault = Color.WHITE
 private val buttonColorToggled = Color.GRAY
@@ -102,7 +103,7 @@ class Menu(batch: Batch) {
         actors {
             visTable {
                 setFillParent(true)
-                defaults().pad(2f).colspan(3).width(BUTTON_WIDTH).minHeight(BUTTON_HEIGHT)
+                defaults().pad(BUTTON_PAD).colspan(3).width(BUTTON_WIDTH).minHeight(BUTTON_HEIGHT)
                 add(TextraLabel("[*]Menu (M)", KnownFonts.getGoNotoUniversalSDF()).apply {
                     color = Color.BLACK
                     alignment = Align.center
@@ -122,15 +123,15 @@ class Menu(batch: Batch) {
                 row()
                 buttonUndo = visTextButton("") {
                     undoButtonImage = visImage(undoDrawable)
-                    cell(colspan = 1, width = undoButtonImage.width)
+                    cell(colspan = 1, width = undoButtonImage.width, align = Align.center)
                 }
                 buttonToggleScheduler = visTextButton("") {
                     schedulerButtonImage = visImage(schedulerOnDrawable)
-                    cell(colspan = 1, width = schedulerButtonImage.width)
+                    cell(colspan = 1, width = schedulerButtonImage.width, align = Align.center)
                 }
                 buttonRedo = visTextButton("") {
                     redoButtonImage = visImage(redoDrawable)
-                    cell(colspan = 1, width = redoButtonImage.width)
+                    cell(colspan = 1, width = redoButtonImage.width, align = Align.center)
                 }
                 row()
                 sliderScheduler = visSlider(0f, 44f, 0.1f)
@@ -138,7 +139,7 @@ class Menu(batch: Batch) {
                 buttonLoadGenerator = visTextButton("Load Generator (H)")
                 row()
                 visLabel("# tiles:").apply {
-                    cell(colspan = 1, width = BUTTON_WIDTH / 3, align = Align.left)
+                    cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
                     color = Color.BLACK
                 }
                 textFieldTiles = visTextField("50").apply {
@@ -146,7 +147,7 @@ class Menu(batch: Batch) {
                 }
                 row()
                 visLabel("# robots:").apply {
-                    cell(colspan = 1, width = BUTTON_WIDTH / 3, align = Align.left)
+                    cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
                     color = Color.BLACK
                 }
                 textFieldRobots = visTextField("1").apply {
@@ -154,15 +155,15 @@ class Menu(batch: Batch) {
                 }
                 row()
                 visLabel("Generate target shape:").apply {
-                    cell(colspan = 2, width = 0.7f * BUTTON_WIDTH, align = Align.left)
+                    cell(colspan = 2, width = undoButtonImage.width + schedulerButtonImage.width, align = Align.left)
                     color = Color.BLACK
                 }
                 checkBoxOverhang = visCheckBox("").apply {
-                    cell(colspan = 1, width = 0.1f * BUTTON_WIDTH, align = Align.right)
+                    cell(colspan = 1, width = redoButtonImage.width, align = Align.right)
                 }
                 row()
                 visLabel("# overhang:").apply {
-                    cell(colspan = 1, width = BUTTON_WIDTH / 3, align = Align.left)
+                    cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
                     color = Color.BLACK
                 }
                 textFieldOverhang = visTextField("15").apply {

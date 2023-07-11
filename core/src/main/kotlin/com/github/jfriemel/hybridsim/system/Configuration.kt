@@ -43,8 +43,10 @@ object Configuration {
      * Does not generate target nodes if [numOverhang] < 0.
      */
     fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1) {
-        val descriptor = generator.generate(numTiles, numRobots, numOverhang)
+        Scheduler.stop()
         clear()
+
+        val descriptor = generator.generate(numTiles, numRobots, numOverhang)
         descriptor.tileNodes.forEach { tileNode -> addTile(Tile(tileNode)) }
         descriptor.robotNodes.forEach { robotNode -> addRobot(AlgorithmLoader.getAlgorithmRobot(Robot(robotNode))) }
         targetNodes = descriptor.targetNodes
