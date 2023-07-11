@@ -43,7 +43,7 @@ private const val BUTTON_HEIGHT = 32f
 private const val BUTTON_PAD = 2f
 
 private val buttonColorDefault = Color.WHITE
-private val buttonColorToggled = Color.GRAY
+private val buttonColorToggled = Color.ROYAL
 private val buttonColorDisabled = Color(1f, 1f, 1f, 0.5f)
 
 class Menu(batch: Batch) {
@@ -378,7 +378,6 @@ class Menu(batch: Batch) {
         val numTiles = if (textFieldTiles.isEmpty) 0 else textFieldTiles.text.toInt()
         val numRobots = if (textFieldRobots.isEmpty) 0 else textFieldRobots.text.toInt()
         val numOverhang = if (textFieldOverhang.isEmpty) 0 else textFieldOverhang.text.toInt()
-        Configuration.generate(numTiles, numRobots, numOverhang)
 
         if (checkBoxOverhang.isChecked) {
             Configuration.generate(numTiles, numRobots, numOverhang)
