@@ -1,3 +1,5 @@
+import kotlin.math.min
+
 fun getGenerator(): Generator = GeneratorImpl()
 
 class GeneratorImpl(): Generator() {
@@ -29,6 +31,14 @@ class GeneratorImpl(): Generator() {
                 nextNode.neighbors().intersect(descriptor.tileNodes)
             )
             tileRemoveCandidates.remove(nextNode)
+        }
+
+        // Robots
+        val robotCandidates = descriptor.tileNodes.toMutableSet()
+        repeat(min(numRobots, numTiles)) {
+            val nextNode = robotCandidates.random()
+            descriptor.robotNodes.add(nextNode)
+            robotCandidates.remove(nextNode)
         }
 
         return descriptor
