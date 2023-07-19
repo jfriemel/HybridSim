@@ -44,7 +44,8 @@ object Configuration {
      */
     fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1) {
         Scheduler.stop()
-        clear()
+        addUndoStep()
+        clear(clearQueues = false)
 
         val descriptor = generator.generate(numTiles, numRobots, numOverhang)
         descriptor.tileNodes.forEach { tileNode -> addTile(Tile(tileNode)) }
@@ -142,6 +143,7 @@ object Configuration {
     /** Take a [json] string and load the [Configuration] from that string. */
     fun loadConfiguration(json: String) {
         Scheduler.stop()
+        addUndoStep()
         klaxon.parse<Configuration>(json = json)
 
         /*
@@ -153,8 +155,6 @@ object Configuration {
         robots = robots.values.associateBy { it.node }.toMutableMap()
         robots.values.forEach { AlgorithmLoader.replaceRobot(it.node) }
         targetNodes = targetNodes.toMutableSet()
-
-        redoQueue.clear()
     }
 
     /** Convert the current [Configuration] string to a JSON string that can be saved to a file. */
@@ -166,16 +166,24 @@ object Configuration {
         return (default().parse(StringBuilder(jsonString)) as JsonObject).toJsonString(prettyPrint = true)
     }
 
-    /** To avoid unexpected behavior, the undo/redo queues can be cleared when loading [Configuration]s/algorithms. */
+    /**
+     * To avoid unexpected behavior, the [undoQueue] and [redoQueue] can be cleared when loading algorithms.
+     */
     fun clearUndoQueues() {
         undoQueue.clear()
         redoQueue.clear()
     }
 
-    /** Clears all configuration variables ([tiles], [robots], [targetNodes], [undoQueue], [redoQueue]). */
-    fun clear() {
+    /**
+     * Clears the configuration variables [tiles], [robots], and [targetNodes].
+     * Also clears [undoQueue] and [redoQueue] if [clearQueues] is true.
+     */
+    fun clear(clearQueues: Boolean = true) {
         arrayOf(tiles, robots).forEach { entityMap -> entityMap.clear() }
-        arrayOf(targetNodes, undoQueue, redoQueue).forEach { collection -> collection.clear() }
+        targetNodes.clear()
+        if (clearQueues) {
+            clearUndoQueues()
+        }
 
     }
 

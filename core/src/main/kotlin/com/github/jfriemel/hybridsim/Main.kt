@@ -44,6 +44,7 @@ class Main : KtxGame<KtxScreen>() {
 
         // Generate random input configuration
         Configuration.generate(50, 1)
+        Configuration.clearUndoQueues()
         screen.resetCamera()
 
         // Start a new coroutine for the scheduler

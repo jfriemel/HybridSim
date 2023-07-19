@@ -207,7 +207,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             phase = Phase.ExploreColumn
             return
         }
-        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }
+            .first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
     }
@@ -288,7 +289,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
+        val moveLabel = (1..6).map { offset -> (outerLabel + offset).mod(6) }.first { label -> labelIsTarget(label) }
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
     }

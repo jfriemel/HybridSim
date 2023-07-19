@@ -20,7 +20,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private var phase = Phase.FindBoundary
 
     private var entryTile: Boolean = false
-    private var moveLabel: Int = 0
+    private var outerLabel: Int = -1
 
     override fun activate() {
         when (phase) {
@@ -51,9 +51,16 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * Exit phase: [Phase.FindOverhang]
      */
     private fun findBoundary() {
-        if (!isAtBoundary()) {
+        if (!isAtBoundary() && outerLabel < 0) {
             moveToLabel(0)
-        } else if (isOnTarget()) {
+            return
+        }
+
+        if (outerLabel < 0) {
+            outerLabel = labels.first { label -> !hasTileAtLabel(label) }
+        }
+
+        if (isOnTarget()) {
             phase = Phase.FindOverhang
         } else {
             traverseTargetTileBoundary()
@@ -70,7 +77,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      */
     private fun findOverhang() {
         if (hasOverhangNbr()) {
-            moveToLabel(overhangNbrLabel()!!)
+            val moveLabel = overhangNbrLabel()!!
+            moveToLabel(moveLabel)
+            outerLabel = (moveLabel + 3).mod(6)
             entryTile = true
             phase = Phase.FindRemovableOverhang
             return
@@ -110,7 +119,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      */
     private fun findDemandComponent() {
         if (isOnTile() && isOnTarget() && hasEmptyTargetNbr()) {
-            moveToLabel(emptyTargetNbrLabel()!!)
+            val moveLabel = emptyTargetNbrLabel()!!
+            moveToLabel(moveLabel)
+            outerLabel = (moveLabel + 3).mod(6)
             phase = Phase.PlaceTargetTile
             return
         }
@@ -129,11 +140,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private fun placeTargetTile() {
         if (isAtDemandBorder()) {
             placeTile()
+            outerLabel = labels.first { label -> !(hasTileAtLabel(label) && labelIsTarget(label)) }
             phase = Phase.FindOverhang
             return
         }
 
-        traverseEmptyTargetBoundary()
+        traverseOutsideTileBoundary()
     }
 
     /**
@@ -144,11 +156,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      */
     private fun traverseTargetTileBoundary() {
         if (!isOnTarget() && hasTargetTileNbr()) {
-            moveToLabel(targetTileNbrLabel()!!)
+            val moveLabel = targetTileNbrLabel()!!
+            moveToLabel(moveLabel)
+            outerLabel = (moveLabel + 3).mod(6)
             return
         }
 
-        traverseBoundary { label: Int ->
+        traverseBoundary { label ->
             canMoveToLabel(label) && hasTileAtLabel(label) && (!isOnTarget() || labelIsTarget(label))
         }
     }
@@ -159,7 +173,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * The robot traverses the boundary of an overhang component.
      */
     private fun traverseOverhangBoundary() {
-        traverseBoundary { label: Int -> canMoveToLabel(label) && hasTileAtLabel(label) && !labelIsTarget(label) }
+        traverseBoundary { label -> canMoveToLabel(label) && hasTileAtLabel(label) && !labelIsTarget(label) }
     }
 
     /**
@@ -168,7 +182,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * The robot traverses the boundary of a connected component of demand nodes.
      */
     private fun traverseEmptyTargetBoundary() {
-        traverseBoundary { label: Int -> canMoveToLabel(label) && !hasTileAtLabel(label) && labelIsTarget(label) }
+        traverseBoundary { label -> canMoveToLabel(label) && !hasTileAtLabel(label) && labelIsTarget(label) }
     }
 
     /**
@@ -176,11 +190,21 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *
      * The robot traverses the boundary of nodes whose labels are considered valid by [isLabelValid].
      */
-    fun traverseBoundary(isLabelValid: (Int) -> Boolean) {
-        val firstInvalidLabel = (1..6).map { (moveLabel - it).mod(6) }
-            .firstOrNull { label -> !isLabelValid(label) } ?: (moveLabel - 1).mod(6)
-        moveLabel = (1..5).map { offset -> (firstInvalidLabel + offset).mod(6) }.firstOrNull(isLabelValid) ?: return
+    private fun traverseBoundary(isLabelValid: (Int) -> Boolean) {
+        val moveLabel = (1..6).map { offset -> (outerLabel + offset).mod(6) }.first(isLabelValid)
         moveToLabel(moveLabel)
+        outerLabel = (moveLabel - 2).mod(6)
+    }
+
+    /**
+     * Helper function
+     *
+     * The robot traverses the nodes on the outside of the boundary of tiles, provided [outerLabel] points to a tile.
+     */
+    private fun traverseOutsideTileBoundary() {
+        val moveLabel = (1..6).map { offset -> (outerLabel + offset).mod(6) }.first { label -> !hasTileAtLabel(label) }
+        moveToLabel(moveLabel)
+        outerLabel = (moveLabel - 2).mod(6)
     }
 
     /**
@@ -197,7 +221,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * nodes where a tile can safely be placed.
      */
     private fun isAtDemandBorder(): Boolean =
-        hasTargetTileNbr() && isAtBorder { label -> !(hasTileAtLabel(label) && labelIsTarget(label)) }
+        isOnTarget() && !isOnTile() && hasTargetTileNbr() && isAtBorder { label ->
+            !(hasTileAtLabel(label) && labelIsTarget(label))
+        }
 
     /**
      * Helper function
