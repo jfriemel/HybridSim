@@ -23,6 +23,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private var entryTile: Boolean = false
     private var moveLabel: Int = 0
 
+    val successorDirs = arrayOf(false, false, false, false, false, false)
+
     override fun activate() {
         when (phase) {
             Phase.FindBoundary -> findBoundary()
@@ -32,6 +34,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.FindDemandComponent -> findDemandComponent()
             Phase.PlaceTargetTile -> placeTargetTile()
         }
+        updateSuccessorDirs()
     }
 
     override fun getColor(): Color {
@@ -246,5 +249,15 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         return boundaryLabels.filter { label -> (label + 1).mod(6) !in boundaryLabels }.size == 1
+    }
+
+    private fun updateSuccessorDirs() {
+        successorDirs.fill(false)
+        labels.forEach { label ->
+            if (hasRobotAtLabel(label) && (robotAtLabel(label)!! as RobotImpl).successorDirs[(label + 3).mod(6)]) {
+
+            }
+        }
+        successorDirs[moveLabel] = true
     }
 }
