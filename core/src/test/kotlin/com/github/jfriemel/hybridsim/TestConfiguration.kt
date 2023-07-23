@@ -47,6 +47,30 @@ class TestConfiguration {
     }
 
     @Test
+    fun `move robot`() {
+        val robotNode = Node(-771, -732)
+        val robot = Robot(robotNode)
+        val nextNode = Node(-511, 928)
+        Configuration.addRobot(robot)
+        Configuration.moveRobot(robotNode, nextNode)
+        Assertions.assertEquals(robot, Configuration.robots[nextNode])
+        Assertions.assertNull(Configuration.robots[robotNode])
+    }
+
+    @Test
+    fun `switch robots`() {
+        val robotNodeA = Node(-44, 632)
+        val robotNodeB = Node(7, 579)
+        val robotA = Robot(robotNodeA)
+        val robotB = Robot(robotNodeB)
+        Configuration.addRobot(robotA)
+        Configuration.addRobot(robotB)
+        Configuration.switchRobots(robotNodeA, robotNodeB)
+        Assertions.assertEquals(robotA, Configuration.robots[robotNodeB])
+        Assertions.assertEquals(robotB, Configuration.robots[robotNodeA])
+    }
+
+    @Test
     fun `add target`() {
         val node = Node(10, 5)
         Configuration.addTarget(node)

@@ -76,6 +76,18 @@ open class Robot(
         return true
     }
 
+    /** The robot tries to switch positions with the [Robot] at the given [label]. Returns true if successful. */
+    fun switchWithRobotNbr(label: Int): Boolean {
+        if (!hasRobotAtLabel(label)) {
+            return false
+        }
+        val robotNbr = robotAtLabel(label)!!
+        Configuration.switchRobots(node, nodeAtLabel(label))
+        robotNbr.node = node
+        node = nodeAtLabel(label)
+        return true
+    }
+
     /** Checks whether the robot is at a boundary, i.e., it has a [Node] neighbor that is not occupied by a [Tile]. */
     fun isAtBoundary(): Boolean = labels.any { label -> !hasTileAtLabel(label) }
 
@@ -168,6 +180,12 @@ open class Robot(
 
     /** @return [Robot] neighbor that is not on a tile (i.e., "hanging"). */
     fun hangingRobotNbr(): Robot? = hangingRobotNbrLabel()?.let { label -> robotAtLabel(label) }
+
+    /** @return A list of all labels with [Robot] neighbors. */
+    fun allRobotNbrLabels(): List<Int> = labels.filter { label -> hasRobotAtLabel(label) }
+
+    /** @return A list of all [Robot] neighbors. */
+    fun allRobotNbrs(): List<Robot> = allRobotNbrLabels().map { label -> robotAtLabel(label)!! }
 
     /** Checks whether the robot is on a target [Node]. */
     fun isOnTarget(): Boolean = node in Configuration.targetNodes

@@ -158,6 +158,44 @@ class TestRobot {
         Assertions.assertEquals(startNode, robot.node)
     }
 
+    @ParameterizedTest(name = "neighbor label {2}")
+    @CsvSource(
+        "13, 28, 0",
+        "12, 27, 1",
+        "12, 26, 2",
+        "13, 26, 3",
+        "14, 26, 4",
+        "14, 27, 5",
+    )
+    fun `can switch with robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+        // Initialize
+        val startNode = Node(startNodeX, startNodeY)
+        val robot = Robot(startNode, 0)
+        Configuration.addRobot(robot)
+        val robotNbr = Configuration.robots[robotNode]
+
+        // Switch robots
+        Assertions.assertTrue(robot.switchWithRobotNbr(label))
+
+        // Robots have been switched correctly
+        Assertions.assertEquals(robotNode, robot.node)
+        Assertions.assertEquals(startNode, robotNbr!!.node)
+        Assertions.assertFalse(robot.carriesTile)
+        Assertions.assertTrue(robotNbr.carriesTile)
+        Assertions.assertEquals(robot, Configuration.robots[robotNode])
+        Assertions.assertEquals(robotNbr, Configuration.robots[startNode])
+    }
+
+    @Test
+    fun `cannot switch with non-existent robot neighbor`() {
+        val robotNode = Node(744, -380)
+        val robot = Robot(robotNode)
+        robot.labels.forEach { label ->
+            Assertions.assertFalse(robot.switchWithRobotNbr(label))
+            Assertions.assertEquals(robotNode, robot.node)
+        }
+    }
+
     @Test
     fun `is at a boundary`() {
         val robot = Robot(Node(617, -966))
@@ -180,12 +218,15 @@ class TestRobot {
         "14, 27, 5",
     )
     fun `can interact with robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
-        val robot = Robot(Node(startNodeX, startNodeY), 0)
+        val startNode = Node(startNodeX, startNodeY)
+        val robot = Robot(startNode, 0)
         Assertions.assertTrue(robot.hasRobotAtLabel(label))
         Assertions.assertEquals(Configuration.robots[robotNode], robot.robotAtLabel(label))
         Assertions.assertTrue(robot.hasRobotNbr())
         Assertions.assertEquals(label, robot.robotNbrLabel())
         Assertions.assertEquals(Configuration.robots[robotNode], robot.robotNbr())
+        Assertions.assertEquals(listOf(label), robot.allRobotNbrLabels())
+        Assertions.assertEquals(listOf(Configuration.robots[robotNode]), robot.allRobotNbrs())
     }
 
     @ParameterizedTest(name = "neighbor label {2}")
@@ -242,6 +283,8 @@ class TestRobot {
         Assertions.assertFalse(robot.hasRobotNbr())
         Assertions.assertNull(robot.robotNbrLabel())
         Assertions.assertNull(robot.robotNbr())
+        Assertions.assertTrue(robot.allRobotNbrLabels().isEmpty())
+        Assertions.assertTrue(robot.allRobotNbrs().isEmpty())
     }
 
     @ParameterizedTest(name = "movement label {2}")

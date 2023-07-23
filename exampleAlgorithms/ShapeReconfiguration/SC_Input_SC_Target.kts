@@ -202,7 +202,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * The robot traverses the nodes on the outside of the boundary of tiles, provided [outerLabel] points to a tile.
      */
     private fun traverseOutsideTileBoundary() {
-        val moveLabel = (1..6).map { offset -> (outerLabel + offset).mod(6) }.first { label -> !hasTileAtLabel(label) }
+        val moveLabel = (1..6).map { offset -> (outerLabel - offset).mod(6) }.first { label -> !hasTileAtLabel(label) }
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
     }

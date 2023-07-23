@@ -94,6 +94,17 @@ object Configuration {
         robots[nextNode] = robot
     }
 
+    /** Switches the [Robot] at [nodeA] with the [Robot] at [nodeB] if both robots exist. */
+    fun switchRobots(nodeA: Node, nodeB: Node, addUndoStep: Boolean = false) {
+        if (addUndoStep) {
+            addUndoStep()
+        }
+        val robotA = robots.remove(nodeA) ?: return
+        val robotB = robots.remove(nodeB) ?: return
+        robots[nodeA] = robotB
+        robots[nodeB] = robotA
+    }
+
     /** Add the given [node] to the target area. */
     fun addTarget(node: Node, addUndoStep: Boolean = false) {
         if (addUndoStep) {
