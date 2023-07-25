@@ -14,7 +14,7 @@ private enum class Phase {
 
 class RobotImpl(node: Node) : Robot(
     node = node,
-    orientation = 0,
+    orientation = 0,  // common chirality
     carriesTile = false,
     numPebbles = 0,
     maxPebbles = 0,
@@ -29,7 +29,7 @@ class RobotImpl(node: Node) : Robot(
     override fun activate() {
         when (phase) {
             Phase.FindBoundary, Phase.LeaveOverhang, Phase.FindOverhang, Phase.FindDemandComponent ->
-                move()
+                move()  // No extra functionality needed on top of move() with updatePhase() and updateMoveDir()
             Phase.FindRemovableOverhang ->
                 findRemovableOverhang()
             Phase.Hanging ->
@@ -88,6 +88,10 @@ class RobotImpl(node: Node) : Robot(
         }
     }
 
+    /**
+     * The robot traverses its overhang component until it finds a safely removable tile or a hanging robot neighbor
+     * which carries a tile.
+     */
     private fun findRemovableOverhang() {
         if (((!entryTile && isAtOverhangBorder()) || !hasOverhangNbr())) {
             if (hasHangingRobotNbr()) {
@@ -345,6 +349,11 @@ class RobotImpl(node: Node) : Robot(
         }
     }
 
+    /**
+     * Helper function
+     *
+     * @return A function that checks for a given label whether the robot can move there in its current [phase].
+     */
     private fun getValidLabelFunction(): (Int) -> Boolean {
         return when (phase) {
             Phase.FindBoundary ->

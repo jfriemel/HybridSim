@@ -19,15 +19,15 @@ else {
 
 application {
   sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
-  mainClass.set('com.github.jfriemel.hybridsim.Lwjgl3LauncherKt')
+  mainClass.set('com.github.jfriemel.hybridsim.Launcher')
   eclipse.project.name = appName + '-lwjgl3'
 }
 
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+  implementation "com.github.ajalt.clikt:clikt:$cliktVersion"
   implementation project(':core')
-  implementation "org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion"
 }
 
 def os = System.properties['os.name'].toLowerCase()
