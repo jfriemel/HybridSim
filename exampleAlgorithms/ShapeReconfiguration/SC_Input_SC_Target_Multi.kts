@@ -1,5 +1,5 @@
 fun getRobot(node: Node, orientation: Int): Robot {
-    return RobotImpl(node, 0)
+    return RobotImpl(node)
 }
 
 private enum class Phase {
@@ -12,9 +12,9 @@ private enum class Phase {
     PlaceTargetTile,
 }
 
-class RobotImpl(node: Node, orientation: Int) : Robot(
+class RobotImpl(node: Node) : Robot(
     node = node,
-    orientation = orientation,
+    orientation = 0,
     carriesTile = false,
     numPebbles = 0,
     maxPebbles = 0,
@@ -27,17 +27,16 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private var moveDir: Int? = null
 
     override fun activate() {
-        print("$node  $moveDir  $outerLabel -- ")
         when (phase) {
-            Phase.FindBoundary -> findBoundary()
-            Phase.LeaveOverhang -> leaveOverhang()
-            Phase.FindOverhang -> findOverhang()
-            Phase.FindRemovableOverhang -> findRemovableOverhang()
-            Phase.Hanging -> hanging()
-            Phase.FindDemandComponent -> findDemandComponent()
-            Phase.PlaceTargetTile -> placeTargetTile()
+            Phase.FindBoundary, Phase.LeaveOverhang, Phase.FindOverhang, Phase.FindDemandComponent ->
+                move()
+            Phase.FindRemovableOverhang ->
+                findRemovableOverhang()
+            Phase.Hanging ->
+                hanging()
+            Phase.PlaceTargetTile ->
+                placeTargetTile()
         }
-        println("$node  $moveDir  $outerLabel")
     }
 
     override fun getColor(): Color {
@@ -50,86 +49,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.FindDemandComponent -> Color.SKY
             Phase.PlaceTargetTile -> Color.WHITE
         }
-    }
-
-    /** The robot walks north until it reaches the boundary of the input shape. */
-    private fun findBoundary() {
-        if (!isAtBoundary()) {
-            move()
-            return
-        }
-
-        outerLabel = labels.first { label -> !hasTileAtLabel(label) }
-
-        if (isOnTarget()) {
-            phase = if (carriesTile) Phase.FindDemandComponent else Phase.FindOverhang
-            return
-        } else if (hasTargetTileNbr()) {
-            val moveLabel = targetTileNbrLabel()!!
-            if (moveToLabel(moveLabel)) {
-                outerLabel = (moveLabel + 3).mod(6)
-                phase = if (carriesTile) Phase.FindDemandComponent else Phase.FindOverhang
-                return
-            }
-        }
-        phase = Phase.LeaveOverhang
-    }
-
-    /** The robot traverses the boundary of the overhang component until it reaches a target tile. */
-    private fun leaveOverhang() {
-        if (hasTargetTileNbr()) {
-            val moveLabel = targetTileNbrLabel()!!
-            if (moveToLabel(moveLabel)) {
-                outerLabel = (moveLabel + 3).mod(6)
-                phase = if (carriesTile) {
-                    Phase.FindDemandComponent
-                } else {
-                    Phase.FindOverhang
-                }
-            }
-        } else {
-            move()
-        }
-    }
-
-    /**
-     * The robot traverses the target tile boundary until it encounters an overhang tile.
-     * It moves to the tile and sets [entryTile] to true.
-     */
-    private fun findOverhang() {
-        if (hasOverhangNbr()) {
-            val moveLabel = overhangNbrLabel()!!
-            if (moveToLabel(moveLabel)) {
-                outerLabel = (moveLabel + 3).mod(6)
-                entryTile = true
-                phase = Phase.FindRemovableOverhang
-                return
-            }
-        }
-
-        move()
-    }
-
-    /**
-     * The robot traverses the overhang boundary until it encounters a tile that can be removed without breaking the
-     * connectivity of the overhang component (checked by [isAtOverhangBorder]).
-     * To make sure that the robot does not disconnect the overhang component from the rest of the tile structure, it
-     * does not lift the first overhang tile it moved to (checked by [entryTile]) unless it is the only tile of the
-     * component.
-     */
-    private fun findRemovableOverhang() {
-        if (((!entryTile && isAtOverhangBorder()) || !hasOverhangNbr())) {
-            if (hasHangingRobotNbr()) {
-                phase = Phase.LeaveOverhang
-            } else {
-                liftTile()
-                phase = Phase.Hanging
-            }
-            return
-        }
-
-        hasCheckedTile = true
-        move()
     }
 
     /**
@@ -169,23 +88,20 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
     }
 
-    /** The robot traverses the target tile boundary until it can move to demand node. */
-    private fun findDemandComponent() {
-        if (isOnTile() && isOnTarget() && hasEmptyTargetNbr()) {
-            val moveLabel = emptyTargetNbrLabel()!!
-            if (moveToLabel(moveLabel)) {
-                outerLabel = (moveLabel + 3).mod(6)
-                phase = Phase.PlaceTargetTile
-                return
+    private fun findRemovableOverhang() {
+        if (((!entryTile && isAtOverhangBorder()) || !hasOverhangNbr())) {
+            if (hasHangingRobotNbr()) {
+                allHangingRobotNbrs().firstOrNull { robotNbr -> robotNbr.carriesTile }?.let{ robotNbr ->
+                    robotNbr.carriesTile = false
+                    carriesTile = true
+                    phase = Phase.LeaveOverhang
+                }
+            } else {
+                liftTile()
+                phase = Phase.Hanging
             }
-        } else if (!isOnTarget() && hasTargetTileNbr()) {
-            val moveLabel = targetTileNbrLabel()!!
-            if (moveToLabel(moveLabel)) {
-                outerLabel = (moveLabel + 3).mod(6)
-                return
-            }
+            return
         }
-
         move()
     }
 
@@ -210,10 +126,16 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      * The robot moves (or passes its carried tile) based on its current [phase].
      */
     private fun move() {
+        updatePhase()
+        hasCheckedTile = true
         updateMoveDir()
 
         if (moveDir != null && moveToLabel(moveDir!!)) {
-            outerLabel = if (phase == Phase.PlaceTargetTile) (moveDir!! + 2).mod(6) else (moveDir!! - 2).mod(6)
+            outerLabel = if (phase == Phase.Hanging || phase == Phase.PlaceTargetTile) {
+                (moveDir!! + 2).mod(6)
+            } else {
+                (moveDir!! - 2).mod(6)
+            }
             entryTile = false
             hasCheckedTile = false
         } else if (
@@ -237,7 +159,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 Phase.LeaveOverhang
             }
             robotNbr.carriesTile = true
-            robotNbr.outerLabel = (moveDir!! + 1).mod(6)
+            robotNbr.outerLabel = (moveDir!! - 2).mod(6)
             robotNbr.phase = if (robotNbr.isOnTarget()) {
                 Phase.FindDemandComponent
             } else {
@@ -257,7 +179,11 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                         return@forEach
                     }
                     if (!carriesTile) {
-                        phase = robotNbr.phase
+                        phase = if (robotNbr.phase == Phase.FindRemovableOverhang) {
+                            Phase.LeaveOverhang
+                        } else {
+                            robotNbr.phase
+                        }
                     }
                     outerLabel = if (phase == Phase.Hanging || phase == Phase.PlaceTargetTile) {  // RHR
                         (label - 1).mod(6)
@@ -280,7 +206,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                         }
                         entryTile = false
                         hasCheckedTile = false
-                        // TODO: Move one step
                         return@findCopyableNbr
                     }
                 }
@@ -291,6 +216,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             }
         }
 
+        updatePhase()
         updateMoveDir()
     }
 
@@ -318,8 +244,55 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         robotNbr.entryTile = false
         robotNbr.hasCheckedTile = false
 
-        updateMoveDir()
+        robotNbr.updatePhase()
         robotNbr.updateMoveDir()
+    }
+
+    /**
+     * Helper function
+     *
+     * Updates the robot's [phase] based on its current node.
+     * Can be called by other robots because it only uses information visible by all neighbors.
+     */
+    private fun updatePhase() {
+        when (phase) {
+            Phase.FindBoundary -> {
+                if (!isOnTile()) {
+                    phase = Phase.Hanging
+                }
+            }
+
+            Phase.LeaveOverhang -> {
+                if (isOnTarget()) {
+                    phase = if (carriesTile) {
+                        Phase.FindDemandComponent
+                    } else {
+                        Phase.FindOverhang
+                    }
+                }
+            }
+
+            Phase.FindOverhang -> {
+                if (!isOnTarget()) {
+                    entryTile = true
+                    phase = Phase.FindRemovableOverhang
+                }
+            }
+
+            Phase.FindRemovableOverhang -> {
+                if (isOnTarget()) {
+                    phase = Phase.FindOverhang
+                }
+            }
+
+            Phase.FindDemandComponent -> {
+                if (!isOnTile() && isOnTarget()) {
+                    phase = Phase.PlaceTargetTile
+                }
+            }
+
+            else -> return
+        }
     }
 
     /**
@@ -337,7 +310,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
         when (phase) {
             Phase.FindBoundary -> {
-                moveDir = if (hasTileAtLabel(0)) 0 else null
+                moveDir = if (isOnTile()) 0 else null
             }
 
             Phase.LeaveOverhang, Phase.FindOverhang, Phase.FindDemandComponent -> {
@@ -376,10 +349,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         return when (phase) {
             Phase.FindBoundary ->
                 { label -> label == 0 }
-            Phase.LeaveOverhang, Phase.FindRemovableOverhang ->
+            Phase.FindOverhang, Phase.LeaveOverhang ->
+                { label -> hasTileAtLabel(label) }
+            Phase.FindRemovableOverhang ->
                 { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
-            Phase.FindOverhang, Phase.FindDemandComponent ->
-                { label -> hasTileAtLabel(label) && labelIsTarget(label) }
+            Phase.FindDemandComponent ->
+                { label -> labelIsTarget(label) }
             Phase.PlaceTargetTile, Phase.Hanging ->
                 { label -> !hasTileAtLabel(label) }
         }

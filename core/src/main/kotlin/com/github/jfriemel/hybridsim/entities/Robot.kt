@@ -187,6 +187,12 @@ open class Robot(
     /** @return A list of all [Robot] neighbors. */
     fun allRobotNbrs(): List<Robot> = allRobotNbrLabels().map { label -> robotAtLabel(label)!! }
 
+    /** @return A list of all labels with hanging [Robot] neighbors. */
+    fun allHangingRobotNbrLabels(): List<Int> = allRobotNbrLabels().filter { label -> !hasTileAtLabel(label) }
+
+    /** @return A list of all hanging [Robot] neighbors. */
+    fun allHangingRobotNbrs(): List<Robot> = allHangingRobotNbrLabels().map { label -> robotAtLabel(label)!! }
+
     /** Checks whether the robot is on a target [Node]. */
     fun isOnTarget(): Boolean = node in Configuration.targetNodes
 

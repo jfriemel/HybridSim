@@ -243,6 +243,8 @@ class TestRobot {
         Assertions.assertTrue(robot.hasHangingRobotNbr())
         Assertions.assertEquals(label, robot.hangingRobotNbrLabel())
         Assertions.assertEquals(Configuration.robots[robotNode], robot.hangingRobotNbr())
+        Assertions.assertEquals(listOf(label), robot.allHangingRobotNbrLabels())
+        Assertions.assertEquals(listOf(Configuration.robots[robotNode]), robot.allHangingRobotNbrs())
     }
 
     @ParameterizedTest(name = "neighbor label {2}")
@@ -268,14 +270,16 @@ class TestRobot {
         Assertions.assertFalse(robot.hasHangingRobotNbr())
         Assertions.assertNull(robot.hangingRobotNbrLabel())
         Assertions.assertNull(robot.hangingRobotNbr())
+        Assertions.assertTrue(robot.allHangingRobotNbrLabels().isEmpty())
+        Assertions.assertTrue(robot.allHangingRobotNbrs().isEmpty())
     }
 
     @Test
     fun `cannot see non-existent neighbors`() {
         val robot = Robot(Node(-536, 370))
-        robot.labels.forEach {
-            Assertions.assertFalse(robot.hasTileAtLabel(it))
-            Assertions.assertFalse(robot.hasRobotAtLabel(it))
+        robot.labels.forEach { label ->
+            Assertions.assertFalse(robot.hasTileAtLabel(label))
+            Assertions.assertFalse(robot.hasRobotAtLabel(label))
         }
         Assertions.assertFalse(robot.hasTileNbr())
         Assertions.assertNull(robot.tileNbrLabel())
@@ -285,6 +289,8 @@ class TestRobot {
         Assertions.assertNull(robot.robotNbr())
         Assertions.assertTrue(robot.allRobotNbrLabels().isEmpty())
         Assertions.assertTrue(robot.allRobotNbrs().isEmpty())
+        Assertions.assertTrue(robot.allHangingRobotNbrLabels().isEmpty())
+        Assertions.assertTrue(robot.allHangingRobotNbrs().isEmpty())
     }
 
     @ParameterizedTest(name = "movement label {2}")
