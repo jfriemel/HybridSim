@@ -99,12 +99,14 @@ class RobotImpl(node: Node) : Robot(
                     robotNbr.carriesTile = false
                     carriesTile = true
                     phase = Phase.LeaveOverhang
+                    return
                 }
+                phase = Phase.LeaveOverhang
             } else {
                 liftTile()
                 phase = Phase.Hanging
+                return
             }
-            return
         }
         move()
     }
@@ -147,6 +149,10 @@ class RobotImpl(node: Node) : Robot(
                 hasRobotAtLabel(moveDir!!) &&
                 (robotAtLabel(moveDir!!) as RobotImpl).moveDir == (moveDir!! + 3).mod(6)
         ) {
+            if (phase == Phase.FindRemovableOverhang &&
+                (robotAtLabel(moveDir!!) as RobotImpl).phase == Phase.FindRemovableOverhang) {
+                phase = Phase.LeaveOverhang
+            }
             switch(moveDir!!)
         } else if (
                 moveDir != null &&
@@ -166,6 +172,28 @@ class RobotImpl(node: Node) : Robot(
             robotNbr.outerLabel = (moveDir!! - 2).mod(6)
             robotNbr.phase = if (robotNbr.isOnTarget()) {
                 Phase.FindDemandComponent
+            } else {
+                Phase.LeaveOverhang
+            }
+        } else if (
+                moveDir != null &&
+                (phase == Phase.FindRemovableOverhang || phase == Phase.FindOverhang) &&
+                hasRobotAtLabel(moveDir!!) &&
+                (robotAtLabel(moveDir!!)!! as RobotImpl).phase == Phase.LeaveOverhang &&
+                !robotAtLabel(moveDir!!)!!.carriesTile
+        ) {
+            val robotNbr = (robotAtLabel(moveDir!!)!! as RobotImpl)
+            robotNbr.outerLabel = (moveDir!! - 2).mod(6)
+            robotNbr.entryTile = if (phase == Phase.FindOverhang) {
+                true
+            } else {
+                false
+            }
+            robotNbr.hasCheckedTile = false
+            robotNbr.phase = Phase.FindRemovableOverhang
+            robotNbr.updateMoveDir()
+            phase = if (isOnTarget()) {
+                Phase.FindOverhang
             } else {
                 Phase.LeaveOverhang
             }

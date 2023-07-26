@@ -24,13 +24,16 @@ import java.io.File
 private val logger = logger<MainGUI>()
 
 class MainGUI(
-    private val algorithm: File? = null,
-    private val configuration: File? = null,
-    private val generator: File? = null,
+    private val algFile: File? = null,
+    private val configFile: File? = null,
+    private val genFile: File? = null,
+    private val numTiles: Int,
+    private val numRobots: Int,
+    private val numOverhang: Int,
 ) : KtxGame<KtxScreen>() {
     override fun create() {
         // Enable logging
-        Gdx.app.logLevel = Application.LOG_ERROR
+        Gdx.app.logLevel = Application.LOG_DEBUG
         logger.debug { "HybridSim (GUI) launched" }
 
         // Set UI look
@@ -50,14 +53,14 @@ class MainGUI(
         Gdx.input.inputProcessor = inputMultiplexer
 
         // Load algorithm
-        algorithm?.let { file -> AlgorithmLoader.loadAlgorithm(file) }
+        algFile?.let { file -> AlgorithmLoader.loadAlgorithm(file) }
 
         // Load generator
-        generator?.let { file -> GeneratorLoader.loadGenerator(file) }
+        genFile?.let { file -> GeneratorLoader.loadGenerator(file) }
 
         // Load configuration or generate random configuration
-        configuration?.let { file -> Configuration.loadConfiguration(file.readText()) }
-            ?: Configuration.generate(50, 1)
+        configFile?.let { file -> Configuration.loadConfiguration(file.readText()) }
+            ?: Configuration.generate(numTiles, numRobots, numOverhang)
         Configuration.clearUndoQueues()
         screen.resetCamera()
 

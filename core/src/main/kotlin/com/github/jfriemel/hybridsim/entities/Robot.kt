@@ -31,10 +31,12 @@ open class Robot(
 
     /**
      * Interface for [activate] called by the Scheduler and the InputHandler to activate the robot and create an undo
-     * step in the [Configuration].
+     * step in the [Configuration] (if [withUndo] is true).
      */
-    fun triggerActivate() {
-        Configuration.addUndoStep()
+    fun triggerActivate(withUndo: Boolean = true) {
+        if (withUndo) {
+            Configuration.addUndoStep()
+        }
         activate()
     }
 
