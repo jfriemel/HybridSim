@@ -4,6 +4,12 @@ import com.github.jfriemel.hybridsim.system.Configuration
 
 object FullSequentialScheduler {
 
+    /**
+     * Sequentially actives robots (every robot exactly once per round) until all robots are finished or all target
+     * nodes are occupied by tiles.
+     *
+     * @return The number of rounds until termination.
+     */
     fun run(): Int {
         var round = 0
         var finished: Boolean

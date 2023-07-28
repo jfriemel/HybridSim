@@ -66,6 +66,10 @@ class MainCLI(
 
 }
 
+/**
+ * Performs a full sequential scheduler run on the current [Configuration] until termination. Then writes the number of
+ * rounds for the current configuration to the [outputFile] csv file.
+ */
 private fun singleRun(id: Int, n: Int, k: Int, m: Int, outputFile: File?) {
     val rounds = FullSequentialScheduler.run()
     println("id=$id, n=$n, k=$k, m=$m, rounds=$rounds")
