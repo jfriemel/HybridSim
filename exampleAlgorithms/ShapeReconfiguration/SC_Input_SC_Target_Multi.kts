@@ -27,7 +27,6 @@ class RobotImpl(node: Node) : Robot(
     private var moveDir: Int? = null
 
     override fun activate() {
-        print("$node  $moveDir  $outerLabel  $hasCheckedTile  $entryTile -- ")
         when (phase) {
             Phase.FindBoundary, Phase.LeaveOverhang, Phase.FindOverhang, Phase.FindDemandComponent ->
                 move()  // No extra functionality needed on top of move() with updatePhase() and updateMoveDir()
@@ -38,7 +37,6 @@ class RobotImpl(node: Node) : Robot(
             Phase.PlaceTargetTile ->
                 placeTargetTile()
         }
-        println("$node  $moveDir  $outerLabel  $hasCheckedTile  $entryTile")
     }
 
     override fun getColor(): Color {

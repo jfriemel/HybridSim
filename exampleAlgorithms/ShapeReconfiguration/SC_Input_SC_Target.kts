@@ -21,6 +21,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     private var entryTile: Boolean = false
     private var outerLabel: Int = -1
+    private var lhr: Boolean = true
 
     override fun activate() {
         when (phase) {
@@ -122,6 +123,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             val moveLabel = emptyTargetNbrLabel()!!
             moveToLabel(moveLabel)
             outerLabel = (moveLabel + 3).mod(6)
+            lhr = true
             phase = Phase.PlaceTargetTile
             return
         }
@@ -188,21 +190,30 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Helper function
      *
-     * The robot traverses the boundary of nodes whose labels are considered valid by [isLabelValid].
+     * The robot traverses the nodes on the outside of the boundary of tiles, provided [outerLabel] points to a tile.
      */
-    private fun traverseBoundary(isLabelValid: (Int) -> Boolean) {
-        val moveLabel = (1..6).map { offset -> (outerLabel + offset).mod(6) }.first(isLabelValid)
-        moveToLabel(moveLabel)
-        outerLabel = (moveLabel - 2).mod(6)
+    private fun traverseOutsideTileBoundary() {
+        val moveLabelL = (1..6).map { offset -> (outerLabel + offset).mod(6) }.first { label -> !hasTileAtLabel(label) }
+        val moveLabelR = (1..6).map { offset -> (outerLabel - offset).mod(6) }.first { label -> !hasTileAtLabel(label) }
+        if ((lhr && !labelIsTarget(moveLabelL)) || (!lhr && !labelIsTarget(moveLabelR))) {
+            lhr = !lhr
+        }
+        if (lhr) {
+            moveToLabel(moveLabelL)
+            outerLabel = (moveLabelL - 2).mod(6)
+        } else {
+            moveToLabel(moveLabelR)
+            outerLabel = (moveLabelR + 2).mod(6)
+        }
     }
 
     /**
      * Helper function
      *
-     * The robot traverses the nodes on the outside of the boundary of tiles, provided [outerLabel] points to a tile.
+     * The robot traverses the boundary of nodes whose labels are considered valid by [isLabelValid].
      */
-    private fun traverseOutsideTileBoundary() {
-        val moveLabel = (1..6).map { offset -> (outerLabel - offset).mod(6) }.first { label -> !hasTileAtLabel(label) }
+    private fun traverseBoundary(isLabelValid: (Int) -> Boolean) {
+        val moveLabel = (1..6).map { offset -> (outerLabel + offset).mod(6) }.first(isLabelValid)
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
     }
