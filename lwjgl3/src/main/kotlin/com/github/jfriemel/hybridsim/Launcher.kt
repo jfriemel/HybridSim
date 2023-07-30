@@ -65,6 +65,12 @@ class Main : CliktCommand() {
             "shall be executed for all given values of num_tiles, num_robots, and num_overhang.",
     ).int().restrictTo(min = 1).default(1)
 
+    private val threshold by option(
+        "--threshold", "-t",
+        help = "Only valid when used together with --no_gui. Restricts the number of rounds in a single run. If a " +
+            "run exceeds this number, it is repeated. Useful for algorithms that can get stuck in some configurations."
+    ).int().restrictTo(min = 1).default(Int.MAX_VALUE)
+
     private val outputFile by option(
         "--output", "-o",
         help = "Only valid when used together with --no_gui. The path to a .csv file where a report of the algorithm " +
@@ -73,7 +79,9 @@ class Main : CliktCommand() {
 
     override fun run() {
         if (noGui) {
-            MainCLI(algFile, configFile, genFile, numTiles, numRobots, numOverhang, numRuns, outputFile).main()
+            MainCLI(
+                algFile, configFile, genFile, numTiles, numRobots, numOverhang, numRuns,  threshold, outputFile
+            ).main()
         } else {
             Lwjgl3Application(
                 MainGUI(algFile, configFile, genFile, numTiles[0], numRobots[0], numOverhang[0]),

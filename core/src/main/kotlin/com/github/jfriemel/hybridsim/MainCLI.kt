@@ -15,6 +15,7 @@ class MainCLI(
     private val numRobots: List<Int>,
     private val numOverhang: List<Int>,
     private val numRuns: Int,
+    private val threshold: Int,
     private val outputFile: File?,
 ) {
 
@@ -43,8 +44,7 @@ class MainCLI(
             val k = Configuration.robots.keys.size
             val m = Configuration.targetNodes.size
             for (id in 0..<numRuns) {
-                Configuration.loadConfiguration(configJson)
-                singleRun(id, n, k, m, outputFile)
+                singleRun(configJson, id, n, k, m, threshold, outputFile)
             }
             return
         }
@@ -55,8 +55,7 @@ class MainCLI(
             for (k in numRobots) {
                 for (m in numOverhang) {
                     repeat(numRuns) {
-                        Configuration.generate(n, k, m)
-                        singleRun(id, n, k, m, outputFile)
+                        singleRun(null, id, n, k, m, threshold, outputFile)
                         id++
                     }
                 }
@@ -67,11 +66,24 @@ class MainCLI(
 }
 
 /**
- * Performs a full sequential scheduler run on the current [Configuration] until termination. Then writes the number of
- * rounds for the current configuration to the [outputFile] csv file.
+ * Loads the [Configuration] from [configJson] or generates a configuration if [configJson] is null. Then performs a
+ * full sequential scheduler run on the current [Configuration] until termination. Repeats the run if the number of
+ * rounds reaches [threshold] before termination. Then writes the number of rounds for the current configuration to the
+ * [outputFile] csv file.
  */
-private fun singleRun(id: Int, n: Int, k: Int, m: Int, outputFile: File?) {
-    val rounds = FullSequentialScheduler.run()
+private fun singleRun(configJson: String?, id: Int, n: Int, k: Int, m: Int, threshold: Int, outputFile: File?) {
+    var rounds: Int?
+    do {
+        if (configJson != null) {
+            Configuration.loadConfiguration(configJson)
+        } else {
+            Configuration.generate(n, k, m)
+        }
+        rounds = FullSequentialScheduler.run(threshold)
+        if (rounds == null) {
+            println("id=$id, n=$n, k=$k, m=$m, threshold $threshold reached, run aborted!")
+        }
+    } while (rounds == null)
     println("id=$id, n=$n, k=$k, m=$m, rounds=$rounds")
     outputFile?.let { file ->
         csvWriter().writeAll(listOf(listOf(id, n, k, m, rounds)), file, append = true)

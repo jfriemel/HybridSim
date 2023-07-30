@@ -6,12 +6,12 @@ object FullSequentialScheduler {
 
     /**
      * Sequentially actives robots (every robot exactly once per round) until all robots are finished or all target
-     * nodes are occupied by tiles.
+     * nodes are occupied by tiles or the number of rounds reaches [threshold].
      *
-     * @return The number of rounds until termination.
+     * @return The number of rounds until termination or null if the number of rounds reaches [threshold].
      */
-    fun run(): Int {
-        var round = 0
+    fun run(threshold: Int): Int? {
+        var rounds = 0
         var finished: Boolean
         val remainingTarget = Configuration.targetNodes.minus(Configuration.tiles.keys).toMutableSet()
         do {
@@ -21,15 +21,19 @@ object FullSequentialScheduler {
                 robot.triggerActivate(withUndo = false)
                 finished = finished && robot.finished()
             }
-            round += 1
+
             if (Configuration.targetNodes.isNotEmpty()) {
                 remainingTarget.removeAll(Configuration.tiles.keys)
                 if (remainingTarget.isEmpty()) {
                     finished = true
                 }
             }
+
+            if (rounds++ == threshold) {
+                return null
+            }
         } while (!finished)
-        return round
+        return rounds
     }
 
 }
