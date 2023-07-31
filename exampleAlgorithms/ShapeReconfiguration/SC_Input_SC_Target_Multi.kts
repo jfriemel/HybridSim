@@ -149,32 +149,41 @@ class RobotImpl(node: Node) : Robot(
                 ((robotAtLabel(moveDir!!) as RobotImpl).moveDir == (moveDir!! + 3).mod(6) ||
                     (robotAtLabel(moveDir!!) as RobotImpl).phase == Phase.FindBoundary)
         ) {
-            if (phase == Phase.FindRemovableOverhang &&
-                (robotAtLabel(moveDir!!) as RobotImpl).phase == Phase.FindRemovableOverhang) {
+            if (
+                    phase == Phase.FindRemovableOverhang &&
+                    (robotAtLabel(moveDir!!) as RobotImpl).phase == Phase.FindRemovableOverhang
+            ) {
                 phase = Phase.LeaveOverhang
             }
             switch(moveDir!!)
         } else if (
                 moveDir != null &&
                 carriesTile &&
-                isOnTile() &&
                 hasRobotAtLabel(moveDir!!) &&
                 !robotAtLabel(moveDir!!)!!.carriesTile
         ) {
             val robotNbr = (robotAtLabel(moveDir!!)!! as RobotImpl)
             carriesTile = false
-            phase = if (isOnTarget()) {
-                Phase.FindOverhang
-            } else {
-                Phase.LeaveOverhang
-            }
             robotNbr.carriesTile = true
             robotNbr.outerLabel = (moveDir!! - 2).mod(6)
-            robotNbr.phase = if (robotNbr.isOnTarget()) {
+            robotNbr.phase = if (phase == Phase.PlaceTargetTile || phase == Phase.Hanging) {
+                phase
+            } else if (labelIsTarget(moveDir!!)) {
                 Phase.FindDemandComponent
             } else {
                 Phase.LeaveOverhang
             }
+            phase = if (!isOnTile()) {
+                Phase.Hanging
+            } else if (isOnTarget()) {
+                Phase.FindOverhang
+            } else {
+                Phase.LeaveOverhang
+            }
+            updatePhase()
+            updateMoveDir()
+            robotNbr.updatePhase()
+            robotNbr.updateMoveDir()
         } else if (
                 moveDir != null &&
                 (phase == Phase.FindRemovableOverhang || phase == Phase.FindOverhang) &&
