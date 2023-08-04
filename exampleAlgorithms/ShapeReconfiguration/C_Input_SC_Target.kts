@@ -151,9 +151,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         if (
             (!entryTile || !hasTargetTileNbr())
             && !hasTileAtLabel((moveLabel + 1).mod(6)) && !labelIsTarget((moveLabel + 1).mod(6))
-            && validLabel((moveLabel + 2).mod(6))
-            && (validLabel((moveLabel + 3).mod(6))
-                || !hasTileAtLabel((moveLabel + 4).mod(6)) && !labelIsTarget((moveLabel + 4).mod(6)))
+            && hasTileAtLabel((moveLabel + 2).mod(6)) && !labelIsTarget((moveLabel + 2).mod(6))
+            && intArrayOf(3, 4, 5).all { offset -> !hasTileAtLabel((moveLabel + offset).mod(6)) }
         ) {
             liftTile()
             compressDir = (moveLabel + 1).mod(6)
