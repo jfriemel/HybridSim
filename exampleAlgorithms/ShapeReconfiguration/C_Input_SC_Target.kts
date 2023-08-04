@@ -6,6 +6,7 @@ private enum class Phase {
     // Block formation for finding outer boundary
     FindBlockTile,
     MoveBlockTile,
+    ReturnTile,
 
     // Compression and search for removable overhang tile
     FindOverhang,
@@ -35,10 +36,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private var compressDir: Int = -1
     private var hasMoved: Boolean = false
 
+    private var initialTarget = false
+
     override fun activate() {
         when (phase) {
             Phase.FindBlockTile -> findBlockTile()
             Phase.MoveBlockTile -> moveBlockTile()
+            Phase.ReturnTile -> returnTile()
             Phase.FindOverhang -> findOverhang()
             Phase.SearchAndLiftOverhang -> searchAndLiftOverhang()
             Phase.CompressOverhang -> compressOverhang()
@@ -50,7 +54,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     override fun getColor(): Color = when (phase) {
-        Phase.FindBlockTile, Phase.MoveBlockTile
+        Phase.FindBlockTile, Phase.MoveBlockTile, Phase.ReturnTile
             -> Color.ORANGE
         Phase.FindOverhang, Phase.SearchAndLiftOverhang, Phase.CompressOverhang, Phase.LeaveOverhang
             -> Color.SCARLET
@@ -68,6 +72,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *   [Phase.MoveBlockTile]
      */
     private fun findBlockTile() {
+        initialTarget = isOnTarget()
+
         // If at outer boundary, move to target tile and enter [Phase.FindOverhang]
         if (isOnTarget() && (hasOverhangNbr() || hasEmptyNonTargetNbr())) {
             outerLabel = overhangNbrLabel() ?: emptyNonTargetNbrLabel()!!
@@ -97,13 +103,50 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *
      * Moves a tile southeast until it encounters an empty node in the block formation algorithm.
      *
-     * Exit phase: [Phase.FindBlockTile]
+     * Exit phases:
+     *   [Phase.FindBlockTile]
+     *   [Phase.ReturnTile]
      */
     private fun moveBlockTile() {
         moveToLabel(2)
         if (!isOnTile()) {
+            if (!initialTarget && isOnTarget()) {
+                phase = Phase.ReturnTile
+            } else {
+                placeTile()
+                phase = Phase.FindBlockTile
+            }
+        }
+    }
+
+    /**
+     * Enter phase: [Phase.ReturnTile]
+     *
+     * Moves a tiles northwest to avoid placing it on a demand node not connected to the target tile shape.
+     * Then moves back southwest until it encounters a demand node to enter the target tile shape.
+     *
+     * Exit phases:
+     *   [Phase.FindOverhang]
+     *   [Phase.LeaveOverhang]
+     */
+    private fun returnTile() {
+        if (carriesTile && !isOnTile() && !isOnTarget()) {
             placeTile()
-            phase = Phase.FindBlockTile
+            return
+        } else if (!carriesTile && hasTargetTileNbr()) {
+            moveToLabel(targetTileNbrLabel()!!)
+            phase = Phase.FindOverhang
+            return
+        } else if (!carriesTile && hasEmptyTargetNbr()) {
+            outerLabel = emptyTargetNbrLabel()!!
+            phase = Phase.LeaveOverhang
+            return
+        }
+
+        if (carriesTile) {
+            moveToLabel(5)
+        } else {
+            moveToLabel(2)
         }
     }
 
@@ -139,6 +182,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *   [Phase.CompressOverhang]
      */
     private fun searchAndLiftOverhang() {
+        if (carriesTile && !isOnTile()) {
+            placeTile()
+            entryTile = true
+            return
+        }
+
         if (!hasOverhangNbr() || ((!entryTile || !hasTargetTileNbr()) && isOnTile() && isAtBorder())) {
             liftTile()
             phase = Phase.LeaveOverhang
@@ -149,7 +198,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first(validLabel)
 
         if (
-            (!entryTile || !hasTargetTileNbr())
+            !entryTile
             && !hasTileAtLabel((moveLabel + 1).mod(6)) && !labelIsTarget((moveLabel + 1).mod(6))
             && hasTileAtLabel((moveLabel + 2).mod(6)) && !labelIsTarget((moveLabel + 2).mod(6))
             && intArrayOf(3, 4, 5).all { offset -> !hasTileAtLabel((moveLabel + offset).mod(6)) }
@@ -181,9 +230,18 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
         if (carriesTile) {
-            placeTile()
+            if (
+                (hasTileAtLabel(compressDir) && !labelIsTarget(compressDir))
+                && (!hasTileAtLabel((compressDir + 1).mod(6)) || labelIsTarget((compressDir + 1).mod(6)))
+            ) {
+                moveToLabel((compressDir + 3).mod(6))
+                phase = Phase.SearchAndLiftOverhang
+            } else {
+                placeTile()
+            }
             return
         }
+
         moveToLabel((compressDir + 4).mod(6))
         outerLabel = (compressDir + 2).mod(6)
         phase = Phase.SearchAndLiftOverhang
@@ -203,7 +261,11 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             moveToLabel(moveLabel)
             outerLabel = (moveLabel + 3).mod(6)
             columnDir = moveLabel
-            phase = Phase.ExploreColumn
+            phase = if (carriesTile) {
+                Phase.ExploreColumn
+            } else {
+                Phase.FindOverhang
+            }
             return
         }
         val moveLabel = (1..6).map { (outerLabel + it).mod(6) }
