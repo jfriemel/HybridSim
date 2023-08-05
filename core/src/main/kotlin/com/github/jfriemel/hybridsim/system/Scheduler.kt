@@ -76,11 +76,12 @@ object Scheduler {
             }
 
             // Activate a number of robots (sequential activations, no overlap)
+            Configuration.addUndoStep()
             for (activationIndex in 1..activationsPerCycle) {
                 // Pick a random robot to activate (fair sequential scheduler)
                 val robot = robots[Random.nextInt(robots.size)]
                 try {
-                    robot.triggerActivate()
+                    robot.triggerActivate(withUndo = false)
                 } catch (e: Exception) {
                     // Ensure Scheduler does not crash when Robot crashes due to faulty algorithm script
                     logger.error { "Robot at ${robot.node} crashed!" }

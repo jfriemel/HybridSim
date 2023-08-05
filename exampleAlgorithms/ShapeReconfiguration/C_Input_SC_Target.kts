@@ -201,7 +201,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             !entryTile
             && !hasTileAtLabel((moveLabel + 1).mod(6)) && !labelIsTarget((moveLabel + 1).mod(6))
             && hasTileAtLabel((moveLabel + 2).mod(6)) && !labelIsTarget((moveLabel + 2).mod(6))
-            && intArrayOf(3, 4, 5).all { offset -> !hasTileAtLabel((moveLabel + offset).mod(6)) }
+            && intArrayOf(3, 4, 5).all { offset ->
+                !hasTileAtLabel((moveLabel + offset).mod(6)) || labelIsTarget((moveLabel + offset).mod(6))
+            }
         ) {
             liftTile()
             compressDir = (moveLabel + 1).mod(6)
@@ -230,9 +232,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
         if (carriesTile) {
+            val invalidNbrs = labels.filter { label -> !hasTileAtLabel(label) || labelIsTarget(label) }
             if (
                 (hasTileAtLabel(compressDir) && !labelIsTarget(compressDir))
-                && (!hasTileAtLabel((compressDir + 1).mod(6)) || labelIsTarget((compressDir + 1).mod(6)))
+                && (invalidNbrs.size > 2 && (compressDir + 1).mod(6) in invalidNbrs)
             ) {
                 moveToLabel((compressDir + 3).mod(6))
                 phase = Phase.SearchAndLiftOverhang
