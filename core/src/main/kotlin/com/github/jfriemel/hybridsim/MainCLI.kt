@@ -7,56 +7,86 @@ import com.github.jfriemel.hybridsim.system.GeneratorLoader
 import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
 import java.io.File
 
-class MainCLI(
-    private val algFile: File? = null,
-    private val configFile: File? = null,
-    private val genFile: File? = null,
-    private val numTiles: List<Int>,
-    private val numRobots: List<Int>,
-    private val numOverhang: List<Int>,
-    private val numRuns: Int,
-    private val threshold: Int,
-    private val outputFile: File?,
-) {
+data class CLIArguments(
+    val algFile: File? = null,
+    val configFile: File? = null,
+    val genFile: File? = null,
+    val configDir: File? = null,
+    val numTiles: List<Int>,
+    val numRobots: List<Int>,
+    val numOverhang: List<Int>,
+    val numRuns: Int,
+    val limit: Int,
+    val startID: Int,
+    val outputFile: File?,
+)
+
+class MainCLI(private val args: CLIArguments) {
 
     fun main() {
-        if (algFile == null || (genFile == null && configFile == null)) {
-            System.err.println("Cannot run without algorithm script and either generator script or configuration file!")
+        if (args.algFile == null || (args.genFile == null && args.configFile == null && args.configDir == null)) {
+            System.err.println(
+                "Cannot run without algorithm script and either generator script or configuration file or directory!"
+            )
             return
         }
 
         // Load algorithm
-        algFile.let { file -> AlgorithmLoader.loadAlgorithm(file) }
+        args.algFile.let { file -> AlgorithmLoader.loadAlgorithm(file) }
 
         // Load generator
-        genFile?.let { file -> GeneratorLoader.loadGenerator(file) }
+        args.genFile?.let { file -> GeneratorLoader.loadGenerator(file) }
 
         // Write CSV header
-        outputFile?.let { file ->
+        args.outputFile?.let { file ->
+            if (file.exists()) {
+                System.err.println("Output file $file already exists, aborting!")
+                return
+            }
+            file.parentFile.mkdirs()
             csvWriter().writeAll(listOf(listOf("id", "numTiles", "numRobots", "numOverhang", "rounds")), file)
         }
 
         // Run algorithm on given configuration
-        if (configFile != null) {
-            val configJson = configFile.readText()
-            Configuration.loadConfiguration(configJson)
-            val n = Configuration.tiles.keys.size
-            val k = Configuration.robots.keys.size
-            val m = Configuration.targetNodes.size
-            for (id in 0..<numRuns) {
-                singleRun(configJson, id, n, k, m, threshold, outputFile)
+        if (args.configFile != null) {
+            val configJson = args.configFile.readText()
+
+            for (id in args.startID..<(args.numRuns + args.startID)) {
+                Configuration.loadConfiguration(configJson)
+                val n = Configuration.tiles.keys.size
+                val k = Configuration.robots.keys.size
+                val m = Configuration.tiles.keys.minus(Configuration.targetNodes).size
+                singleRun(id, n, k, m, args.limit, args.outputFile)
+            }
+            return
+        }
+
+        // Run algorithm on all configurations in specified configuration directory
+        var id = args.startID
+        if (args.configDir != null) {
+            args.configDir.listFiles()?.filter { file ->
+                file.toString().endsWith(".json")
+            }?.forEach { file ->
+                val configJson = file.readText()
+                repeat(args.numRuns) {
+                    Configuration.loadConfiguration(configJson)
+                    val n = Configuration.tiles.keys.size
+                    val k = Configuration.robots.keys.size
+                    val m = Configuration.tiles.keys.minus(Configuration.targetNodes).size
+                    singleRun(id++, n, k, m, args.limit, args.outputFile)
+                }
             }
             return
         }
 
         // Run algorithm on generated configurations
-        var id = 0
-        for (n in numTiles) {
-            for (k in numRobots) {
-                for (m in numOverhang) {
-                    repeat(numRuns) {
-                        singleRun(null, id, n, k, m, threshold, outputFile)
-                        id++
+        id = args.startID
+        for (n in args.numTiles) {
+            for (k in args.numRobots) {
+                for (m in args.numOverhang) {
+                    repeat(args.numRuns) {
+                        Configuration.generate(n, k, m)
+                        singleRun(id++, n, k, m, args.limit, args.outputFile)
                     }
                 }
             }
@@ -66,25 +96,17 @@ class MainCLI(
 }
 
 /**
- * Loads the [Configuration] from [configJson] or generates a configuration if [configJson] is null. Then performs a
- * full sequential scheduler run on the current [Configuration] until termination. Repeats the run if the number of
- * rounds reaches [threshold] before termination. Then writes the number of rounds for the current configuration to the
+ * Performs a full sequential scheduler run on the current [Configuration] until termination or until the number of
+ * rounds reaches the specified [limit]. Finally, writes the number of rounds for the current configuration to the
  * [outputFile] csv file.
  */
-private fun singleRun(configJson: String?, id: Int, n: Int, k: Int, m: Int, threshold: Int, outputFile: File?) {
-    var rounds: Int?
-    do {
-        if (configJson != null) {
-            Configuration.loadConfiguration(configJson)
-        } else {
-            Configuration.generate(n, k, m)
-        }
-        rounds = FullSequentialScheduler.run(threshold)
-        if (rounds == null) {
-            println("id=$id, n=$n, k=$k, m=$m, threshold $threshold reached, run aborted!")
-        }
-    } while (rounds == null)
-    println("id=$id, n=$n, k=$k, m=$m, rounds=$rounds")
+private fun singleRun(id: Int, n: Int, k: Int, m: Int, limit: Int, outputFile: File?) {
+    val rounds: Int? = FullSequentialScheduler.run(limit)
+    if (rounds == null) {
+        println("id=$id, n=$n, k=$k, m=$m, rounds=$limit (limit!)")
+    } else {
+        println("id=$id, n=$n, k=$k, m=$m, rounds=$rounds")
+    }
     outputFile?.let { file ->
         csvWriter().writeAll(listOf(listOf(id, n, k, m, rounds)), file, append = true)
     }
