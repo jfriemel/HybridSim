@@ -104,7 +104,7 @@ class Menu(batch: Batch) {
             visTable {
                 setFillParent(true)
                 defaults().pad(BUTTON_PAD).colspan(3).width(BUTTON_WIDTH).minHeight(BUTTON_HEIGHT)
-                add(TextraLabel("[*]Menu (M)", KnownFonts.getGoNotoUniversalSDF()).apply {
+                add(TextraLabel("[*]Menu (M)", KnownFonts.getGoNotoUniversal()).apply {
                     color = Color.BLACK
                     alignment = Align.center
                 })
