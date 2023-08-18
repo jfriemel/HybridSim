@@ -22,7 +22,7 @@ Make sure that your imports do not clash with the default imports.
 For example, do not import java.awt.Color as it clashes with com.badlogic.gdx.graphics.Color.
  */
 
-/** This function must remain in your script. */
+/** This function must remain in your script (although you may change the implementation to fit your needs). */
 fun getRobot(node: Node, orientation: Int): Robot {
     return RobotImpl(node, orientation)
 }

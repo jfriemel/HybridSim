@@ -40,4 +40,9 @@ object GeneratorLoader {
         Configuration.generator = (engine as Invocable).invokeFunction("getGenerator") as Generator
     }
 
+    /** Replaces the [Configuration]'s [Generator] with the default implementation. */
+    fun reset() {
+        Configuration.generator = Generator()
+    }
+
 }
