@@ -2,8 +2,8 @@ package com.github.jfriemel.hybridsim
 
 import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
+import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
-import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

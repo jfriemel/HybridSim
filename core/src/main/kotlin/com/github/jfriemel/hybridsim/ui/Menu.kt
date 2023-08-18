@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.GeneratorLoader
 import com.github.jfriemel.hybridsim.system.Scheduler

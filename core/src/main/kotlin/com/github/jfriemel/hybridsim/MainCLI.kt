@@ -2,9 +2,9 @@ package com.github.jfriemel.hybridsim
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import com.github.jfriemel.hybridsim.cli.FullSequentialScheduler
+import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.GeneratorLoader
-import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
 import java.io.File
 
 data class CLIArguments(

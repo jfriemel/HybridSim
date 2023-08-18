@@ -1,15 +1,14 @@
-package com.github.jfriemel.hybridsim.ui
+package com.github.jfriemel.hybridsim.system
 
 import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
-import com.github.jfriemel.hybridsim.system.Configuration
-import com.github.jfriemel.hybridsim.system.Scheduler
+import ktx.log.logger
 import java.io.File
 import javax.script.Compilable
 import javax.script.Invocable
 import javax.script.ScriptEngineManager
 
-private val logger = ktx.log.logger<AlgorithmLoader>()
+private val logger = logger<AlgorithmLoader>()
 
 object AlgorithmLoader {
 

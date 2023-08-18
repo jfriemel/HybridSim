@@ -7,7 +7,6 @@ import com.beust.klaxon.Parser.Companion.default
 import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
-import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
 
 private data class TimeState(
     val tiles: MutableMap<Node, Tile>,

@@ -4,10 +4,10 @@ import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.GeneratorLoader
 import com.github.jfriemel.hybridsim.system.Scheduler
-import com.github.jfriemel.hybridsim.ui.AlgorithmLoader
 import com.github.jfriemel.hybridsim.ui.InputHandler
 import com.github.jfriemel.hybridsim.ui.Menu
 import com.github.jfriemel.hybridsim.ui.SimScreen

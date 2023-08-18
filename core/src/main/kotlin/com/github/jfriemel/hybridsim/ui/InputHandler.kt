@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.files.FileHandle
 import com.github.jfriemel.hybridsim.entities.Robot
 import com.github.jfriemel.hybridsim.entities.Tile
+import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
 import com.github.jfriemel.hybridsim.system.Scheduler
 import ktx.app.KtxInputAdapter
