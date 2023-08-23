@@ -1,5 +1,3 @@
-/** Single-robot line formation algorithm from https://doi.org/10.1007/s11047-019-09774-2 */
-
 fun getRobot(node: Node, orientation: Int): Robot {
     return RobotImpl(node, orientation)
 }
@@ -20,7 +18,7 @@ private enum class Phase {
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
     node = node,
-    orientation = 0,//orientation,
+    orientation = orientation,
     carriesTile = false,
     numPebbles = 0,
     maxPebbles = 0,
@@ -54,6 +52,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
     }
 
+    /**
+     * Enter phase: [Phase.MoveSouth]
+     *
+     * The robot moves to the southern end of its current column of tiles.
+     *
+     * Exit phase: [Phase.FindTile]
+     */
     private fun moveSouth() {
         if (hasTileAtLabel(3)) {
             moveToLabel(3)
@@ -63,6 +68,17 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         phase = Phase.FindTile
     }
 
+    /**
+     * Enter phase: [Phase.FindTile]
+     *
+     * The robot moves to the northernmost westernmost tile and lifts it. During the movement, it checks whether a line
+     * may already be formed. If so, it switches to the line moving phases.
+     *
+     * Exit phases:
+     *   [Phase.MoveLineNorthWest]
+     *   [Phase.MoveLineSouth]
+     *   [Phase.MoveTile]
+     */
     private fun findTile() {
         tilesToSides = tilesToSides || intArrayOf(1, 2, 4, 5).any { label -> hasTileAtLabel(label) }
         containsTarget = containsTarget || isOnTarget()
@@ -83,6 +99,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         phase = Phase.MoveTile
     }
 
+    /**
+     * Enter phase: [Phase.MoveTile]
+     *
+     * The robot places its carried tile below the southern tip of its tile column.
+     *
+     * Exit phase: [Phase.FindTile]
+     */
     private fun moveTile() {
         if (!isOnTile()) {
             placeTile()
@@ -92,6 +115,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         moveToLabel(3)
     }
 
+    /**
+     * Enter phase: [Phase.MoveLineNorthWest]
+     *
+     * The robot moves the entire line in direction north-west.
+     *
+     * Exit phase: [Phase.MoveLineSouth]
+     */
     private fun moveLineNorthWest() {
         if (!carriesTile) {
             if (hasTileAtLabel(1)) {
@@ -120,6 +150,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
     }
 
+    /**
+     * Enter phase: [Phase.MoveLineSouth]
+     *
+     * The robot moves the entire line in direction south.
+     *
+     * Exit phase: [Phase.Finished]
+     */
     private fun moveLineSouth() {
         if (!carriesTile) {
             if (hasTileAtLabel(0)) {

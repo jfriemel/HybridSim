@@ -1,5 +1,5 @@
 /**
- * Exploration algorithm for (some) target tile shapes with holes without using pebbles
+ * Exploration algorithm for (some) target tile shapes with holes without using pebbles.
  * Partially based on arbitrary layer traversal algorithm from https://ris.uni-paderborn.de/record/25126
  * Based on maze exploration algorithm from https://doi.org/10.1109/SFCS.1978.30
  * Pebbles are simulated by moving tiles from target nodes to non-target nodes at boundaries.
@@ -95,7 +95,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.PlaceEmulatedPebble -> placeEmulatedPebble()
             Phase.LiftEmulatedPebble -> liftEmulatedPebble()
         }
-        println("p=$phase  d=$pebbleMoveDist  m=$pebbleMoveStep  t=$pebbleToggleStep  h=$heightSign  n=$numEmulatedPebbles  e=$enterLabel  del=$delta  o=$pebbleOverhangNbr  dirs=[$pebbleADir,$pebbleBDir]")
+        // Debugging:
+        // println("p=$phase  d=$pebbleMoveDist  m=$pebbleMoveStep  t=$pebbleToggleStep  h=$heightSign  n=$numEmulatedPebbles  e=$enterLabel  del=$delta  o=$pebbleOverhangNbr  dirs=[$pebbleADir,$pebbleBDir]")
     }
 
     override fun getColor(): Color {

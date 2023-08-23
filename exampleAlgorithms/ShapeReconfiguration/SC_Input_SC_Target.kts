@@ -94,8 +94,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
      *
      * The robot traverses the overhang boundary until it encounters a tile that can be removed without breaking the
      * connectivity of the overhang component (checked by [isAtOverhangBorder]).
-     * To make sure that the robot does not disconnect the overhang component from the rest of the tile structure, it
-     * does not lift the first overhang tile it moved to (checked by [entryTile]) unless it is the only tile of the
+     * To make sure that the robot does not disconnect the overhang component from the rest of the tile shape, it does
+     * not lift the first overhang tile it moves to (checked by [entryTile]) unless that is the only tile of the
      * component.
      *
      * Exit phase: [Phase.FindDemandComponent]
