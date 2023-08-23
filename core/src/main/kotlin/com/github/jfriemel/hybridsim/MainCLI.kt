@@ -14,7 +14,7 @@ data class CLIArguments(
     val configDir: File? = null,
     val numTiles: List<Int>,
     val numRobots: List<Int>,
-    val numOverhang: List<Int>,
+    val numOverhangs: List<Int>,
     val numRuns: Int,
     val limit: Int,
     val startID: Int,
@@ -83,7 +83,7 @@ class MainCLI(private val args: CLIArguments) {
         id = args.startID
         for (n in args.numTiles) {
             for (k in args.numRobots) {
-                for (m in args.numOverhang) {
+                for (m in args.numOverhangs) {
                     repeat(args.numRuns) {
                         Configuration.generate(n, k, m)
                         singleRun(id++, n, k, m, args.limit, args.outputFile)

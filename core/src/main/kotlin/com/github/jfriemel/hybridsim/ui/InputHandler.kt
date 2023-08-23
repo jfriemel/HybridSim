@@ -132,10 +132,8 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
 
             Input.Buttons.RIGHT -> {
                 if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {  // Log coordinates, sometimes helpful
-                    logger.debug { "Screen coordinates:     ($screenX, $screenY)" }
-                    logger.debug { "Node coordinates:       (${node.x}, ${node.y})" }
-                    val sciCoords = node.scientificCoordinates()
-                    logger.debug { "Scientific coordinates: (${sciCoords.first}, ${sciCoords.second})" }
+                    logger.debug { "Screen coordinates: ($screenX, $screenY)" }
+                    logger.debug { "Node coordinates:   (${node.x}, ${node.y})" }
                 } else {
                     touchDragged(screenX, screenY, pointer)
                 }

@@ -16,26 +16,7 @@ data class Node(val x: Int, val y: Int) {
     /** All six neighbors of the current [Node]. */
     fun neighbors(): Collection<Node> = (0..5).map { dir -> nodeInDir(dir) }
 
-    /**
-     * Converts the node's internal integer coordinates to scientific coordinates as used in the hybrid model
-     * literature. Returns scientific coordinates as a [Pair] (x, y).
-     * See: https://doi.org/10.1007/s11047-019-09774-2
-     */
-    fun scientificCoordinates(): Pair<Double, Double> {
-        val scX = x.toDouble()
-        val scY = y.toDouble() - if (x.mod(2) == 0) 0.0 else 0.5
-        return Pair(scX, scY)
-    }
-
     companion object {
         val origin = Node(0, 0)
-
-        /** @return A [Node] corresponding to the given scientific node coordinates ([scX], [scY]). */
-        @Suppress("Unused")
-        fun sciCoordsToNode(scX: Double, scY: Double): Node {
-            val x = scX.toInt()
-            val y = (scY + if (x.mod(2) == 0) 0.0 else 0.5).toInt()
-            return Node(x, y)
-        }
     }
 }
