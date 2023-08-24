@@ -18,7 +18,8 @@ Default imports (no need to add them to the script):
 import com.github.jfriemel.hybridsim.entities.*
 import com.badlogic.gdx.graphics.Color
 
-Make sure that your imports do not clash with the default imports.
+You can still add these imports manually to make use of your IDEs autocomplete features.
+Make sure that your other imports do not clash with the default imports.
 For example, do not import java.awt.Color as it clashes with com.badlogic.gdx.graphics.Color.
  */
 

@@ -1,3 +1,4 @@
+import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -112,7 +113,10 @@ class GeneratorImpl(): Generator() {
                 .flatMap { node -> node.neighbors() }
                 .minus(descriptor.tileNodes)
                 .toMutableSet()
-            repeat(numTiles / 2) {
+            if (closingTileCandidates.isEmpty()) {
+                closingTileCandidates.add(Node.origin)
+            }
+            repeat(ceil(numTiles / 2f).toInt()) {
                 val nextNode = closingTileCandidates.random()
                 descriptor.tileNodes.add(nextNode)
                 closingTileCandidates.addAll(

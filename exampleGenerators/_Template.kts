@@ -18,7 +18,8 @@ import com.github.jfriemel.hybridsim.entities.Node
 import com.github.jfriemel.hybridsim.system.ConfigurationDescriptor
 import com.github.jfriemel.hybridsim.system.Generator
 
-Make sure that your imports do not clash with the default imports.
+You can still add these imports manually to make use of your IDEs autocomplete features.
+Make sure that your other imports do not clash with the default imports.
  */
 
 /** This function must remain in your script (although you may change the implementation to fit your needs). */
