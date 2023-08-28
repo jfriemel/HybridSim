@@ -1,4 +1,17 @@
 buildscript {
+  // Dependency versions
+  ext.badassRuntimeVersion="1.13.0"
+  ext.cliktVersion="4.2.0"
+  ext.gdxVersion="1.12.0"
+  ext.jUnitPlatformVersion="1.10.0"
+  ext.jUnitVersion="5.10.0"
+  ext.klaxonVersion="5.6"
+  ext.kotlinCsvVersion="1.9.2"
+  ext.kotlinVersion="1.9.10"
+  ext.kotlinxCoroutinesVersion="1.7.3"
+  ext.ktxVersion="1.12.0-rc1"
+  ext.textraTypistVersion="0.9.0"
+
   repositories {
     mavenCentral()
     maven { url 'https://s01.oss.sonatype.org' }
@@ -21,11 +34,6 @@ allprojects {
 configure(subprojects) {
   apply plugin: 'java-library'
   apply plugin: 'kotlin'
-  kotlin {
-    jvmToolchain {
-      languageVersion.set(JavaLanguageVersion.of("17"))
-    }
-  }
 }
 
 subprojects {

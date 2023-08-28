@@ -22,7 +22,7 @@ dependencies {
   implementation project(':core')
 }
 
-def os = System.properties['os.name'].toLowerCase()
+def os = System.properties['os.name'].toString().toLowerCase()
 
 run {
   workingDir = rootProject.file('assets').path
@@ -31,6 +31,12 @@ run {
   if (os.contains('mac')) {
     // Required to run LWJGL3 Java apps on MacOS
     jvmArgs += "-XstartOnFirstThread"
+  }
+}
+
+kotlin {
+  jvmToolchain {
+    languageVersion.set(JavaLanguageVersion.of(jvmVersion))
   }
 }
 
@@ -57,7 +63,6 @@ jar {
     file(archiveFile).setExecutable(true, false)
   }
 }
-
 
 runtime {
   options.set(['--strip-debug',

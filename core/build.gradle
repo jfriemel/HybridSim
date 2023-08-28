@@ -24,6 +24,12 @@ dependencies {
   testRuntimeOnly "org.junit.platform:junit-platform-launcher:$jUnitPlatformVersion"
 }
 
+kotlin {
+  jvmToolchain {
+    languageVersion.set(JavaLanguageVersion.of(jvmVersion))
+  }
+}
+
 test {
   useJUnitPlatform()
 }
