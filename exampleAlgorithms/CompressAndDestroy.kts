@@ -1,9 +1,8 @@
 /**
- * The algorithm assumes that the robot is on the outer tile boundary and not adjacent to any other boundary.
- * The robot removes all tiles by destroying safely removable tiles and moving safely movable tiles away from the outer
- * boundary, filling holes, until all tiles are destroyed.
+ * The algorithm assumes that the robot is on the outer tile boundary and not adjacent to any other
+ * boundary. The robot removes all tiles by destroying safely removable tiles and moving safely
+ * movable tiles away from the outer boundary, filling holes, until all tiles are destroyed.
  */
-
 import com.github.jfriemel.hybridsim.system.Configuration
 
 fun getRobot(node: Node, orientation: Int): Robot {
@@ -17,13 +16,14 @@ private enum class Phase {
     Finished,
 }
 
-class RobotImpl(node: Node, orientation: Int) : Robot(
-    node = node,
-    orientation = orientation,
-    carriesTile = false,
-    numPebbles = 0,
-    maxPebbles = 0,
-) {
+class RobotImpl(node: Node, orientation: Int) :
+    Robot(
+        node = node,
+        orientation = orientation,
+        carriesTile = false,
+        numPebbles = 0,
+        maxPebbles = 0,
+    ) {
     private var phase = Phase.Initialize
 
     private var outerLabel = -1
@@ -41,18 +41,19 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     override fun finished(): Boolean = phase == Phase.Finished
 
-    override fun getColor(): Color = when (phase) {
-        Phase.Initialize -> Color.ORANGE
-        Phase.SearchAndDestroy -> Color.SKY
-        Phase.Compress -> Color.TEAL
-        Phase.Finished -> Color.BLACK
-    }
+    override fun getColor(): Color =
+        when (phase) {
+            Phase.Initialize -> Color.ORANGE
+            Phase.SearchAndDestroy -> Color.SKY
+            Phase.Compress -> Color.TEAL
+            Phase.Finished -> Color.BLACK
+        }
 
     /**
      * Enter phase: [Phase.Initialize]
      *
-     * The robot sets a pointer to the outer boundary. If it has no empty node neighbor, it moves in direction 0 until
-     * it finds one.
+     * The robot sets a pointer to the outer boundary. If it has no empty node neighbor, it moves in
+     * direction 0 until it finds one.
      *
      * Exit phase: [Phase.SearchAndDestroy]
      */
@@ -70,14 +71,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Enter phase: [Phase.SearchAndDestroy]
      *
-     * Whenever the robot finds a safely removable tile, it destroys it.
-     * Whenever the robot finds a tile that can be moved towards the inner boundary, it lifts it and enters
-     * [Phase.Compress].
-     * The robot traverses the tile boundary until no tiles are left, then it enters [Phase.Finished].
+     * Whenever the robot finds a safely removable tile, it destroys it. Whenever the robot finds a
+     * tile that can be moved towards the inner boundary, it lifts it and enters [Phase.Compress].
+     * The robot traverses the tile boundary until no tiles are left, then it enters
+     * [Phase.Finished].
      *
-     * Exit phases:
-     *   [Phase.Compress]
-     *   [Phase.Finished]
+     * Exit phases: [Phase.Compress] [Phase.Finished]
      */
     private fun searchAndDestroy() {
         if (isOnTile() && numBoundaries() == 1) {
@@ -85,15 +84,17 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             return
         }
 
-        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label -> hasTileAtLabel(label) }
+        val moveLabel =
+            (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label -> hasTileAtLabel(label) }
         if (moveLabel == null) {
             phase = Phase.Finished
             return
         }
 
         if (
-            !hasTileAtLabel((moveLabel + 1).mod(6)) && hasTileAtLabel((moveLabel + 2).mod(6))
-            && (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6)))
+            !hasTileAtLabel((moveLabel + 1).mod(6)) &&
+                hasTileAtLabel((moveLabel + 2).mod(6)) &&
+                (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6)))
         ) {
             liftTile()
             compressDir = (moveLabel + 1).mod(6)
@@ -109,8 +110,8 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     /**
      * Enter phase: [Phase.Compress]
      *
-     * The robot moves the carried tile towards the inner boundary, places it, moves back, and switches back to
-     * [Phase.SearchAndDestroy].
+     * The robot moves the carried tile towards the inner boundary, places it, moves back, and
+     * switches back to [Phase.SearchAndDestroy].
      *
      * Exit phase: [Phase.SearchAndDestroy]
      */

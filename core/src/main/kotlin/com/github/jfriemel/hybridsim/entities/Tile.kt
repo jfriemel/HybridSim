@@ -7,14 +7,15 @@ import com.github.jfriemel.hybridsim.system.Configuration
 // Typically, no more than one pebble is allowed per tile; but, you know, future-proofing
 const val MAX_PEBBLES_TILE: Int = 1
 
-class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) : Entity(node, sprite) {
+class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) :
+    Entity(node, sprite) {
 
     private var tileColor: Color? = null
 
     /**
-     * Returns the tile's color. If [tileColor] is not null, [tileColor] is returned.
-     * Otherwise, if no target nodes exist, [colorDefault] is returned.
-     * If the tile is at a target node, [colorTarget] is returned. If not, [colorOverhang] is returned.
+     * Returns the tile's color. If [tileColor] is not null, [tileColor] is returned. Otherwise, if
+     * no target nodes exist, [colorDefault] is returned. If the tile is at a target node,
+     * [colorTarget] is returned. If not, [colorOverhang] is returned.
      */
     override fun getColor(): Color {
         return if (tileColor != null) {
@@ -33,7 +34,9 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
         tileColor = color
     }
 
-    /** Adds a pebble to the tile if the tile can hold another pebble. Returns true if successful. */
+    /**
+     * Adds a pebble to the tile if the tile can hold another pebble. Returns true if successful.
+     */
     fun addPebble(): Boolean {
         if (numPebbles >= MAX_PEBBLES_TILE) {
             return false
@@ -42,7 +45,9 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
         return true
     }
 
-    /** Removes a pebble from the tile if the tile is holding a pebble. Returns true if successful. */
+    /**
+     * Removes a pebble from the tile if the tile is holding a pebble. Returns true if successful.
+     */
     fun removePebble(): Boolean {
         if (numPebbles <= 0) {
             return false

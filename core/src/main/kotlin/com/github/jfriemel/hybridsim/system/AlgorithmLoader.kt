@@ -15,14 +15,14 @@ object AlgorithmLoader {
     private var invocator: Invocable? = null
 
     /**
-     * Loads a new algorithm from either the [scriptFile] or the [scriptString] (kts script, see examples).
-     * The script implements a [Robot] and overrides the existing activate() function.
+     * Loads a new algorithm from either the [scriptFile] or the [scriptString] (kts script, see
+     * examples). The script implements a [Robot] and overrides the existing activate() function.
      *
-     * Important: The script needs to have a getRobot() function of the following form:
-     *     fun getRobot(node: Node, orientation: Int): Robot
+     * Important: The script needs to have a getRobot() function of the following form: fun
+     * getRobot(node: Node, orientation: Int): Robot
      *
-     * If this function is absent, or there is a syntax error in the script, or the script could not be loaded for any
-     * other reason, the program crashes.
+     * If this function is absent, or there is a syntax error in the script, or the script could not
+     * be loaded for any other reason, the program crashes.
      */
     fun loadAlgorithm(scriptFile: File? = null, scriptString: String? = null) {
         val script = scriptFile?.readText()?.trim() ?: scriptString
@@ -36,9 +36,11 @@ object AlgorithmLoader {
 
         // Compile the script
         val engine = ScriptEngineManager().getEngineByExtension("kts") as Compilable
-        engine.compile(
-            "import com.github.jfriemel.hybridsim.entities.*; import com.badlogic.gdx.graphics.Color"
-        ).eval()
+        engine
+            .compile(
+                "import com.github.jfriemel.hybridsim.entities.*; import com.badlogic.gdx.graphics.Color"
+            )
+            .eval()
         engine.compile(script).eval()
 
         // Replace robots in the configuration with robots from the loaded script
@@ -48,22 +50,30 @@ object AlgorithmLoader {
     }
 
     /**
-     * Replaces the [Robot] at the given [node] with the robot from the most recently loaded kts script.
-     * Does nothing if there is no robot at the [node] or if no kts script was loaded before the call.
+     * Replaces the [Robot] at the given [node] with the robot from the most recently loaded kts
+     * script. Does nothing if there is no robot at the [node] or if no kts script was loaded before
+     * the call.
      */
     fun replaceRobot(node: Node) {
         val robot = Configuration.robots[node] ?: return
         Configuration.robots[node] = getAlgorithmRobot(robot)
     }
 
-    /** Returns a [Robot] with the most recently loaded algorithm and the same properties as the given [robot]. */
+    /**
+     * Returns a [Robot] with the most recently loaded algorithm and the same properties as the
+     * given [robot].
+     */
     fun getAlgorithmRobot(robot: Robot): Robot {
         return invocator?.let { inv ->
             inv.invokeFunction("getRobot", robot.node, robot.orientation) as Robot
-        } ?: robot
+        }
+            ?: robot
     }
 
-    /** Resets to the default algorithm and replaces all [Robot]s in the [Configuration] with default robots. */
+    /**
+     * Resets to the default algorithm and replaces all [Robot]s in the [Configuration] with default
+     * robots.
+     */
     fun reset() {
         // Reset script function invocator so all new robots are default robots
         invocator = null

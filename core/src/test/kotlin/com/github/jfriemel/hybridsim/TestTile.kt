@@ -69,5 +69,4 @@ class TestTile {
         tile.setColor(Color.CHARTREUSE)
         Assertions.assertEquals(Color.CHARTREUSE, tile.getColor())
     }
-
 }

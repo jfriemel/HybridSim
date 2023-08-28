@@ -8,13 +8,17 @@ import kotlin.random.Random
 open class Generator {
 
     /**
-     * Generates a [Configuration] with [numTiles] tiles, [numRobots] robots, and [numOverhang] overhangs.
-     * Does not generate target nodes if [numOverhang] is negative.
-     * You can write and load your own Generator that overrides this function.
+     * Generates a [Configuration] with [numTiles] tiles, [numRobots] robots, and [numOverhang]
+     * overhangs. Does not generate target nodes if [numOverhang] is negative. You can write and
+     * load your own Generator that overrides this function.
      *
      * @return A [ConfigurationDescriptor] for the generated configuration.
      */
-    open fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1): ConfigurationDescriptor {
+    open fun generate(
+        numTiles: Int,
+        numRobots: Int,
+        numOverhang: Int = -1
+    ): ConfigurationDescriptor {
         val descriptor = ConfigurationDescriptor(mutableSetOf(), mutableSetOf(), mutableSetOf())
 
         if (numTiles <= 0) {
@@ -31,9 +35,7 @@ open class Generator {
                     nextNode = targetCandidates.random()
                 } while (!isValidCandidate(nextNode, descriptor.targetNodes))
                 descriptor.targetNodes.add(nextNode)
-                targetCandidates.addAll(
-                    nextNode.neighbors().minus(descriptor.targetNodes)
-                )
+                targetCandidates.addAll(nextNode.neighbors().minus(descriptor.targetNodes))
                 targetCandidates.remove(nextNode)
             }
             val targetRemoveCandidates = descriptor.targetNodes.toMutableSet()
@@ -60,12 +62,14 @@ open class Generator {
                 }
             }
             descriptor.tileNodes.add(targetTileOrigin)
-            val targetTileCandidates = targetTileOrigin.neighbors().intersect(descriptor.targetNodes).toMutableSet()
+            val targetTileCandidates =
+                targetTileOrigin.neighbors().intersect(descriptor.targetNodes).toMutableSet()
             repeat(numTiles - min(numOverhang, numTiles - 1) - 1) {
                 val nextNode = targetTileCandidates.random()
                 descriptor.tileNodes.add(nextNode)
                 targetTileCandidates.addAll(
-                    nextNode.neighbors()
+                    nextNode
+                        .neighbors()
                         .minus(descriptor.tileNodes)
                         .intersect(descriptor.targetNodes)
                 )
@@ -73,16 +77,16 @@ open class Generator {
             }
 
             // Overhang tiles
-            val overhangCandidates = descriptor.tileNodes.flatMap { node -> node.neighbors() }
-                .minus(descriptor.targetNodes)
-                .toMutableSet()
+            val overhangCandidates =
+                descriptor.tileNodes
+                    .flatMap { node -> node.neighbors() }
+                    .minus(descriptor.targetNodes)
+                    .toMutableSet()
             repeat(min(numOverhang, numTiles - 1)) {
                 val nextNode = overhangCandidates.random()
                 descriptor.tileNodes.add(nextNode)
                 overhangCandidates.addAll(
-                    nextNode.neighbors()
-                        .minus(descriptor.tileNodes)
-                        .minus(descriptor.targetNodes)
+                    nextNode.neighbors().minus(descriptor.tileNodes).minus(descriptor.targetNodes)
                 )
                 overhangCandidates.remove(nextNode)
             }
@@ -98,9 +102,7 @@ open class Generator {
                     nextNode = tileCandidates.random()
                 } while (!isValidCandidate(nextNode, descriptor.tileNodes))
                 descriptor.tileNodes.add(nextNode)
-                tileCandidates.addAll(
-                    nextNode.neighbors().minus(descriptor.tileNodes)
-                )
+                tileCandidates.addAll(nextNode.neighbors().minus(descriptor.tileNodes))
                 tileCandidates.remove(nextNode)
             }
             // Remove n tiles, end up with n/2 tiles, maintain simple connectivity
@@ -111,25 +113,22 @@ open class Generator {
                     nextNode = tileRemoveCandidates.random()
                 } while (!isValidCandidate(nextNode, descriptor.tileNodes))
                 descriptor.tileNodes.remove(nextNode)
-                tileRemoveCandidates.addAll(
-                    nextNode.neighbors().intersect(descriptor.tileNodes)
-                )
+                tileRemoveCandidates.addAll(nextNode.neighbors().intersect(descriptor.tileNodes))
                 tileRemoveCandidates.remove(nextNode)
             }
             // Add n/2 tiles, end up with n tiles, allow tiles to close holes
-            val closingTileCandidates = descriptor.tileNodes
-                .flatMap { node -> node.neighbors() }
-                .minus(descriptor.tileNodes)
-                .toMutableSet()
+            val closingTileCandidates =
+                descriptor.tileNodes
+                    .flatMap { node -> node.neighbors() }
+                    .minus(descriptor.tileNodes)
+                    .toMutableSet()
             if (closingTileCandidates.isEmpty()) {
                 closingTileCandidates.add(Node.origin)
             }
             repeat(ceil(numTiles / 2f).toInt()) {
                 val nextNode = closingTileCandidates.random()
                 descriptor.tileNodes.add(nextNode)
-                closingTileCandidates.addAll(
-                    nextNode.neighbors().minus(descriptor.tileNodes)
-                )
+                closingTileCandidates.addAll(nextNode.neighbors().minus(descriptor.tileNodes))
                 closingTileCandidates.remove(nextNode)
             }
         }
@@ -147,7 +146,7 @@ open class Generator {
 
     private fun isValidCandidate(candidate: Node, nodeSet: Set<Node>): Boolean {
         val otherDirs = (0..5).filter { dir -> candidate.nodeInDir(dir) !in nodeSet }
-        return otherDirs.size == 6 || otherDirs.filter { label -> (label + 1).mod(6) !in otherDirs }.size == 1
+        return otherDirs.size == 6 ||
+            otherDirs.filter { label -> (label + 1).mod(6) !in otherDirs }.size == 1
     }
-
 }

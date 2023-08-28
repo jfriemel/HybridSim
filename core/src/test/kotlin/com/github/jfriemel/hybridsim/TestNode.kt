@@ -39,5 +39,4 @@ class TestNode {
         Assertions.assertEquals(6, node.neighbors().size)
         Assertions.assertTrue(Node(nbrX, nbrY) in node.neighbors())
     }
-
 }

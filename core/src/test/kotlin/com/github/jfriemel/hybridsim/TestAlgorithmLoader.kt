@@ -8,7 +8,8 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-private const val TEST_SCRIPT = """
+private const val TEST_SCRIPT =
+    """
     // Every robot has orientation 5
     fun getRobot(node: Node, orientation: Int) = Robot(node, orientation = 5)
 """
@@ -54,5 +55,4 @@ class TestAlgorithmLoader {
         val algorithmRobot = AlgorithmLoader.getAlgorithmRobot(robot)
         Assertions.assertEquals(3, algorithmRobot.orientation)
     }
-
 }

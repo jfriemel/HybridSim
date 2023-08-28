@@ -28,8 +28,7 @@ object Configuration {
     var robots: MutableMap<Node, Robot> = HashMap()
     var targetNodes: MutableSet<Node> = HashSet()
 
-    @Json(ignored = true)
-    var generator = Generator()
+    @Json(ignored = true) var generator = Generator()
 
     private var undoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
     private var redoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
@@ -37,9 +36,9 @@ object Configuration {
     private val klaxon = Klaxon()
 
     /**
-     * Generate a configuration with the specified number of [Tile]s ([numTiles]), [Robot]s ([numRobots]),
-     * and overhang tiles ([numOverhang]).
-     * Does not generate target nodes if [numOverhang] < 0.
+     * Generate a configuration with the specified number of [Tile]s ([numTiles]), [Robot]s
+     * ([numRobots]), and overhang tiles ([numOverhang]). Does not generate target nodes if
+     * [numOverhang] < 0.
      */
     fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1) {
         Scheduler.stop()
@@ -48,7 +47,9 @@ object Configuration {
 
         val descriptor = generator.generate(numTiles, numRobots, numOverhang)
         descriptor.tileNodes.forEach { tileNode -> addTile(Tile(tileNode)) }
-        descriptor.robotNodes.forEach { robotNode -> addRobot(AlgorithmLoader.getAlgorithmRobot(Robot(robotNode))) }
+        descriptor.robotNodes.forEach { robotNode ->
+            addRobot(AlgorithmLoader.getAlgorithmRobot(Robot(robotNode)))
+        }
         targetNodes = descriptor.targetNodes
     }
 
@@ -120,7 +121,10 @@ object Configuration {
         targetNodes.remove(node)
     }
 
-    /** Undo the last operation that affected the [Configuration]. Returns true if undo was successful. */
+    /**
+     * Undo the last operation that affected the [Configuration]. Returns true if undo was
+     * successful.
+     */
     fun undo() = undo(undoQueue, redoQueue)
 
     /** Revert last undo. Returns true if redo was successful. */
@@ -133,9 +137,9 @@ object Configuration {
     fun redoSteps(): Int = redoQueue.size
 
     /**
-     * Undo/redo the last operation that affected the [Configuration].
-     * For undo: [uq] := [undoQueue], [rq] := [redoQueue]
-     * For redo: [uq] := [redoQueue], [rq] := [undoQueue]
+     * Undo/redo the last operation that affected the [Configuration]. For undo: [uq] :=
+     * [undoQueue], [rq] := [redoQueue] For redo: [uq] := [redoQueue], [rq] := [undoQueue]
+     *
      * @return True if undo/redo was successful.
      */
     private fun undo(uq: ArrayDeque<TimeState>, rq: ArrayDeque<TimeState>): Boolean {
@@ -156,11 +160,11 @@ object Configuration {
         addUndoStep()
         klaxon.parse<Configuration>(json = json)
 
-        /*
-         * Klaxon converts the keys of Maps to Strings. To get our Node keys back, we associate the Map entries (tiles
-         * or robots) by their nodes. Also, the collections created by Klaxon are immutable, so we make them mutable.
-         * There is probably a much cleaner way to do this (with Klaxon Converters), but this works well enough.
-         */
+        // Klaxon converts the keys of Maps to Strings. To get our Node keys back, we associate the
+        // Map entries (tiles or robots) by their nodes. Also, the collections created by Klaxon are
+        // immutable, so we make them mutable.
+        // There is probably a much cleaner way to do this (with Klaxon Converters), but this works
+        // well enough.
         tiles = tiles.values.associateBy { it.node }.toMutableMap()
         robots = robots.values.associateBy { it.node }.toMutableMap()
         robots.values.forEach { AlgorithmLoader.replaceRobot(it.node) }
@@ -173,11 +177,14 @@ object Configuration {
         if (!prettyPrint) {
             return jsonString
         }
-        return (default().parse(StringBuilder(jsonString)) as JsonObject).toJsonString(prettyPrint = true)
+        return (default().parse(StringBuilder(jsonString)) as JsonObject).toJsonString(
+            prettyPrint = true
+        )
     }
 
     /**
-     * To avoid unexpected behavior, the [undoQueue] and [redoQueue] can be cleared when loading algorithms.
+     * To avoid unexpected behavior, the [undoQueue] and [redoQueue] can be cleared when loading
+     * algorithms.
      */
     fun clearUndoQueues() {
         undoQueue.clear()
@@ -185,8 +192,8 @@ object Configuration {
     }
 
     /**
-     * Clears the configuration variables [tiles], [robots], and [targetNodes].
-     * Also clears [undoQueue] and [redoQueue] if [clearQueues] is true.
+     * Clears the configuration variables [tiles], [robots], and [targetNodes]. Also clears
+     * [undoQueue] and [redoQueue] if [clearQueues] is true.
      */
     fun clear(clearQueues: Boolean = true) {
         arrayOf(tiles, robots).forEach { entityMap -> entityMap.clear() }
@@ -194,7 +201,6 @@ object Configuration {
         if (clearQueues) {
             clearUndoQueues()
         }
-
     }
 
     /** Add the current state of the [Configuration] to the [undoQueue], clear the [redoQueue]. */
@@ -205,7 +211,7 @@ object Configuration {
 
     /** Add the current state of the [Configuration] to the given undo/redo [queue]. */
     private fun addToQueue(queue: ArrayDeque<TimeState>) {
-        if (queue.size == MAX_UNDO_STATES) {  // Keep memory consumption in check
+        if (queue.size == MAX_UNDO_STATES) { // Keep memory consumption in check
             queue.removeFirst()
         }
         // Deep copies of robots and tiles:
@@ -213,5 +219,4 @@ object Configuration {
         val queueRobots = robots.mapValues { entry -> entry.value.clone() as Robot }.toMutableMap()
         queue.add(TimeState(queueTiles, queueRobots, targetNodes.toMutableSet()))
     }
-
 }

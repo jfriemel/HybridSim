@@ -10,7 +10,7 @@ buildscript {
 apply plugin: 'org.beryx.runtime'
 
 application {
-  sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
+  sourceSets.main.resources.srcDirs += [rootProject.file('assets').path]
   mainClass.set('com.github.jfriemel.hybridsim.LauncherKt')
   eclipse.project.name = appName + '-lwjgl3'
 }
@@ -69,7 +69,7 @@ runtime {
 // you could very easily need more modules than this one.
 // use the lwjgl3:suggestModules task to see which modules may be needed.
   modules.set([
-      'jdk.unsupported'
+    'jdk.unsupported'
   ])
   distDir.set(file(buildDir))
   jpackage {

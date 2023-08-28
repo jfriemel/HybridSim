@@ -1,10 +1,9 @@
 /**
- * Exploration algorithm for (some) target tile shapes with holes without using pebbles.
- * Partially based on arbitrary layer traversal algorithm from https://ris.uni-paderborn.de/record/25126
- * Based on maze exploration algorithm from https://doi.org/10.1109/SFCS.1978.30
- * Pebbles are simulated by moving tiles from target nodes to non-target nodes at boundaries.
+ * Exploration algorithm for (some) target tile shapes with holes without using pebbles. Partially
+ * based on arbitrary layer traversal algorithm from https://ris.uni-paderborn.de/record/25126 Based
+ * on maze exploration algorithm from https://doi.org/10.1109/SFCS.1978.30 Pebbles are simulated by
+ * moving tiles from target nodes to non-target nodes at boundaries.
  */
-
 fun getRobot(node: Node, orientation: Int): Robot {
     return RobotImpl(node, orientation)
 }
@@ -24,51 +23,63 @@ private enum class Phase {
     LiftEmulatedPebble,
 }
 
-class RobotImpl(node: Node, orientation: Int) : Robot(
-    node = node,
-    orientation = orientation,
-    carriesTile = true,  // Robot may carry initial tile, but this is not required
-    numPebbles = 0,
-    maxPebbles = 0,
-) {
-    private var phase = Phase.TraverseColumn  // Current phase
-    private var preDetectionPhase = Phase.ReturnSouth  // Phase before initiating unique point detection
-    private var prePebbleMovePhase = Phase.FindFirstCandidate  // Phase before moving height pebbles
-    private var prePebbleTogglePhase = Phase.DetectUniquePoint  // Phase before lifting/placing a single pebble
+class RobotImpl(node: Node, orientation: Int) :
+    Robot(
+        node = node,
+        orientation = orientation,
+        carriesTile = true, // Robot may carry initial tile, but this is not required
+        numPebbles = 0,
+        maxPebbles = 0,
+    ) {
+    private var phase = Phase.TraverseColumn // Current phase
+    private var preDetectionPhase =
+        Phase.ReturnSouth // Phase before initiating unique point detection
+    private var prePebbleMovePhase = Phase.FindFirstCandidate // Phase before moving height pebbles
+    private var prePebbleTogglePhase =
+        Phase.DetectUniquePoint // Phase before lifting/placing a single pebble
 
     // Keep track of turn-directions mod 5 for tracking horizontal displacement
-    private var delta = 0  // Acceptable values: {0, 1, 2, 3, 4}
+    private var delta = 0 // Acceptable values: {0, 1, 2, 3, 4}
     // Keep track of the sign (+1, 0, -1) of the current height (using emulated pebbles)
-    private var heightSign = 0  // Acceptable values: {-1, 0, 1}
+    private var heightSign = 0 // Acceptable values: {-1, 0, 1}
     // Keep track of the direction from which the robot entered its current node
-    private var enterLabel = 0  // Acceptable values: {0, 1, 2, 3, 4, 5}
+    private var enterLabel = 0 // Acceptable values: {0, 1, 2, 3, 4, 5}
 
     // Reset enterLabel to previous value before height update subroutine
-    private var preEnterLabel = 0  // Acceptable values: {0, 1, 2, 3, 4, 5}
+    private var preEnterLabel = 0 // Acceptable values: {0, 1, 2, 3, 4, 5}
 
     // Keep track of how many pebbles the robot is currently carrying
-    private var numEmulatedPebbles = 2  // Acceptable values: {0, 1, 2}
-    // If the robot wants to place a pebble next to another pebble, it emulates the new pebble by saving a direction
+    private var numEmulatedPebbles = 2 // Acceptable values: {0, 1, 2}
+    // If the robot wants to place a pebble next to another pebble, it emulates the new pebble by
+    // saving a direction
     // marker its pebble neighbor
-    private var pebbleNbr = -1  // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
-    // If the robot wants to place an overhang tile to emulate a pebble, but the boundary is already blocked by a
-    // different pebble, the robot moves the new overhang tile over the existing overhang tile and remembers the
+    private var pebbleNbr = -1 // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
+    // If the robot wants to place an overhang tile to emulate a pebble, but the boundary is already
+    // blocked by a
+    // different pebble, the robot moves the new overhang tile over the existing overhang tile and
+    // remembers the
     // movement direction
-    private var pebbleOverhangNbr = -1  // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
-    // Last movement direction when placing/lifting a pebble; used to ensure that the robot returns to its original node
-    private var pebbleToggleDir = 0  // Acceptable values: {0, 1, 2, 3, 4, 5}
-    // Distance by which the robot needs to move the B pebble to keep the correct distance between the pebbles
-    private var pebbleMoveDist = 0  // Acceptable values: {-1, 0, 1, 2, 3}
+    private var pebbleOverhangNbr = -1 // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
+    // Last movement direction when placing/lifting a pebble; used to ensure that the robot returns
+    // to
+    // its original node
+    private var pebbleToggleDir = 0 // Acceptable values: {0, 1, 2, 3, 4, 5}
+    // Distance by which the robot needs to move the B pebble to keep the correct distance between
+    // the
+    // pebbles
+    private var pebbleMoveDist = 0 // Acceptable values: {-1, 0, 1, 2, 3}
 
     // Pebble currently being placed/lifted; 0 for A pebble, 1 for B pebble
-    private var currentPebble = 0  // Acceptable values: {0, 1}
+    private var currentPebble = 0 // Acceptable values: {0, 1}
     // Direction of the overhang tile placed for emulating pebble A
-    private var pebbleADir = -1  // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
+    private var pebbleADir = -1 // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
     // Direction of the overhang tile placed for emulating pebble B
-    private var pebbleBDir = -1  // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
+    private var pebbleBDir = -1 // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
 
-    private var pebbleMoveStep = 0  // Acceptable values depend on context, but only finitely many possible
-    private var pebbleToggleStep = 0  // Acceptable values depend on context, but only finitely many possible
+    private var pebbleMoveStep =
+        0 // Acceptable values depend on context, but only finitely many possible
+    private var pebbleToggleStep =
+        0 // Acceptable values depend on context, but only finitely many possible
 
     private var withTile = carriesTile
     private var hasMoved = false
@@ -96,7 +107,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.LiftEmulatedPebble -> liftEmulatedPebble()
         }
         // Debugging:
-        // println("p=$phase  d=$pebbleMoveDist  m=$pebbleMoveStep  t=$pebbleToggleStep  h=$heightSign  n=$numEmulatedPebbles  e=$enterLabel  del=$delta  o=$pebbleOverhangNbr  dirs=[$pebbleADir,$pebbleBDir]")
+        // println("p=$phase  d=$pebbleMoveDist  m=$pebbleMoveStep  t=$pebbleToggleStep
+        // h=$heightSign
+        // n=$numEmulatedPebbles  e=$enterLabel  del=$delta  o=$pebbleOverhangNbr
+        // dirs=[$pebbleADir,$pebbleBDir]")
     }
 
     override fun getColor(): Color {
@@ -104,11 +118,14 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             Phase.TraverseColumn -> Color.ORANGE
             Phase.ReturnSouth -> Color.TEAL
             Phase.TraverseBoundary -> Color.BROWN
-            Phase.DetectUniquePoint, Phase.PlaceEmulatedPebble, Phase.LiftEmulatedPebble, Phase.MoveEmulatedPebbles
-            -> Color.PINK
+            Phase.DetectUniquePoint,
+            Phase.PlaceEmulatedPebble,
+            Phase.LiftEmulatedPebble,
+            Phase.MoveEmulatedPebbles -> Color.PINK
             Phase.FindFirstCandidate -> Color.SCARLET
             Phase.FindLoop -> Color.YELLOW
-            Phase.Backtrack, Phase.BacktrackFurther -> Color.BLUE
+            Phase.Backtrack,
+            Phase.BacktrackFurther -> Color.BLUE
             Phase.ReturnWithResult -> if (result) Color.WHITE else Color.GRAY
         }
     }
@@ -127,7 +144,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
         if (labelIsTarget(0)) {
             moveAndUpdate(0)
-        }  else {
+        } else {
             preDetectionPhase = Phase.TraverseColumn
             phase = Phase.DetectUniquePoint
         }
@@ -140,11 +157,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         // Move one step
-        intArrayOf(4, 5, 0, 1, 2).firstOrNull { label -> labelIsTarget(label) }?.let { label ->
-            moveAndUpdate(label)
-            phase = Phase.TraverseBoundary
-            return
-        }
+        intArrayOf(4, 5, 0, 1, 2)
+            .firstOrNull { label -> labelIsTarget(label) }
+            ?.let { label ->
+                moveAndUpdate(label)
+                phase = Phase.TraverseBoundary
+                return
+            }
 
         phase = Phase.TraverseColumn
     }
@@ -167,8 +186,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
         }
 
         if (
-            (enterLabel in 0..2 && !labelIsTarget(3) && (enterLabel == 2 || !labelIsTarget(2)))
-            || ((enterLabel == 4 || enterLabel == 5) && intArrayOf(0, 1, 2, 3).all { !labelIsTarget(it) })
+            (enterLabel in 0..2 && !labelIsTarget(3) && (enterLabel == 2 || !labelIsTarget(2))) ||
+                ((enterLabel == 4 || enterLabel == 5) &&
+                    intArrayOf(0, 1, 2, 3).all { !labelIsTarget(it) })
         ) {
             phase = Phase.TraverseColumn
             return
@@ -277,16 +297,20 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
         when (pebbleMoveStep) {
             0 -> {
-                when ((enterLabel + 3).mod(6)) {  // determine how far pebble needs to be moved forwards
+                when (
+                    (enterLabel + 3).mod(6)
+                ) { // determine how far pebble needs to be moved forwards
                     0 -> pebbleMoveDist = -1
-                    1, 5 -> pebbleMoveDist = 0
-                    2, 4 -> pebbleMoveDist = 2
+                    1,
+                    5 -> pebbleMoveDist = 0
+                    2,
+                    4 -> pebbleMoveDist = 2
                     3 -> pebbleMoveDist = 3
                 }
 
                 if (isOnEmulatedPebble()) {
                     pebbleMoveStep = 3
-                    pebbleMoveDist = - pebbleMoveDist
+                    pebbleMoveDist = -pebbleMoveDist
                     pebbleADir = pebbleBDir
                     if (enterLabel in intArrayOf(1, 2, 4, 5)) {
                         heightSign = 0
@@ -308,14 +332,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     pebbleMoveStep++
                 }
             }
-
             1 -> {
                 moveBoundary(lhr = rhr)
                 if (isOnEmulatedPebble()) {
                     pebbleMoveStep++
                 }
             }
-
             2 -> {
                 pebbleToggleStep = 0
                 prePebbleTogglePhase = Phase.MoveEmulatedPebbles
@@ -323,11 +345,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 phase = Phase.LiftEmulatedPebble
                 pebbleMoveStep++
             }
-
             3 -> {
                 if (isOnEmulatedPebble()) {
-                    heightSign = - heightSign
-                    pebbleMoveDist = - pebbleMoveDist
+                    heightSign = -heightSign
+                    pebbleMoveDist = -pebbleMoveDist
                 }
                 if (pebbleMoveDist < 0) {
                     moveBoundary(lhr = rhr)
@@ -340,7 +361,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     pebbleMoveStep++
                 }
             }
-
             4 -> {
                 if (isOnEmulatedPebble()) {
                     heightSign = 0
@@ -354,12 +374,10 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 }
                 pebbleMoveStep++
             }
-
             5 -> {
                 moveBoundary(lhr = !rhr)
                 pebbleMoveStep++
             }
-
             6 -> {
                 if (isOnEmulatedPebble()) {
                     pebbleToggleStep = 0
@@ -377,24 +395,30 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private fun placeEmulatedPebble() {
         when (pebbleToggleStep) {
             0 -> {
-                val pebbleNbrCandidate = labels.firstOrNull { label ->
-                    labelIsTarget(label) && !hasTileAtLabel(label) && canMoveToLabel(label)
-                }
+                val pebbleNbrCandidate =
+                    labels.firstOrNull { label ->
+                        labelIsTarget(label) && !hasTileAtLabel(label) && canMoveToLabel(label)
+                    }
                 if (pebbleNbrCandidate != null) {
                     pebbleNbr = pebbleNbrCandidate
                     numEmulatedPebbles--
                     phase = prePebbleTogglePhase
                     tileBelow()?.setColor(Color.PURPLE)
                 } else if (withTile) {
-                    val tmp = labels.firstOrNull { label ->
-                        !labelIsTarget(label) && !hasTileAtLabel(label)
-                            && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
-                    }
-                    if (tmp == null) {
-                        pebbleToggleDir = labels.first { label ->
-                            !labelIsTarget(label)
-                                && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
+                    val tmp =
+                        labels.firstOrNull { label ->
+                            !labelIsTarget(label) &&
+                                !hasTileAtLabel(label) &&
+                                (labelIsTarget((label - 1).mod(6)) ||
+                                    labelIsTarget((label + 1).mod(6)))
                         }
+                    if (tmp == null) {
+                        pebbleToggleDir =
+                            labels.first { label ->
+                                !labelIsTarget(label) &&
+                                    (labelIsTarget((label - 1).mod(6)) ||
+                                        labelIsTarget((label + 1).mod(6)))
+                            }
                         pebbleToggleStep = 19
                     } else {
                         pebbleToggleDir = tmp!!
@@ -409,7 +433,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     liftTile()
                 }
             }
-
             1 -> {
                 if (withTile) {
                     if (labels.filter { label -> !labelIsTarget(label) }.isEmpty()) {
@@ -421,15 +444,20 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                         placeTile()
                     }
                 } else {
-                    val tmp = labels.firstOrNull { label ->
-                        !labelIsTarget(label) && !hasTileAtLabel(label)
-                            && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
-                    }
-                    if (tmp == null) {
-                        pebbleToggleDir = labels.first { label ->
-                            !labelIsTarget(label)
-                                && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
+                    val tmp =
+                        labels.firstOrNull { label ->
+                            !labelIsTarget(label) &&
+                                !hasTileAtLabel(label) &&
+                                (labelIsTarget((label - 1).mod(6)) ||
+                                    labelIsTarget((label + 1).mod(6)))
                         }
+                    if (tmp == null) {
+                        pebbleToggleDir =
+                            labels.first { label ->
+                                !labelIsTarget(label) &&
+                                    (labelIsTarget((label - 1).mod(6)) ||
+                                        labelIsTarget((label + 1).mod(6)))
+                            }
                         pebbleToggleStep = 19
                     } else {
                         pebbleToggleDir = tmp!!
@@ -442,7 +470,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     moveToLabel(pebbleToggleDir)
                 }
             }
-
             2 -> {
                 if (withTile) {
                     moveToLabel((pebbleToggleDir + 3).mod(6))
@@ -455,7 +482,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     }
                 }
             }
-
             3 -> {
                 if (withTile) {
                     liftTile()
@@ -465,31 +491,28 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                 numEmulatedPebbles--
                 phase = prePebbleTogglePhase
             }
-
             10 -> {
                 placeTile()
                 result = true
                 hasResult = true
                 phase = preDetectionPhase
             }
-
             20 -> {
-                pebbleOverhangNbr = labels.first { label ->
-                    !labelIsTarget(label) && !hasTileAtLabel(label)
-                        && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
-                }
+                pebbleOverhangNbr =
+                    labels.first { label ->
+                        !labelIsTarget(label) &&
+                            !hasTileAtLabel(label) &&
+                            (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
+                    }
                 moveToLabel(pebbleOverhangNbr)
             }
-
             21 -> {
                 placeTile()
             }
-
             22 -> {
                 moveToLabel((pebbleOverhangNbr + 3).mod(6))
                 pebbleToggleStep = if (withTile) 1 else 2
             }
-
             else -> throw Exception("Step $pebbleToggleStep invalid in phase $phase")
         }
 
@@ -499,7 +522,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private fun liftEmulatedPebble() {
         when (pebbleToggleStep) {
             0 -> {
-                if (isOnTile() && pebbleNbr >= 0 && labelIsTarget(pebbleNbr) && !hasTileAtLabel(pebbleNbr)) {
+                if (
+                    isOnTile() &&
+                        pebbleNbr >= 0 &&
+                        labelIsTarget(pebbleNbr) &&
+                        !hasTileAtLabel(pebbleNbr)
+                ) {
                     pebbleNbr = -1
                     numEmulatedPebbles++
                     phase = prePebbleTogglePhase
@@ -510,14 +538,15 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     moveToLabel(pebbleToggleDir)
                 }
             }
-
             1 -> {
                 if (withTile) {
                     pebbleToggleDir = if (currentPebble == 0) pebbleADir else pebbleBDir
                     moveToLabel(pebbleToggleDir)
                 } else {
                     if (
-                        pebbleOverhangNbr >= 0 && !labelIsTarget(pebbleOverhangNbr) && hasTileAtLabel(pebbleOverhangNbr)
+                        pebbleOverhangNbr >= 0 &&
+                            !labelIsTarget(pebbleOverhangNbr) &&
+                            hasTileAtLabel(pebbleOverhangNbr)
                     ) {
                         moveToLabel(pebbleOverhangNbr)
                         pebbleToggleStep = 9
@@ -526,11 +555,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     }
                 }
             }
-
             2 -> {
                 if (withTile) {
                     if (
-                        pebbleOverhangNbr >= 0 && !labelIsTarget(pebbleOverhangNbr) && hasTileAtLabel(pebbleOverhangNbr)
+                        pebbleOverhangNbr >= 0 &&
+                            !labelIsTarget(pebbleOverhangNbr) &&
+                            hasTileAtLabel(pebbleOverhangNbr)
                     ) {
                         moveToLabel(pebbleOverhangNbr)
                         pebbleToggleStep = 9
@@ -541,7 +571,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     moveToLabel((pebbleToggleDir + 3).mod(6))
                 }
             }
-
             3 -> {
                 if (withTile) {
                     moveToLabel((pebbleToggleDir + 3).mod(6))
@@ -553,17 +582,18 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     phase = prePebbleTogglePhase
                 }
             }
-
             4 -> {
                 moveToLabel((pebbleNbr + 3).mod(6))
             }
-
             5 -> {
                 if (withTile) {
-                    pebbleToggleDir = labels.first { label ->
-                        !labelIsTarget(label) && !hasTileAtLabel(label)
-                            && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
-                    }
+                    pebbleToggleDir =
+                        labels.first { label ->
+                            !labelIsTarget(label) &&
+                                !hasTileAtLabel(label) &&
+                                (labelIsTarget((label - 1).mod(6)) ||
+                                    labelIsTarget((label + 1).mod(6)))
+                        }
                     if (currentPebble == 0) {
                         pebbleBDir = pebbleToggleDir
                     } else {
@@ -574,15 +604,17 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     liftTile()
                 }
             }
-
             6 -> {
                 if (withTile) {
                     placeTile()
                 } else {
-                    pebbleToggleDir = labels.first { label ->
-                        !labelIsTarget(label) && !hasTileAtLabel(label)
-                            && (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
-                    }
+                    pebbleToggleDir =
+                        labels.first { label ->
+                            !labelIsTarget(label) &&
+                                !hasTileAtLabel(label) &&
+                                (labelIsTarget((label - 1).mod(6)) ||
+                                    labelIsTarget((label + 1).mod(6)))
+                        }
                     if (currentPebble == 0) {
                         pebbleBDir = pebbleToggleDir
                     } else {
@@ -591,7 +623,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     moveToLabel(pebbleToggleDir)
                 }
             }
-
             7 -> {
                 if (withTile) {
                     moveToLabel((pebbleToggleDir + 3).mod(6))
@@ -599,7 +630,6 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     placeTile()
                 }
             }
-
             8 -> {
                 if (withTile) {
                     liftTile()
@@ -607,24 +637,20 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     moveToLabel((pebbleToggleDir + 3).mod(6))
                 }
             }
-
             9 -> {
                 moveToLabel(pebbleNbr)
                 pebbleNbr = -1
                 numEmulatedPebbles++
                 phase = prePebbleTogglePhase
             }
-
             10 -> {
                 liftTile()
             }
-
             11 -> {
                 moveToLabel(((pebbleOverhangNbr) + 3).mod(6))
                 pebbleOverhangNbr = -1
                 pebbleToggleStep = if (withTile) 2 else 1
             }
-
             else -> throw Exception("Step $pebbleToggleStep invalid in phase $phase")
         }
 
@@ -634,14 +660,19 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private fun isOnEmulatedPebble(): Boolean =
         !isOnTile() || (pebbleNbr >= 0 && labelIsTarget(pebbleNbr) && !hasTileAtLabel(pebbleNbr))
 
-    private fun moveBoundary(lhr: Boolean, updateHeight: Boolean = false, currentPhase: Phase = Phase.FindLoop) {
-        val moveLabel = if (lhr && prevLhr) {
-            (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
-        } else if (!lhr && !prevLhr) {
-            (1..6).map { (enterLabel - it).mod(6) }.first { label -> labelIsTarget(label) }
-        } else {
-            enterLabel
-        }
+    private fun moveBoundary(
+        lhr: Boolean,
+        updateHeight: Boolean = false,
+        currentPhase: Phase = Phase.FindLoop
+    ) {
+        val moveLabel =
+            if (lhr && prevLhr) {
+                (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
+            } else if (!lhr && !prevLhr) {
+                (1..6).map { (enterLabel - it).mod(6) }.first { label -> labelIsTarget(label) }
+            } else {
+                enterLabel
+            }
         moveAndUpdate(moveLabel, updateDelta = updateHeight)
         prevLhr = lhr
 
@@ -656,7 +687,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     private fun moveAndUpdate(label: Int, updateDelta: Boolean = true) {
         val turnDegree = (label - (enterLabel + 3)).mod(6)
         // Update turn-delta
-        if (phase in arrayOf(Phase.FindFirstCandidate, Phase.FindLoop)) {  // RHR traversal
+        if (phase in arrayOf(Phase.FindFirstCandidate, Phase.FindLoop)) { // RHR traversal
             if (updateDelta) {
                 if (turnDegree in 3..5) {
                     delta = (delta - (6 - turnDegree)).mod(5)
@@ -664,7 +695,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
                     delta = (delta + 1).mod(5)
                 }
             }
-        } else {  // LHR traversal
+        } else { // LHR traversal
             if (updateDelta) {
                 if (turnDegree in 1..3) {
                     delta = (delta - turnDegree).mod(5)

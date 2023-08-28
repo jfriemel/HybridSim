@@ -10,17 +10,17 @@ private val logger = ktx.log.logger<GeneratorLoader>()
 object GeneratorLoader {
 
     /**
-     * Loads a new [Generator] from either the [scriptFile] or the [scriptString] (kts script, see examples).
-     * A [Generator] is used to randomly generate a new [Configuration].
+     * Loads a new [Generator] from either the [scriptFile] or the [scriptString] (kts script, see
+     * examples). A [Generator] is used to randomly generate a new [Configuration].
      *
-     * Important: The script needs to have a getGenerator() function of the following form:
-     *     fun getGenerator(): Generator
+     * Important: The script needs to have a getGenerator() function of the following form: fun
+     * getGenerator(): Generator
      *
-     * The [Generator], in turn, needs to implement the following function:
-     *     override fun generate(numTiles: Int, numRobots: Int, numOverhang: Int): ConfigurationDescriptor
+     * The [Generator], in turn, needs to implement the following function: override fun
+     * generate(numTiles: Int, numRobots: Int, numOverhang: Int): ConfigurationDescriptor
      *
-     * If either function is absent, or there is a syntax error in the script, or the script could not be loaded for any
-     * other reason, the program crashes.
+     * If either function is absent, or there is a syntax error in the script, or the script could
+     * not be loaded for any other reason, the program crashes.
      */
     fun loadGenerator(scriptFile: File? = null, scriptString: String? = null) {
         val script = scriptFile?.readText()?.trim() ?: scriptString
@@ -31,11 +31,13 @@ object GeneratorLoader {
 
         // Compile the script
         val engine = ScriptEngineManager().getEngineByExtension("kts") as Compilable
-        engine.compile(
-            "import com.github.jfriemel.hybridsim.entities.Node; " +
-                "import com.github.jfriemel.hybridsim.system.ConfigurationDescriptor; " +
-                "import com.github.jfriemel.hybridsim.system.Generator"
-        ).eval()
+        engine
+            .compile(
+                "import com.github.jfriemel.hybridsim.entities.Node; " +
+                    "import com.github.jfriemel.hybridsim.system.ConfigurationDescriptor; " +
+                    "import com.github.jfriemel.hybridsim.system.Generator"
+            )
+            .eval()
         engine.compile(script).eval()
         Configuration.generator = (engine as Invocable).invokeFunction("getGenerator") as Generator
     }
@@ -44,5 +46,4 @@ object GeneratorLoader {
     fun reset() {
         Configuration.generator = Generator()
     }
-
 }

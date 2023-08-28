@@ -10,13 +10,14 @@ private enum class Phase {
     Finished,
 }
 
-class RobotImpl(node: Node, orientation: Int) : Robot(
-    node = node,
-    orientation = orientation,
-    carriesTile = false,
-    numPebbles = 0,
-    maxPebbles = 0,
-) {
+class RobotImpl(node: Node, orientation: Int) :
+    Robot(
+        node = node,
+        orientation = orientation,
+        carriesTile = false,
+        numPebbles = 0,
+        maxPebbles = 0,
+    ) {
     private var phase = Phase.FindTile
 
     private var testActive = false
@@ -42,13 +43,15 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun findTile() {
-        intArrayOf(5, 4, 0).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
-            moveToLabel(label)
-            if (label == 4) {
-                numMovementsSW++
+        intArrayOf(5, 4, 0)
+            .firstOrNull { label -> hasTileAtLabel(label) }
+            ?.let { label ->
+                moveToLabel(label)
+                if (label == 4) {
+                    numMovementsSW++
+                }
+                return
             }
-            return
-        }
 
         liftTile()
         if (!hasTileAtLabel(1) && !testActive) {
@@ -62,7 +65,9 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
 
     private fun moveTile() {
         moveToLabel(2)
-        if ((hasTileAtLabel(1) && !hasTileAtLabel(0)) || (hasTileAtLabel(3) && !hasTileAtLabel(4))) {
+        if (
+            (hasTileAtLabel(1) && !hasTileAtLabel(0)) || (hasTileAtLabel(3) && !hasTileAtLabel(4))
+        ) {
             testActive = false
         }
         if (!isOnTile()) {

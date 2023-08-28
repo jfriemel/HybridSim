@@ -63,12 +63,19 @@ class TestGenerator {
         "467, 427, 79",
         "934, 209, 610",
     )
-    fun `generate valid shape reconfiguration instance`(numTiles: Int, numRobots: Int, numOverhang: Int) {
+    fun `generate valid shape reconfiguration instance`(
+        numTiles: Int,
+        numRobots: Int,
+        numOverhang: Int
+    ) {
         Configuration.generate(numTiles, numRobots, numOverhang)
         Assertions.assertEquals(numTiles, Configuration.tiles.size)
         Assertions.assertEquals(numRobots, Configuration.robots.size)
         Assertions.assertTrue(Configuration.tiles.keys.containsAll(Configuration.robots.keys))
-        Assertions.assertEquals(numOverhang, Configuration.targetNodes.minus(Configuration.tiles.keys).size)
+        Assertions.assertEquals(
+            numOverhang,
+            Configuration.targetNodes.minus(Configuration.tiles.keys).size
+        )
     }
 
     @ParameterizedTest(name = "numTiles = {0}, numRobots = {1}, numOverhang = {2}")
@@ -81,14 +88,23 @@ class TestGenerator {
         Assertions.assertEquals(numTiles, Configuration.tiles.size)
         Assertions.assertEquals(numRobots, Configuration.robots.size)
         Assertions.assertTrue(Configuration.tiles.keys.containsAll(Configuration.robots.keys))
-        Assertions.assertEquals(numTiles - 1, Configuration.targetNodes.minus(Configuration.tiles.keys).size)
+        Assertions.assertEquals(
+            numTiles - 1,
+            Configuration.targetNodes.minus(Configuration.tiles.keys).size
+        )
     }
 
     @Test
     fun `generate connected shapes`() {
         Configuration.generate(1000, 25, 350)
-        Assertions.assertEquals(Configuration.tiles.keys, getConnectedComponent(Configuration.tiles.keys))
-        Assertions.assertEquals(Configuration.targetNodes, getConnectedComponent(Configuration.targetNodes))
+        Assertions.assertEquals(
+            Configuration.tiles.keys,
+            getConnectedComponent(Configuration.tiles.keys)
+        )
+        Assertions.assertEquals(
+            Configuration.targetNodes,
+            getConnectedComponent(Configuration.targetNodes)
+        )
     }
 
     /** @return Set of all nodes in [shape] reachable from the first node in [shape]. */
@@ -106,5 +122,4 @@ class TestGenerator {
         }
         return component
     }
-
 }

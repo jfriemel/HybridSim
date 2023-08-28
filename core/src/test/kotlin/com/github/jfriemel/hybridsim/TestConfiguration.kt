@@ -179,14 +179,15 @@ class TestConfiguration {
     @Test
     fun `get empty configuration json`() {
         val json = Configuration.getJson().replace("\\s+".toRegex(), "")
-        val validResponses = arrayOf(
-            "{\"robots\":{},\"targetNodes\":[],\"tiles\":{}}",
-            "{\"targetNodes\":[],\"robots\":{},\"tiles\":{}}",
-            "{\"targetNodes\":[],\"tiles\":{},\"robots\":{}}",
-            "{\"robots\":{},\"tiles\":{},\"targetNodes\":[]}",
-            "{\"tiles\":{},\"robots\":{},\"targetNodes\":[]}",
-            "{\"tiles\":{},\"targetNodes\":[],\"robots\":{}}",
-        )
+        val validResponses =
+            arrayOf(
+                "{\"robots\":{},\"targetNodes\":[],\"tiles\":{}}",
+                "{\"targetNodes\":[],\"robots\":{},\"tiles\":{}}",
+                "{\"targetNodes\":[],\"tiles\":{},\"robots\":{}}",
+                "{\"robots\":{},\"tiles\":{},\"targetNodes\":[]}",
+                "{\"tiles\":{},\"robots\":{},\"targetNodes\":[]}",
+                "{\"tiles\":{},\"targetNodes\":[],\"robots\":{}}",
+            )
         Assertions.assertTrue(json in validResponses)
     }
 
@@ -206,7 +207,8 @@ class TestConfiguration {
         val targetNode = Node(-512, 2048)
         val tileNode = Node(0, 1024)
 
-        val json = """
+        val json =
+            """
             {
                 "robots" : {"$robotNode": {"orientation" : $robotOrientation, "node" : {"x" : ${robotNode.x}, "y" : ${robotNode.y}}}},
                 "targetNodes" : [{"x" : ${targetNode.x}, "y" : ${targetNode.y}}],
@@ -248,5 +250,4 @@ class TestConfiguration {
         Assertions.assertEquals(tile.node, Configuration.tiles[tile.node]!!.node)
         Assertions.assertEquals(mutableSetOf(targetNode), Configuration.targetNodes)
     }
-
 }

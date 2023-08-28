@@ -244,7 +244,10 @@ class TestRobot {
         Assertions.assertEquals(label, robot.hangingRobotNbrLabel())
         Assertions.assertEquals(Configuration.robots[robotNode], robot.hangingRobotNbr())
         Assertions.assertEquals(listOf(label), robot.allHangingRobotNbrLabels())
-        Assertions.assertEquals(listOf(Configuration.robots[robotNode]), robot.allHangingRobotNbrs())
+        Assertions.assertEquals(
+            listOf(Configuration.robots[robotNode]),
+            robot.allHangingRobotNbrs()
+        )
     }
 
     @ParameterizedTest(name = "neighbor label {2}")
@@ -436,8 +439,8 @@ class TestRobot {
     @ParameterizedTest(name = "number of boundaries = {2}")
     @CsvSource(
         "258, 257, 0",
-        "254, 257, 1",  // one tile neighbor
-        "258, 254, 1",  // no tile neighbors
+        "254, 257, 1", // one tile neighbor
+        "258, 254, 1", // no tile neighbors
         "255, 256, 2",
         "256, 256, 3",
     )
@@ -449,8 +452,8 @@ class TestRobot {
     @ParameterizedTest(name = "number of boundaries = {2}")
     @CsvSource(
         "258, 254, 0",
-        "254, 257, 1",  // one tile neighbor
-        "258, 257, 1",  // surrounded by tiles
+        "254, 257, 1", // one tile neighbor
+        "258, 257, 1", // surrounded by tiles
         "255, 256, 2",
         "256, 256, 3",
     )
@@ -552,5 +555,4 @@ class TestRobot {
         Assertions.assertEquals(tileNode, robot.node)
         Assertions.assertEquals(1, Configuration.undoSteps())
     }
-
 }

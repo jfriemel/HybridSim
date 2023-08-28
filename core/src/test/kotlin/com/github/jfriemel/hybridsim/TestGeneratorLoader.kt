@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-private const val TEST_SCRIPT = """
+private const val TEST_SCRIPT =
+    """
 fun getGenerator(): Generator = GeneratorImpl()
 
 class GeneratorImpl(): Generator() {
@@ -44,5 +45,4 @@ class TestGeneratorLoader {
         Assertions.assertEquals(5, Configuration.robots.size)
         Assertions.assertEquals(10, Configuration.targetNodes.size)
     }
-
 }

@@ -23,20 +23,19 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
     private var mouseY = 0
 
     override fun keyDown(keycode: Int): Boolean {
-        // Using the key codes from Input.Keys is pretty annoying since it assumes a standard QWERTY layout
+        // Using the key codes from Input.Keys is pretty annoying since it assumes a standard QWERTY
+        // layout
         when (keycode) {
             Input.Keys.UP -> screen.yMomentum = -1
             Input.Keys.LEFT -> screen.xMomentum = -1
             Input.Keys.DOWN -> screen.yMomentum = 1
             Input.Keys.RIGHT -> screen.xMomentum = 1
             Input.Keys.F11 -> toggleFullscreen()
-
             Input.Keys.SPACE -> {
                 menu.untoggleToggleButtons()
                 Scheduler.toggle()
             }
-
-            Input.Keys.ESCAPE -> {  // Emergency handbrake, basically stop everything
+            Input.Keys.ESCAPE -> { // Emergency handbrake, basically stop everything
                 Scheduler.stop()
                 menu.untoggleToggleButtons()
                 if (!menu.isActive()) {
@@ -47,10 +46,11 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 }
                 screen.resetCamera()
             }
-
-            Input.Keys.Y, Input.Keys.Z -> {
+            Input.Keys.Y,
+            Input.Keys.Z -> {
                 // Undo with Ctrl+Y or Ctrl+Z, redo with Ctrl+Shift+Y or Ctrl+Shift+Z
-                // I strongly dislike this, but I see no alternative as I cannot access the user's keyboard layout
+                // I strongly dislike this, but I see no alternative as I cannot access the user's
+                // keyboard layout
                 if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
                     Scheduler.stop()
                     if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
@@ -60,8 +60,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     }
                 }
             }
-
-            Input.Keys.F2 -> {  // Take a screenshot
+            Input.Keys.F2 -> { // Take a screenshot
                 try {
                     val time = LocalDateTime.now().toString().split(".")[0].replace(':', '-')
                     val path = Paths.get(System.getProperty("user.dir"), "screenshots", "$time.png")
@@ -78,10 +77,13 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
     }
 
     override fun keyUp(keycode: Int): Boolean {
-        // Using the key codes from Input.Keys is pretty annoying since it assumes a standard QWERTY layout
+        // Using the key codes from Input.Keys is pretty annoying since it assumes a standard QWERTY
+        // layout
         when (keycode) {
-            Input.Keys.UP, Input.Keys.DOWN -> screen.yMomentum = 0
-            Input.Keys.LEFT, Input.Keys.RIGHT -> screen.xMomentum = 0
+            Input.Keys.UP,
+            Input.Keys.DOWN -> screen.yMomentum = 0
+            Input.Keys.LEFT,
+            Input.Keys.RIGHT -> screen.xMomentum = 0
         }
         return true
     }
@@ -91,18 +93,31 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             '+' -> screen.zoom(-1f)
             '-' -> screen.zoom(1f)
             '0' -> screen.resetCamera()
-            'f', 'F' -> toggleFullscreen()
-            'm', 'M' -> menu.toggleActive()
-            'l', 'L' -> menu.loadConfiguration()
+            'f',
+            'F' -> toggleFullscreen()
+            'm',
+            'M' -> menu.toggleActive()
+            'l',
+            'L' -> menu.loadConfiguration()
             's' -> menu.saveConfiguration(false)
             'S' -> menu.saveConfiguration(true)
-            'a', 'A' -> menu.loadAlgorithm()
-            't', 'T' -> menu.togglePutTiles()
-            'r', 'R' -> menu.togglePutRobots()
-            'z', 'Z' -> menu.toggleSelectTarget()
-            'h', 'H' -> menu.loadGenerator()
-            'g', 'G' -> menu.generateConfiguration()
-            '<', '>' -> Configuration.targetNodes.addAll(Configuration.tiles.keys)  // Sometimes helpful for testing
+            'a',
+            'A' -> menu.loadAlgorithm()
+            't',
+            'T' -> menu.togglePutTiles()
+            'r',
+            'R' -> menu.togglePutRobots()
+            'z',
+            'Z' -> menu.toggleSelectTarget()
+            'h',
+            'H' -> menu.loadGenerator()
+            'g',
+            'G' -> menu.generateConfiguration()
+            '<',
+            '>' ->
+                Configuration.targetNodes.addAll(
+                    Configuration.tiles.keys
+                ) // Sometimes helpful for testing
         }
         return true
     }
@@ -129,9 +144,10 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     touchDragged(screenX, screenY, pointer)
                 }
             }
-
             Input.Buttons.RIGHT -> {
-                if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {  // Log coordinates, sometimes helpful
+                if (
+                    Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)
+                ) { // Log coordinates, sometimes helpful
                     logger.debug { "Screen coordinates: ($screenX, $screenY)" }
                     logger.debug { "Node coordinates:   (${node.x}, ${node.y})" }
                 } else {
@@ -156,7 +172,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 mouseY = screenY
             } else if (menu.putTiles && node !in Configuration.tiles) {
                 Configuration.addTile(Tile(node), addUndoStep = true)
-                if (menu.selectTarget) {  // Place tile and target in one step
+                if (menu.selectTarget) { // Place tile and target in one step
                     Configuration.addTarget(node, addUndoStep = false)
                 }
             } else if (menu.putRobots && node !in Configuration.robots) {
@@ -168,7 +184,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             if (menu.putTiles && node in Configuration.tiles) {
                 Configuration.removeTile(node, addUndoStep = true)
-                if (menu.selectTarget) {  // Remove tile and target in one step
+                if (menu.selectTarget) { // Remove tile and target in one step
                     Configuration.removeTarget(node, addUndoStep = false)
                 }
             } else if (menu.putRobots && node in Configuration.robots) {

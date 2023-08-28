@@ -6,20 +6,22 @@ import kotlin.math.max
 object FullSequentialScheduler {
 
     /**
-     * Sequentially actives robots (every robot exactly once per round) until all robots are finished or all target
-     * nodes are occupied by tiles or the number of rounds reaches [limit].
+     * Sequentially actives robots (every robot exactly once per round) until all robots are
+     * finished or all target nodes are occupied by tiles or the number of rounds reaches [limit].
      *
-     * @return The number of rounds (rounded to the nearest multiple of the number of tiles) until termination
-     * or null if the number of rounds reaches [limit].
+     * @return The number of rounds (rounded to the nearest multiple of the number of tiles) until
+     *   termination or null if the number of rounds reaches [limit].
      */
     fun run(limit: Int): Int? {
         var rounds = 0
         var finished = false
-        val remainingTarget = if (Configuration.targetNodes.isEmpty()) {
-            null
-        } else {
-            Configuration.targetNodes.minus(Configuration.tiles.keys).toMutableSet()
-        }
+        val remainingTarget =
+            if (Configuration.targetNodes.isEmpty()) {
+                null
+            } else {
+                Configuration.targetNodes.minus(Configuration.tiles.keys).toMutableSet()
+            }
+
         val numTiles = max(Configuration.tiles.keys.size, 1)
         while (!finished) {
             repeat(numTiles) {
@@ -43,7 +45,7 @@ object FullSequentialScheduler {
                 return null
             }
         }
+
         return rounds
     }
-
 }

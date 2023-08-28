@@ -15,23 +15,22 @@ open class Robot(
     @Json(ignored = true) var carrySprite: Sprite? = null,
 ) : Entity(node, sprite) {
 
-    @Json(ignored = true)
-    val labels = intArrayOf(0, 1, 2, 3, 4, 5)
+    @Json(ignored = true) val labels = intArrayOf(0, 1, 2, 3, 4, 5)
 
     /**
-     * The code executed by the robot when it is activated.
-     * The function is overriden by imported algorithms (.kts scripts).
-     * As per the model, the algorithm needs to be convertible to an equivalent finite state automaton.
-     * In other words, it needs to run in constant time and with constant space.
-     * For further constraints, check out this paper: https://doi.org/10.1007/s11047-019-09774-2
+     * The code executed by the robot when it is activated. The function is overriden by imported
+     * algorithms (.kts scripts). As per the model, the algorithm needs to be convertible to an
+     * equivalent finite state automaton. In other words, it needs to run in constant time and with
+     * constant space. For further constraints, check out this paper:
+     * https://doi.org/10.1007/s11047-019-09774-2
      */
-    protected open fun activate() {  // Default implementation does nothing
+    protected open fun activate() { // Default implementation does nothing
         return
     }
 
     /**
-     * Interface for [activate] called by the Scheduler and the InputHandler to activate the robot and create an undo
-     * step in the [Configuration] (if [withUndo] is true).
+     * Interface for [activate] called by the Scheduler and the InputHandler to activate the robot
+     * and create an undo step in the [Configuration] (if [withUndo] is true).
      */
     fun triggerActivate(withUndo: Boolean = true) {
         if (withUndo) {
@@ -41,15 +40,15 @@ open class Robot(
     }
 
     /**
-     * The function can be overriden by imported algorithms to indicate whether the robot is finished with executing
-     * its algorithm.
-     * When all robots are finished (i.e., every finished() call returns true), the Scheduler stops automatically.
+     * The function can be overriden by imported algorithms to indicate whether the robot is
+     * finished with executing its algorithm. When all robots are finished (i.e., every finished()
+     * call returns true), the Scheduler stops automatically.
      */
     open fun finished(): Boolean = false
 
     /**
-     * Checks whether the robot can move to the given [label] without running into another robot or violating
-     * connectivity.
+     * Checks whether the robot can move to the given [label] without running into another robot or
+     * violating connectivity.
      */
     fun canMoveToLabel(label: Int): Boolean {
         // Check whether node at label is occupied by robot
@@ -64,7 +63,8 @@ open class Robot(
 
         // Check whether node is reachable without violating connectivity
         return intArrayOf((label - 1).mod(6), (label + 1).mod(6)).any { nbrLabel ->
-            nodeAtLabel(nbrLabel) in Configuration.tiles || robotAtLabel(nbrLabel)?.carriesTile == true
+            nodeAtLabel(nbrLabel) in Configuration.tiles ||
+                robotAtLabel(nbrLabel)?.carriesTile == true
         }
     }
 
@@ -78,7 +78,10 @@ open class Robot(
         return true
     }
 
-    /** The robot tries to switch positions with the [Robot] at the given [label]. Returns true if successful. */
+    /**
+     * The robot tries to switch positions with the [Robot] at the given [label]. Returns true if
+     * successful.
+     */
     fun switchWithRobotNbr(label: Int): Boolean {
         if (!hasRobotAtLabel(label)) {
             return false
@@ -90,7 +93,10 @@ open class Robot(
         return true
     }
 
-    /** Checks whether the robot is at a boundary, i.e., it has a [Node] neighbor that is not occupied by a [Tile]. */
+    /**
+     * Checks whether the robot is at a boundary, i.e., it has a [Node] neighbor that is not
+     * occupied by a [Tile].
+     */
     fun isAtBoundary(): Boolean = labels.any { label -> !hasTileAtLabel(label) }
 
     /** Checks whether the robot is on top of a [Tile]. */
@@ -122,7 +128,10 @@ open class Robot(
     /** @return True if there is a [Tile] at the robot's location, and it has a pebble. */
     fun tileHasPebble(): Boolean = tileBelow()?.hasPebble() == true
 
-    /** Tries to put a pebble on the [Tile] at the robot's current location. Returns true if successful. */
+    /**
+     * Tries to put a pebble on the [Tile] at the robot's current location. Returns true if
+     * successful.
+     */
     fun putPebble(): Boolean {
         if (!isOnTile() || tileHasPebble() || numPebbles == 0) {
             return false
@@ -132,7 +141,10 @@ open class Robot(
         return true
     }
 
-    /** Tries to take a pebble from the [Tile] at the robot's current location. Returns true if successful. */
+    /**
+     * Tries to take a pebble from the [Tile] at the robot's current location. Returns true if
+     * successful.
+     */
     fun takePebble(): Boolean {
         if (!isOnTile() || !tileHasPebble() || numPebbles >= maxPebbles) {
             return false
@@ -173,9 +185,8 @@ open class Robot(
     fun robotNbr(): Robot? = robotNbrLabel()?.let { label -> robotAtLabel(label) }
 
     /** @return Label of a [Robot] neighbor that is not on a tile (i.e., "hanging"). */
-    fun hangingRobotNbrLabel(): Int? = labels.firstOrNull { label ->
-        hasRobotAtLabel(label) && !robotAtLabel(label)!!.isOnTile()
-    }
+    fun hangingRobotNbrLabel(): Int? =
+        labels.firstOrNull { label -> hasRobotAtLabel(label) && !robotAtLabel(label)!!.isOnTile() }
 
     /** Checks whether the robot has a [Robot] neighbor that is not on a tile (i.e., "hanging"). */
     fun hasHangingRobotNbr(): Boolean = hangingRobotNbrLabel() != null
@@ -190,10 +201,12 @@ open class Robot(
     fun allRobotNbrs(): List<Robot> = allRobotNbrLabels().map { label -> robotAtLabel(label)!! }
 
     /** @return A list of all labels with hanging [Robot] neighbors. */
-    fun allHangingRobotNbrLabels(): List<Int> = allRobotNbrLabels().filter { label -> !hasTileAtLabel(label) }
+    fun allHangingRobotNbrLabels(): List<Int> =
+        allRobotNbrLabels().filter { label -> !hasTileAtLabel(label) }
 
     /** @return A list of all hanging [Robot] neighbors. */
-    fun allHangingRobotNbrs(): List<Robot> = allHangingRobotNbrLabels().map { label -> robotAtLabel(label)!! }
+    fun allHangingRobotNbrs(): List<Robot> =
+        allHangingRobotNbrLabels().map { label -> robotAtLabel(label)!! }
 
     /** Checks whether the robot is on a target [Node]. */
     fun isOnTarget(): Boolean = node in Configuration.targetNodes
@@ -201,44 +214,66 @@ open class Robot(
     /** Checks whether the node at the [label] is a target [Node]. */
     fun labelIsTarget(label: Int): Boolean = nodeAtLabel(label) in Configuration.targetNodes
 
-    /** @return Label of a [Tile] neighbor that is on a target [Node] or null if there is no such neighbor. */
-    fun targetTileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && labelIsTarget(label) }
+    /**
+     * @return Label of a [Tile] neighbor that is on a target [Node] or null if there is no such
+     *   neighbor.
+     */
+    fun targetTileNbrLabel(): Int? =
+        labels.firstOrNull { label -> hasTileAtLabel(label) && labelIsTarget(label) }
 
     /** Checks whether the robot has a [Tile] neighbor that is on a target [Node]. */
     fun hasTargetTileNbr(): Boolean = targetTileNbrLabel() != null
 
-    /** @return A [Tile] neighbor that is on a target [Node] or null if there is no such neighbor. */
+    /**
+     * @return A [Tile] neighbor that is on a target [Node] or null if there is no such neighbor.
+     */
     fun targetTileNbr(): Tile? = targetTileNbrLabel()?.let { label -> tileAtLabel(label) }
 
-    /** @return Label of an empty [Node] neighbor that is a target or null if there is no such neighbor. */
-    fun emptyTargetNbrLabel(): Int? = labels.firstOrNull { label -> !hasTileAtLabel(label) && labelIsTarget(label) }
+    /**
+     * @return Label of an empty [Node] neighbor that is a target or null if there is no such
+     *   neighbor.
+     */
+    fun emptyTargetNbrLabel(): Int? =
+        labels.firstOrNull { label -> !hasTileAtLabel(label) && labelIsTarget(label) }
 
     /** Checks whether the robot has an empty [Node] neighbor that is a target. */
     fun hasEmptyTargetNbr(): Boolean = emptyTargetNbrLabel() != null
 
-    /** @return Label of an empty [Node] neighbor that is not a target or null if there is no such neighbor. */
-    fun emptyNonTargetNbrLabel(): Int? = labels.firstOrNull { label -> !hasTileAtLabel(label) && !labelIsTarget(label) }
+    /**
+     * @return Label of an empty [Node] neighbor that is not a target or null if there is no such
+     *   neighbor.
+     */
+    fun emptyNonTargetNbrLabel(): Int? =
+        labels.firstOrNull { label -> !hasTileAtLabel(label) && !labelIsTarget(label) }
 
     /** Checks whether the robot has an empty [Node] neighbor that is not a target. */
     fun hasEmptyNonTargetNbr(): Boolean = emptyNonTargetNbrLabel() != null
 
-    /** @return Label of a [Tile] neighbor that is not on a target [Node] or null if there is no such neighbor. */
-    fun overhangNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+    /**
+     * @return Label of a [Tile] neighbor that is not on a target [Node] or null if there is no such
+     *   neighbor.
+     */
+    fun overhangNbrLabel(): Int? =
+        labels.firstOrNull { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
 
     /** Checks whether the robot has a [Tile] neighbor that is not on a target [Node]. */
     fun hasOverhangNbr(): Boolean = overhangNbrLabel() != null
 
-    /** @return A [Tile] neighbor that is not on a target [Node] or null if there is no such neighbor. */
+    /**
+     * @return A [Tile] neighbor that is not on a target [Node] or null if there is no such
+     *   neighbor.
+     */
     fun overhangNbr(): Tile? = overhangNbrLabel()?.let { label -> tileAtLabel(label) }
 
     /**
-     * By default, counts and returns the number of connected components of empty nodes adjacent to the robot.
-     * If [tileBoundaries] is true, counts the number of connected components of tile nodes adjacent to the robot.
+     * By default, counts and returns the number of connected components of empty nodes adjacent to
+     * the robot. If [tileBoundaries] is true, counts the number of connected components of tile
+     * nodes adjacent to the robot.
      */
     fun numBoundaries(tileBoundaries: Boolean = false): Int {
         val boundaryLabels = labels.filter { label -> hasTileAtLabel(label) == tileBoundaries }
 
-        if (boundaryLabels.size == 6) {  // Completely surrounded by boundary
+        if (boundaryLabels.size == 6) { // Completely surrounded by boundary
             return 1
         }
 
@@ -248,5 +283,4 @@ open class Robot(
     /** @return The [Node] at the given [label]. */
     @SuppressWarnings("WeakerAccess")
     protected fun nodeAtLabel(label: Int): Node = node.nodeInDir((orientation + label).mod(6))
-
 }

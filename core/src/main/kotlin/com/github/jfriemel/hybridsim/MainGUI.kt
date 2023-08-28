@@ -70,8 +70,6 @@ class MainGUI(
     }
 
     private fun launchScheduler() {
-        KtxAsync.launch {
-            Scheduler.run()
-        }
+        KtxAsync.launch { Scheduler.run() }
     }
 }

@@ -27,7 +27,14 @@ import ktx.actors.onClick
 import ktx.actors.onKeyUp
 import ktx.log.logger
 import ktx.scene2d.actors
-import ktx.scene2d.vis.*
+import ktx.scene2d.vis.KVisTextButton
+import ktx.scene2d.vis.visCheckBox
+import ktx.scene2d.vis.visImage
+import ktx.scene2d.vis.visLabel
+import ktx.scene2d.vis.visSlider
+import ktx.scene2d.vis.visTable
+import ktx.scene2d.vis.visTextButton
+import ktx.scene2d.vis.visTextField
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.JFrame
@@ -79,16 +86,21 @@ class Menu(batch: Batch) {
 
     // Textures for the scheduler and undo/redo buttons
     private val schedulerOnDrawable =
-        TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_on.png"), true).apply {
-            setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
-        })
+        TextureRegionDrawable(
+            Texture(Gdx.files.internal("ui/scheduler_on.png"), true).apply {
+                setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
+            }
+        )
     private val schedulerOffDrawable =
-        TextureRegionDrawable(Texture(Gdx.files.internal("ui/scheduler_off.png"), true).apply {
+        TextureRegionDrawable(
+            Texture(Gdx.files.internal("ui/scheduler_off.png"), true).apply {
+                setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
+            }
+        )
+    private var undoTexture =
+        Texture(Gdx.files.internal("ui/undo.png"), true).apply {
             setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
-        })
-    private var undoTexture = Texture(Gdx.files.internal("ui/undo.png"), true).apply {
-        setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
-    }
+        }
     private var undoDrawable = TextureRegionDrawable(undoTexture)
     private var redoDrawable = TextureRegionDrawable(undoTexture).apply { region.flip(true, false) }
     private var schedulerButtonImage: VisImage
@@ -96,108 +108,132 @@ class Menu(batch: Batch) {
     private var redoButtonImage: VisImage
 
     // File extension filters for the files used by the simulator
-    private val jsonFilter = FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
+    private val jsonFilter =
+        FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
     private val algoFilter = FileNameExtensionFilter("HybridSim algorithm scripts (.kts)", "kts")
-    private val genFilter = FileNameExtensionFilter("HybridSim configuration generator scripts (.kts)", "kts")
+    private val genFilter =
+        FileNameExtensionFilter("HybridSim configuration generator scripts (.kts)", "kts")
 
-    val menuStage = Stage(ScreenViewport(OrthographicCamera()), batch).apply {
-        actors {
-            visTable {
-                setFillParent(true)
-                defaults().pad(BUTTON_PAD).colspan(3).width(BUTTON_WIDTH).minHeight(BUTTON_HEIGHT)
-                add(TextraLabel("[*]Menu (M)", KnownFonts.getGoNotoUniversal()).apply {
-                    color = Color.BLACK
-                    alignment = Align.center
-                })
-                row()
-                buttonLoadConfig = visTextButton("Load Configuration (L)")
-                row()
-                buttonSaveConfig = visTextButton("Save Configuration (S)")
-                row()
-                buttonLoadAlgorithm = visTextButton("Load Algorithm (A)")
-                row()
-                buttonPutTiles = visTextButton("Put Tiles (T)")
-                row()
-                buttonPutRobots = visTextButton("Put Robots (R)")
-                row()
-                buttonSelectTarget = visTextButton("Select Target Nodes (Z)")
-                row()
-                buttonUndo = visTextButton("") {
-                    undoButtonImage = visImage(undoDrawable)
-                    cell(colspan = 1, width = undoButtonImage.width, align = Align.center)
+    val menuStage =
+        Stage(ScreenViewport(OrthographicCamera()), batch).apply {
+            actors {
+                visTable {
+                    setFillParent(true)
+                    defaults()
+                        .pad(BUTTON_PAD)
+                        .colspan(3)
+                        .width(BUTTON_WIDTH)
+                        .minHeight(BUTTON_HEIGHT)
+                    add(
+                        TextraLabel("[*]Menu (M)", KnownFonts.getGoNotoUniversal()).apply {
+                            color = Color.BLACK
+                            alignment = Align.center
+                        }
+                    )
+                    row()
+                    buttonLoadConfig = visTextButton("Load Configuration (L)")
+                    row()
+                    buttonSaveConfig = visTextButton("Save Configuration (S)")
+                    row()
+                    buttonLoadAlgorithm = visTextButton("Load Algorithm (A)")
+                    row()
+                    buttonPutTiles = visTextButton("Put Tiles (T)")
+                    row()
+                    buttonPutRobots = visTextButton("Put Robots (R)")
+                    row()
+                    buttonSelectTarget = visTextButton("Select Target Nodes (Z)")
+                    row()
+                    buttonUndo =
+                        visTextButton("") {
+                            undoButtonImage = visImage(undoDrawable)
+                            cell(colspan = 1, width = undoButtonImage.width, align = Align.center)
+                        }
+                    buttonToggleScheduler =
+                        visTextButton("") {
+                            schedulerButtonImage = visImage(schedulerOnDrawable)
+                            cell(
+                                colspan = 1,
+                                width = schedulerButtonImage.width,
+                                align = Align.center
+                            )
+                        }
+                    buttonRedo =
+                        visTextButton("") {
+                            redoButtonImage = visImage(redoDrawable)
+                            cell(colspan = 1, width = redoButtonImage.width, align = Align.center)
+                        }
+                    row()
+                    sliderScheduler = visSlider(0f, 44f, 0.1f)
+                    row()
+                    buttonLoadGenerator = visTextButton("Load Generator (H)")
+                    row()
+                    visLabel("# tiles:").apply {
+                        cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
+                        color = Color.BLACK
+                    }
+                    textFieldTiles =
+                        visTextField("50").apply {
+                            cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
+                        }
+                    row()
+                    visLabel("# robots:").apply {
+                        cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
+                        color = Color.BLACK
+                    }
+                    textFieldRobots =
+                        visTextField("1").apply {
+                            cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
+                        }
+                    row()
+                    visLabel("Generate target shape:").apply {
+                        cell(
+                            colspan = 2,
+                            width = undoButtonImage.width + schedulerButtonImage.width,
+                            align = Align.left
+                        )
+                        color = Color.BLACK
+                    }
+                    checkBoxOverhang =
+                        visCheckBox("").apply {
+                            cell(colspan = 1, width = redoButtonImage.width, align = Align.right)
+                        }
+                    row()
+                    visLabel("# overhang:").apply {
+                        cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
+                        color = Color.BLACK
+                    }
+                    textFieldOverhang =
+                        visTextField("15").apply {
+                            cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
+                        }
+                    row()
+                    buttonGenerate = visTextButton("Generate (G)")
                 }
-                buttonToggleScheduler = visTextButton("") {
-                    schedulerButtonImage = visImage(schedulerOnDrawable)
-                    cell(colspan = 1, width = schedulerButtonImage.width, align = Align.center)
-                }
-                buttonRedo = visTextButton("") {
-                    redoButtonImage = visImage(redoDrawable)
-                    cell(colspan = 1, width = redoButtonImage.width, align = Align.center)
-                }
-                row()
-                sliderScheduler = visSlider(0f, 44f, 0.1f)
-                row()
-                buttonLoadGenerator = visTextButton("Load Generator (H)")
-                row()
-                visLabel("# tiles:").apply {
-                    cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
-                    color = Color.BLACK
-                }
-                textFieldTiles = visTextField("50").apply {
-                    cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
-                }
-                row()
-                visLabel("# robots:").apply {
-                    cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
-                    color = Color.BLACK
-                }
-                textFieldRobots = visTextField("1").apply {
-                    cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
-                }
-                row()
-                visLabel("Generate target shape:").apply {
-                    cell(colspan = 2, width = undoButtonImage.width + schedulerButtonImage.width, align = Align.left)
-                    color = Color.BLACK
-                }
-                checkBoxOverhang = visCheckBox("").apply {
-                    cell(colspan = 1, width = redoButtonImage.width, align = Align.right)
-                }
-                row()
-                visLabel("# overhang:").apply {
-                    cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
-                    color = Color.BLACK
-                }
-                textFieldOverhang = visTextField("15").apply {
-                    cell(colspan = 2, width = BUTTON_WIDTH / 2, align = Align.right)
-                }
-                row()
-                buttonGenerate = visTextButton("Generate (G)")
             }
         }
-    }
 
     // An array of all clickable UI elements to easily enable / disable all at once
-    private val inputElements: Array<Actor> = arrayOf(
-        buttonLoadConfig,
-        buttonSaveConfig,
-        buttonLoadAlgorithm,
-        buttonPutTiles,
-        buttonPutRobots,
-        buttonSelectTarget,
-        buttonToggleScheduler,
-        buttonUndo,
-        buttonRedo,
-        sliderScheduler,
-        buttonLoadGenerator,
-        textFieldTiles,
-        textFieldRobots,
-        checkBoxOverhang,
-        textFieldOverhang,
-        buttonGenerate,
-    )
-    private val fileChooserButtons = arrayOf(
-        buttonLoadConfig, buttonSaveConfig, buttonLoadAlgorithm, buttonLoadGenerator
-    )
+    private val inputElements: Array<Actor> =
+        arrayOf(
+            buttonLoadConfig,
+            buttonSaveConfig,
+            buttonLoadAlgorithm,
+            buttonPutTiles,
+            buttonPutRobots,
+            buttonSelectTarget,
+            buttonToggleScheduler,
+            buttonUndo,
+            buttonRedo,
+            sliderScheduler,
+            buttonLoadGenerator,
+            textFieldTiles,
+            textFieldRobots,
+            checkBoxOverhang,
+            textFieldOverhang,
+            buttonGenerate,
+        )
+    private val fileChooserButtons =
+        arrayOf(buttonLoadConfig, buttonSaveConfig, buttonLoadAlgorithm, buttonLoadGenerator)
     private val toggleButtons = arrayOf(buttonPutTiles, buttonPutRobots, buttonSelectTarget)
 
     init {
@@ -209,7 +245,9 @@ class Menu(batch: Batch) {
             logger.error { e.stackTraceToString() }
         }
         buttonLoadConfig.onClick { if (active) loadConfiguration() }
-        buttonSaveConfig.onClick { if (active) saveConfiguration(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) }
+        buttonSaveConfig.onClick {
+            if (active) saveConfiguration(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+        }
         buttonLoadAlgorithm.onClick { if (active) loadAlgorithm() }
 
         buttonPutTiles.onClick { if (active) togglePutTiles() }
@@ -279,7 +317,9 @@ class Menu(batch: Batch) {
         }
     }
 
-    /** Called when a frame is rendered to draw the menu. Menu is only drawn when [active] is true. */
+    /**
+     * Called when a frame is rendered to draw the menu. Menu is only drawn when [active] is true.
+     */
     fun draw() {
         if (active) {
             // Enable / disable file chooser buttons
@@ -296,7 +336,8 @@ class Menu(batch: Batch) {
             }
 
             // Choose correct texture for scheduler button
-            schedulerButtonImage.drawable = if (Scheduler.isRunning()) schedulerOffDrawable else schedulerOnDrawable
+            schedulerButtonImage.drawable =
+                if (Scheduler.isRunning()) schedulerOffDrawable else schedulerOnDrawable
 
             // Enable / disable undo / redo buttons
             if (Configuration.undoSteps() <= 0 && buttonUndo.isTouchable) {
@@ -320,13 +361,19 @@ class Menu(batch: Batch) {
         }
     }
 
-    /** Called when the window is resized to ensure that the menu remains at the right-hand side of the screen. */
+    /**
+     * Called when the window is resized to ensure that the menu remains at the right-hand side of
+     * the screen.
+     */
     fun resize(width: Int, height: Int) {
         menuStage.viewport.update(width, height, true)
         menuStage.actors.get(0).setPosition((width - BUTTON_WIDTH) / 2f - 6f, 0f)
     }
 
-    /** Opens a file selector window. The user can select a [Configuration] file (JSON format) to be loaded. */
+    /**
+     * Opens a file selector window. The user can select a [Configuration] file (JSON format) to be
+     * loaded.
+     */
     fun loadConfiguration() {
         if (Gdx.graphics.isFullscreen) return
 
@@ -339,7 +386,10 @@ class Menu(batch: Batch) {
         screen?.resetCamera()
     }
 
-    /** Opens a file selector window. The user can select a file where the current [Configuration] is to be saved. */
+    /**
+     * Opens a file selector window. The user can select a file where the current [Configuration] is
+     * to be saved.
+     */
     fun saveConfiguration(prettyPrint: Boolean) {
         if (Gdx.graphics.isFullscreen) return
 
@@ -350,7 +400,10 @@ class Menu(batch: Batch) {
         configFile.writeText(Configuration.getJson(prettyPrint))
     }
 
-    /** Opens a file selector window. The user can select an algorithm file (kts script) to be loaded. */
+    /**
+     * Opens a file selector window. The user can select an algorithm file (kts script) to be
+     * loaded.
+     */
     fun loadAlgorithm() {
         if (Gdx.graphics.isFullscreen) return
 
@@ -362,7 +415,10 @@ class Menu(batch: Batch) {
         AlgorithmLoader.loadAlgorithm(scriptFile = algorithmFile)
     }
 
-    /** Opens a file selector window. The user can select a configuration generator file (kts script) to be loaded. */
+    /**
+     * Opens a file selector window. The user can select a configuration generator file (kts script)
+     * to be loaded.
+     */
     fun loadGenerator() {
         if (Gdx.graphics.isFullscreen) return
 
@@ -424,8 +480,8 @@ class Menu(batch: Batch) {
     }
 
     /**
-     * Opens a file selector window, [filter] specifies which file endings are allowed.
-     * Returns the selected [File] or null if no file was selected.
+     * Opens a file selector window, [filter] specifies which file endings are allowed. Returns the
+     * selected [File] or null if no file was selected.
      */
     private fun getFile(filter: FileNameExtensionFilter, save: Boolean = false): File? {
         val fileChooser = JFileChooser()
@@ -440,11 +496,12 @@ class Menu(batch: Batch) {
         f.isVisible = false
 
         // Open either "Open" or "Save" dialog
-        val choice = if (save) {
-            fileChooser.showSaveDialog(f)
-        } else {
-            fileChooser.showOpenDialog(f)
-        }
+        val choice =
+            if (save) {
+                fileChooser.showSaveDialog(f)
+            } else {
+                fileChooser.showOpenDialog(f)
+            }
         f.dispose()
 
         return if (choice == JFileChooser.APPROVE_OPTION) {
@@ -453,5 +510,4 @@ class Menu(batch: Batch) {
             null
         }
     }
-
 }

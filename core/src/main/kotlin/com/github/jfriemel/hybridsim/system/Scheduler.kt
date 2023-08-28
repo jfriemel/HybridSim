@@ -10,8 +10,8 @@ private val logger = logger<Scheduler>()
 object Scheduler {
 
     private var active = false
-    private var cycleDelay = 120L  // Delay after completion of each activation cycle in ms
-    private var activationsPerCycle = 1  // Number of activations per scheduler cycle
+    private var cycleDelay = 120L // Delay after completion of each activation cycle in ms
+    private var activationsPerCycle = 1 // Number of activations per scheduler cycle
 
     /** @return True if the scheduler is running. */
     fun isRunning(): Boolean = active
@@ -83,7 +83,8 @@ object Scheduler {
                 try {
                     robot.triggerActivate(withUndo = false)
                 } catch (e: Exception) {
-                    // Ensure Scheduler does not crash when Robot crashes due to faulty algorithm script
+                    // Ensure Scheduler does not crash when Robot crashes due to faulty algorithm
+                    // script
                     logger.error { "Robot at ${robot.node} crashed!" }
                     logger.error { e.toString() }
                     logger.error { e.stackTraceToString() }
@@ -110,5 +111,4 @@ object Scheduler {
             delay(cycleDelay)
         }
     }
-
 }

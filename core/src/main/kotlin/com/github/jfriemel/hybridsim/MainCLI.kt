@@ -24,9 +24,13 @@ data class CLIArguments(
 class MainCLI(private val args: CLIArguments) {
 
     fun main() {
-        if (args.algFile == null || (args.genFile == null && args.configFile == null && args.configDir == null)) {
+        if (
+            args.algFile == null
+            || (args.genFile == null && args.configFile == null && args.configDir == null)
+        ) {
             System.err.println(
-                "Cannot run without algorithm script and either generator script or configuration file or directory!"
+                "Cannot run without algorithm script and either generator script or " +
+                    "configuration file or directory!"
             )
             return
         }
@@ -44,7 +48,10 @@ class MainCLI(private val args: CLIArguments) {
                 return
             }
             file.parentFile.mkdirs()
-            csvWriter().writeAll(listOf(listOf("id", "numTiles", "numRobots", "numOverhang", "rounds")), file)
+            csvWriter().writeAll(
+                listOf(listOf("id", "numTiles", "numRobots", "numOverhang", "rounds")),
+                file,
+            )
         }
 
         // Run algorithm on given configuration
@@ -92,13 +99,12 @@ class MainCLI(private val args: CLIArguments) {
             }
         }
     }
-
 }
 
 /**
- * Performs a full sequential scheduler run on the current [Configuration] until termination or until the number of
- * rounds reaches the specified [limit]. Finally, writes the number of rounds for the current configuration to the
- * [outputFile] csv file.
+ * Performs a full sequential scheduler run on the current [Configuration] until termination or
+ * until the number of rounds reaches the specified [limit]. Finally, writes the number of rounds
+ * for the current configuration to the [outputFile] csv file.
  */
 private fun singleRun(id: Int, n: Int, k: Int, m: Int, limit: Int, outputFile: File?) {
     val rounds: Int? = FullSequentialScheduler.run(limit)
