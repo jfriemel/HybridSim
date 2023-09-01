@@ -15,8 +15,6 @@ buildscript {
   repositories {
     mavenCentral()
     maven { url 'https://s01.oss.sonatype.org' }
-    mavenLocal()
-    google()
     gradlePluginPortal()
   }
   dependencies {
@@ -40,9 +38,7 @@ subprojects {
   repositories {
     mavenCentral()
     maven { url 'https://s01.oss.sonatype.org' }
-    mavenLocal()
     gradlePluginPortal()
-    maven { url 'https://jitpack.io' }
   }
 }
 
