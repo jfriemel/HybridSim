@@ -198,7 +198,7 @@ class Menu(batch: Batch) {
                             cell(colspan = 1, width = redoButtonImage.width, align = Align.right)
                         }
                     row()
-                    visLabel("# overhang:").apply {
+                    visLabel("# overhangs:").apply {
                         cell(colspan = 1, width = undoButtonImage.width, align = Align.left)
                         color = Color.BLACK
                     }
