@@ -3,7 +3,6 @@ package com.github.jfriemel.hybridsim.system
 import kotlinx.coroutines.delay
 import ktx.log.logger
 import java.lang.Long.max
-import kotlin.random.Random
 
 private val logger = logger<Scheduler>()
 
@@ -79,7 +78,7 @@ object Scheduler {
             Configuration.addUndoStep()
             for (activationIndex in 1..activationsPerCycle) {
                 // Pick a random robot to activate (fair sequential scheduler)
-                val robot = robots[Random.nextInt(robots.size)]
+                val robot = robots[Commons.random.nextInt(robots.size)]
                 try {
                     robot.triggerActivate(withUndo = false)
                 } catch (e: Exception) {

@@ -10,16 +10,20 @@
  */
 
 /*
-Add any imports you may need (e.g., import kotlin.random.Random)
+Add any imports you may need.
 
 Default imports (no need to add them to the script):
 
 import com.github.jfriemel.hybridsim.entities.Node
+import com.github.jfriemel.hybridsim.system.Commons
 import com.github.jfriemel.hybridsim.system.ConfigurationDescriptor
 import com.github.jfriemel.hybridsim.system.Generator
 
 You can still add these imports manually to make use of your IDEs autocomplete features.
 Make sure that your other imports do not clash with the default imports.
+
+For randomness, use Commons.random instead of kotlin.random.Random (or other randomness
+implementations) as its seed can be specified using a command-line argument (--seed).
  */
 
 /**
@@ -55,7 +59,7 @@ class GeneratorImpl : Generator() {
         )
         /* Example:
         repeat(numTiles) {
-            tileNodes.add(Node(Random.nextInt(), Random.nextInt()))  // Requires 'import kotlin.random.Random'
+            tileNodes.add(Node(Commons.random.nextInt(), Commons.random.nextInt()))
         }
          */
 

@@ -21,7 +21,7 @@ class GeneratorImpl : Generator() {
         repeat(numTiles + (numTiles / 2) - 1) {
             var nextNode: Node
             do {
-                nextNode = tileCandidates.random()
+                nextNode = tileCandidates.random(Commons.random)
             } while (!isValidCandidate(nextNode, descriptor.tileNodes))
             descriptor.tileNodes.add(nextNode)
             tileCandidates.addAll(nextNode.neighbors().minus(descriptor.tileNodes))
@@ -31,7 +31,7 @@ class GeneratorImpl : Generator() {
         repeat(numTiles / 2) {
             var nextNode: Node
             do {
-                nextNode = tileRemoveCandidates.random()
+                nextNode = tileRemoveCandidates.random(Commons.random)
             } while (!isValidCandidate(nextNode, descriptor.tileNodes))
             descriptor.tileNodes.remove(nextNode)
             tileRemoveCandidates.addAll(nextNode.neighbors().intersect(descriptor.tileNodes))
@@ -41,7 +41,7 @@ class GeneratorImpl : Generator() {
         // Robots
         val robotCandidates = descriptor.tileNodes.toMutableSet()
         repeat(min(numRobots, numTiles)) {
-            val nextNode = robotCandidates.random()
+            val nextNode = robotCandidates.random(Commons.random)
             descriptor.robotNodes.add(nextNode)
             robotCandidates.remove(nextNode)
         }
@@ -56,7 +56,7 @@ class GeneratorImpl : Generator() {
         // Target tiles
         var targetTileOrigin: Node
         do {
-            targetTileOrigin = descriptor.tileNodes.random()
+            targetTileOrigin = descriptor.tileNodes.random(Commons.random)
         } while (descriptor.tileNodes.containsAll(targetTileOrigin.neighbors()))
         descriptor.targetNodes.add(targetTileOrigin)
         val targetTileCandidates =
@@ -64,7 +64,7 @@ class GeneratorImpl : Generator() {
         repeat(numTiles - min(numOverhang, numTiles - 1) - 1) {
             var nextNode: Node
             do {
-                nextNode = targetTileCandidates.random()
+                nextNode = targetTileCandidates.random(Commons.random)
             } while (!isValidCandidate(nextNode, descriptor.targetNodes))
             descriptor.targetNodes.add(nextNode)
             targetTileCandidates.addAll(
@@ -82,7 +82,7 @@ class GeneratorImpl : Generator() {
         repeat(min(numOverhang, numTiles - 1)) {
             var nextNode: Node
             do {
-                nextNode = demandNodeCandidates.random()
+                nextNode = demandNodeCandidates.random(Commons.random)
             } while (!isValidCandidate(nextNode, descriptor.targetNodes))
             descriptor.targetNodes.add(nextNode)
             demandNodeCandidates.addAll(

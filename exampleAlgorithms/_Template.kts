@@ -10,16 +10,20 @@
  */
 
 /*
-Add any imports you may need (e.g., import kotlin.random.Random)
+Add any imports you may need.
 
 Default imports (no need to add them to the script):
 
 import com.github.jfriemel.hybridsim.entities.*
+import com.github.jfriemel.hybridsim.system.Commons
 import com.badlogic.gdx.graphics.Color
 
 You can still add these imports manually to make use of your IDEs autocomplete features.
 Make sure that your other imports do not clash with the default imports.
 For example, do not import java.awt.Color as it clashes with com.badlogic.gdx.graphics.Color.
+
+For randomness, use Commons.random instead of kotlin.random.Random (or other randomness
+implementations) as its seed can be specified using a command-line argument (--seed).
  */
 
 /**

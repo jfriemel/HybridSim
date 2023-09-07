@@ -1,5 +1,6 @@
 package com.github.jfriemel.hybridsim.cli
 
+import com.github.jfriemel.hybridsim.system.Commons
 import com.github.jfriemel.hybridsim.system.Configuration
 import kotlin.math.max
 
@@ -26,7 +27,7 @@ object FullSequentialScheduler {
         while (!finished) {
             repeat(numTiles) {
                 finished = true
-                val robots = Configuration.robots.values.shuffled()
+                val robots = Configuration.robots.values.shuffled(Commons.random)
                 for (robot in robots) {
                     robot.triggerActivate(withUndo = false)
                     finished = finished && robot.finished()

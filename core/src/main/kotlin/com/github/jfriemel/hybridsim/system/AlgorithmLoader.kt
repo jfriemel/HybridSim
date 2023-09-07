@@ -38,7 +38,9 @@ object AlgorithmLoader {
         val engine = ScriptEngineManager().getEngineByExtension("kts") as Compilable
         engine
             .compile(
-                "import com.github.jfriemel.hybridsim.entities.*; import com.badlogic.gdx.graphics.Color"
+                "import com.github.jfriemel.hybridsim.entities.*; " +
+                    "import com.github.jfriemel.hybridsim.system.Commons; " +
+                    "import com.badlogic.gdx.graphics.Color"
             )
             .eval()
         engine.compile(script).eval()

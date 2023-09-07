@@ -3,7 +3,6 @@ package com.github.jfriemel.hybridsim.system
 import com.github.jfriemel.hybridsim.entities.Node
 import kotlin.math.ceil
 import kotlin.math.min
-import kotlin.random.Random
 
 open class Generator {
 
@@ -32,7 +31,7 @@ open class Generator {
             repeat(numTiles + (numTiles / 2) - 1) {
                 var nextNode: Node
                 do {
-                    nextNode = targetCandidates.random()
+                    nextNode = targetCandidates.random(Commons.random)
                 } while (!isValidCandidate(nextNode, descriptor.targetNodes))
                 descriptor.targetNodes.add(nextNode)
                 targetCandidates.addAll(nextNode.neighbors().minus(descriptor.targetNodes))
@@ -42,7 +41,7 @@ open class Generator {
             repeat(numTiles / 2) {
                 var nextNode: Node
                 do {
-                    nextNode = targetRemoveCandidates.random()
+                    nextNode = targetRemoveCandidates.random(Commons.random)
                 } while (!isValidCandidate(nextNode, descriptor.targetNodes))
                 descriptor.targetNodes.remove(nextNode)
                 targetRemoveCandidates.addAll(
@@ -52,8 +51,8 @@ open class Generator {
             }
 
             // Target tiles
-            val dir = Random.nextInt(0, 6)
-            var targetTileOrigin = descriptor.targetNodes.random()
+            val dir = Commons.random.nextInt(0, 6)
+            var targetTileOrigin = descriptor.targetNodes.random(Commons.random)
             var currentNode = targetTileOrigin
             repeat(numTiles) {
                 currentNode = currentNode.nodeInDir(dir)
@@ -65,7 +64,7 @@ open class Generator {
             val targetTileCandidates =
                 targetTileOrigin.neighbors().intersect(descriptor.targetNodes).toMutableSet()
             repeat(numTiles - min(numOverhang, numTiles - 1) - 1) {
-                val nextNode = targetTileCandidates.random()
+                val nextNode = targetTileCandidates.random(Commons.random)
                 descriptor.tileNodes.add(nextNode)
                 targetTileCandidates.addAll(
                     nextNode
@@ -83,7 +82,7 @@ open class Generator {
                     .minus(descriptor.targetNodes)
                     .toMutableSet()
             repeat(min(numOverhang, numTiles - 1)) {
-                val nextNode = overhangCandidates.random()
+                val nextNode = overhangCandidates.random(Commons.random)
                 descriptor.tileNodes.add(nextNode)
                 overhangCandidates.addAll(
                     nextNode.neighbors().minus(descriptor.tileNodes).minus(descriptor.targetNodes)
@@ -99,7 +98,7 @@ open class Generator {
             repeat(numTiles + numTiles / 2 - 1) {
                 var nextNode: Node
                 do {
-                    nextNode = tileCandidates.random()
+                    nextNode = tileCandidates.random(Commons.random)
                 } while (!isValidCandidate(nextNode, descriptor.tileNodes))
                 descriptor.tileNodes.add(nextNode)
                 tileCandidates.addAll(nextNode.neighbors().minus(descriptor.tileNodes))
@@ -110,7 +109,7 @@ open class Generator {
             repeat(numTiles) {
                 var nextNode: Node
                 do {
-                    nextNode = tileRemoveCandidates.random()
+                    nextNode = tileRemoveCandidates.random(Commons.random)
                 } while (!isValidCandidate(nextNode, descriptor.tileNodes))
                 descriptor.tileNodes.remove(nextNode)
                 tileRemoveCandidates.addAll(nextNode.neighbors().intersect(descriptor.tileNodes))
@@ -126,7 +125,7 @@ open class Generator {
                 closingTileCandidates.add(Node.origin)
             }
             repeat(ceil(numTiles / 2f).toInt()) {
-                val nextNode = closingTileCandidates.random()
+                val nextNode = closingTileCandidates.random(Commons.random)
                 descriptor.tileNodes.add(nextNode)
                 closingTileCandidates.addAll(nextNode.neighbors().minus(descriptor.tileNodes))
                 closingTileCandidates.remove(nextNode)
@@ -136,7 +135,7 @@ open class Generator {
         // Robots
         val robotCandidates = descriptor.tileNodes.toMutableSet()
         repeat(min(numRobots, numTiles)) {
-            val nextNode = robotCandidates.random()
+            val nextNode = robotCandidates.random(Commons.random)
             descriptor.robotNodes.add(nextNode)
             robotCandidates.remove(nextNode)
         }

@@ -9,7 +9,10 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.split
 import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.clikt.parameters.types.int
+import com.github.ajalt.clikt.parameters.types.long
 import com.github.ajalt.clikt.parameters.types.restrictTo
+import com.github.jfriemel.hybridsim.system.Commons
+import kotlin.random.Random
 
 fun main(args: Array<String>) = Main().main(args)
 
@@ -89,7 +92,17 @@ class Main : CliktCommand() {
             "simulations shall be stored.",
     ).file(canBeDir = false)
 
+    private val seed by option(
+        "--seed", "-s",
+        help = "Set a seed for randomness. Note: This may not affect randomness in loaded algorithms or " +
+            "configuration generators."
+    ).long()
+
     override fun run() {
+        if (seed != null) {
+            Commons.random = Random(seed!!)
+        }
+
         if (noGui) {
             val cliArgs = CLIArguments(
                 algFile,
@@ -106,8 +119,11 @@ class Main : CliktCommand() {
             )
             MainCLI(cliArgs).main()
         } else {
+            val guiArgs = GUIArguments(
+                algFile, configFile, genFile, numTiles[0], numRobots[0], numOverhangs[0]
+            )
             Lwjgl3Application(
-                MainGUI(algFile, configFile, genFile, numTiles[0], numRobots[0], numOverhangs[0]),
+                MainGUI(guiArgs),
                 Lwjgl3ApplicationConfiguration().apply {
                     setTitle("HybridSim")
                     useVsync(true)

@@ -23,14 +23,16 @@ import java.io.File
 
 private val logger = logger<MainGUI>()
 
-class MainGUI(
-    private val algFile: File? = null,
-    private val configFile: File? = null,
-    private val genFile: File? = null,
-    private val numTiles: Int,
-    private val numRobots: Int,
-    private val numOverhang: Int,
-) : KtxGame<KtxScreen>() {
+data class GUIArguments(
+    val algFile: File?,
+    val configFile: File?,
+    val genFile: File?,
+    val numTiles: Int,
+    val numRobots: Int,
+    val numOverhang: Int,
+)
+
+class MainGUI(private val args: GUIArguments) : KtxGame<KtxScreen>() {
     override fun create() {
         // Enable logging
         Gdx.app.logLevel = Application.LOG_DEBUG
@@ -53,14 +55,14 @@ class MainGUI(
         Gdx.input.inputProcessor = inputMultiplexer
 
         // Load algorithm
-        algFile?.let { file -> AlgorithmLoader.loadAlgorithm(file) }
+        args.algFile?.let { file -> AlgorithmLoader.loadAlgorithm(file) }
 
         // Load generator
-        genFile?.let { file -> GeneratorLoader.loadGenerator(file) }
+        args.genFile?.let { file -> GeneratorLoader.loadGenerator(file) }
 
         // Load configuration or generate random configuration
-        configFile?.let { file -> Configuration.loadConfiguration(file.readText()) }
-            ?: Configuration.generate(numTiles, numRobots, numOverhang)
+        args.configFile?.let { file -> Configuration.loadConfiguration(file.readText()) }
+            ?: Configuration.generate(args.numTiles, args.numRobots, args.numOverhang)
         Configuration.clearUndoQueues()
         screen.resetCamera()
 
