@@ -182,10 +182,10 @@ class RobotImpl(node: Node, orientation: Int) :
             moveToLabel(2)
             return
         }
-        if (hasTileAtLabel(1)) {
-            phase = Phase.CarryTileToVertex
+        phase = if (hasTileAtLabel(1)) {
+            Phase.CarryTileToVertex
         } else {
-            phase = Phase.Finished
+            Phase.Finished
         }
     }
 }

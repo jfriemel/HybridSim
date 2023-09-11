@@ -57,14 +57,11 @@ class RobotImpl(node: Node, orientation: Int) :
             .firstOrNull { label -> hasTileAtLabel(label) }
             ?.let { label ->
                 // Note: In the tile shape formation paper mentioned above, the precedence of
-                // movement
-                // directions in the
-                // tile searching phase is given as N, NW, SW (0, 5, 4) instead of NW, SW, N (5, 4,
-                // 0).
+                // movement directions in the tile searching phase is given as N, NW, SW (0, 5, 4)
+                // instead of NW, SW, N (5, 4, 0).
                 // This is a mistake. In the proof of Theorem 3, it becomes clear that the authors
-                // mean
-                // NW, SW, N, i.e.,
-                // they want the robot to move as far west as possible before moving north.
+                // mean NW, SW, N, i.e., they want the robot to move as far west as possible before
+                // moving north.
                 moveToLabel(label)
                 return
             }
