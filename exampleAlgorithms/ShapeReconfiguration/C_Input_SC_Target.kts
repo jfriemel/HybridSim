@@ -58,14 +58,19 @@ class RobotImpl(node: Node, orientation: Int) :
         when (phase) {
             Phase.FindBlockTile,
             Phase.MoveBlockTile,
-            Phase.ReturnTile -> Color.ORANGE
+            Phase.ReturnTile,
+            -> Color.ORANGE
+
             Phase.FindOverhang,
             Phase.CompactOverhang,
             Phase.CompactOverhangHelper,
-            Phase.LeaveOverhang -> Color.SCARLET
+            Phase.LeaveOverhang,
+            -> Color.SCARLET
+
             Phase.ExploreColumn,
             Phase.ReturnToColumnTop,
-            Phase.ExploreBoundary -> Color.SKY
+            Phase.ExploreBoundary,
+            -> Color.SKY
         }
 
     /**
@@ -204,14 +209,14 @@ class RobotImpl(node: Node, orientation: Int) :
 
         if (
             !entryTile &&
-                !hasTileAtLabel((moveLabel + 1).mod(6)) &&
-                !labelIsTarget((moveLabel + 1).mod(6)) &&
-                hasTileAtLabel((moveLabel + 2).mod(6)) &&
-                !labelIsTarget((moveLabel + 2).mod(6)) &&
-                intArrayOf(3, 4, 5).all { offset ->
-                    !hasTileAtLabel((moveLabel + offset).mod(6)) ||
-                        labelIsTarget((moveLabel + offset).mod(6))
-                }
+            !hasTileAtLabel((moveLabel + 1).mod(6)) &&
+            !labelIsTarget((moveLabel + 1).mod(6)) &&
+            hasTileAtLabel((moveLabel + 2).mod(6)) &&
+            !labelIsTarget((moveLabel + 2).mod(6)) &&
+            intArrayOf(3, 4, 5).all { offset ->
+                !hasTileAtLabel((moveLabel + offset).mod(6)) ||
+                    labelIsTarget((moveLabel + offset).mod(6))
+            }
         ) {
             liftTile()
             compactionDir = (moveLabel + 1).mod(6)
@@ -244,7 +249,7 @@ class RobotImpl(node: Node, orientation: Int) :
                 labels.filter { label -> !hasTileAtLabel(label) || labelIsTarget(label) }
             if (
                 (hasTileAtLabel(compactionDir) && !labelIsTarget(compactionDir)) &&
-                    (invalidNbrs.size > 2 && (compactionDir + 1).mod(6) in invalidNbrs)
+                (invalidNbrs.size > 2 && (compactionDir + 1).mod(6) in invalidNbrs)
             ) {
                 moveToLabel((compactionDir + 3).mod(6))
                 phase = Phase.CompactOverhang

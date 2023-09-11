@@ -5,5 +5,4 @@ import kotlin.random.Random
 object Commons {
 
     var random: Random = Random.Default
-
 }

@@ -93,8 +93,8 @@ class RobotImpl(node: Node, orientation: Int) :
 
         if (
             !hasTileAtLabel((moveLabel + 1).mod(6)) &&
-                hasTileAtLabel((moveLabel + 2).mod(6)) &&
-                (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6)))
+            hasTileAtLabel((moveLabel + 2).mod(6)) &&
+            (hasTileAtLabel((moveLabel + 3).mod(6)) || !hasTileAtLabel((moveLabel + 4).mod(6)))
         ) {
             liftTile()
             compressDir = (moveLabel + 1).mod(6)

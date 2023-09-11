@@ -246,7 +246,7 @@ class TestRobot {
         Assertions.assertEquals(listOf(label), robot.allHangingRobotNbrLabels())
         Assertions.assertEquals(
             listOf(Configuration.robots[robotNode]),
-            robot.allHangingRobotNbrs()
+            robot.allHangingRobotNbrs(),
         )
     }
 

@@ -67,7 +67,9 @@ class RobotImpl(node: Node, orientation: Int) :
             Phase.FindFirstCandidate -> Color.SCARLET
             Phase.FindLoop -> Color.YELLOW
             Phase.Backtrack,
-            Phase.BacktrackFurther -> Color.BLUE
+            Phase.BacktrackFurther,
+            -> Color.BLUE
+
             Phase.ReturnWithResult -> if (result) Color.WHITE else Color.GRAY
         }
     }
@@ -129,8 +131,10 @@ class RobotImpl(node: Node, orientation: Int) :
 
         if (
             (enterLabel in 0..2 && !hasTileAtLabel(3) && (enterLabel == 2 || !hasTileAtLabel(2))) ||
-                ((enterLabel == 4 || enterLabel == 5) &&
-                    intArrayOf(0, 1, 2, 3).all { !hasTileAtLabel(it) })
+            (
+                (enterLabel == 4 || enterLabel == 5) &&
+                    intArrayOf(0, 1, 2, 3).all { !hasTileAtLabel(it) }
+                )
         ) {
             phase = Phase.TraverseColumn
             return
@@ -270,9 +274,11 @@ class RobotImpl(node: Node, orientation: Int) :
             when (label) {
                 0 -> 2 // north
                 1,
-                5 -> 1 // north-east, north-west
+                5,
+                -> 1 // north-east, north-west
                 2,
-                4 -> -1 // south-east, south-west
+                4,
+                -> -1 // south-east, south-west
                 3 -> -2 // south
                 else -> 0 // impossible direction
             }

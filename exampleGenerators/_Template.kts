@@ -44,7 +44,7 @@ class GeneratorImpl : Generator() {
     override fun generate(
         numTiles: Int,
         numRobots: Int,
-        numOverhang: Int
+        numOverhang: Int,
     ): ConfigurationDescriptor {
         // The set of nodes occupied by tiles in your generated configuration
         val tileNodes: MutableSet<Node> = mutableSetOf()
@@ -55,7 +55,7 @@ class GeneratorImpl : Generator() {
         val targetNodes: MutableSet<Node> = mutableSetOf()
 
         TODO(
-            "Replace with your generator implementation where you fill the sets above with nodes as you see fit"
+            "Replace with your generator implementation where you fill the sets above with nodes as you see fit",
         )
         /* Example:
         repeat(numTiles) {

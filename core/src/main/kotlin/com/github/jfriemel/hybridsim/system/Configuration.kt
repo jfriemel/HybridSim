@@ -28,7 +28,8 @@ object Configuration {
     var robots: MutableMap<Node, Robot> = HashMap()
     var targetNodes: MutableSet<Node> = HashSet()
 
-    @Json(ignored = true) var generator = Generator()
+    @Json(ignored = true)
+    var generator = Generator()
 
     private var undoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
     private var redoQueue: ArrayDeque<TimeState> = ArrayDeque(MAX_UNDO_STATES)
@@ -178,7 +179,7 @@ object Configuration {
             return jsonString
         }
         return (default().parse(StringBuilder(jsonString)) as JsonObject).toJsonString(
-            prettyPrint = true
+            prettyPrint = true,
         )
     }
 

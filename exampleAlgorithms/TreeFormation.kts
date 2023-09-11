@@ -4,30 +4,16 @@ fun getRobot(node: Node, orientation: Int): Robot {
 }
 
 private enum class Phase {
-    Initialize,
-    SearchNextBranch,
-    SearchNextBranchMoveN,
-    CheckOverhangs,
-    CheckOverhangsAfterN,
-    MoveE,
-    HasMovedE,
-    GetTileN,
-    GetTileNW,
-    GetTileNWAfterLift,
-    BringTile,
-    BringTileMoveS,
-    BringTileFinalize,
-    Finished,
+    Initialize, SearchNextBranch, SearchNextBranchMoveN, CheckOverhangs, CheckOverhangsAfterN, MoveE, HasMovedE, GetTileN, GetTileNW, GetTileNWAfterLift, BringTile, BringTileMoveS, BringTileFinalize, Finished,
 }
 
-class RobotImpl(node: Node, orientation: Int) :
-    Robot(
-        node = node,
-        orientation = orientation,
-        carriesTile = false,
-        numPebbles = 0,
-        maxPebbles = 0,
-    ) {
+class RobotImpl(node: Node, orientation: Int) : Robot(
+    node = node,
+    orientation = orientation,
+    carriesTile = false,
+    numPebbles = 0,
+    maxPebbles = 0,
+) {
     private var phase = Phase.Initialize
 
     private var overhangTopFound = false
@@ -57,39 +43,45 @@ class RobotImpl(node: Node, orientation: Int) :
         return when (phase) {
             Phase.Initialize -> Color.ORANGE
             Phase.SearchNextBranch,
-            Phase.SearchNextBranchMoveN -> Color.TEAL
+            Phase.SearchNextBranchMoveN,
+            -> Color.TEAL
+
             Phase.CheckOverhangs,
-            Phase.CheckOverhangsAfterN -> Color.SKY
+            Phase.CheckOverhangsAfterN,
+            -> Color.SKY
+
             Phase.MoveE,
-            Phase.HasMovedE -> Color.SCARLET
+            Phase.HasMovedE,
+            -> Color.SCARLET
+
             Phase.GetTileN -> Color.BLUE
             Phase.GetTileNW,
-            Phase.GetTileNWAfterLift -> Color.YELLOW
+            Phase.GetTileNWAfterLift,
+            -> Color.YELLOW
+
             Phase.BringTile,
             Phase.BringTileMoveS,
-            Phase.BringTileFinalize -> Color.BROWN
+            Phase.BringTileFinalize,
+            -> Color.BROWN
+
             Phase.Finished -> Color.BLACK
         }
     }
 
     private fun initialize() {
-        intArrayOf(1, 2, 0)
-            .firstOrNull { label -> hasTileAtLabel(label) }
-            ?.let { label ->
-                moveToLabel(label)
-                return
-            }
+        intArrayOf(1, 2, 0).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            return
+        }
         phase = Phase.SearchNextBranch
     }
 
     private fun searchNextBranch() {
-        intArrayOf(5, 4)
-            .firstOrNull { label -> hasTileAtLabel(label) }
-            ?.let { label ->
-                moveToLabel(label)
-                phase = Phase.SearchNextBranchMoveN
-                return
-            }
+        intArrayOf(5, 4).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            phase = Phase.SearchNextBranchMoveN
+            return
+        }
 
         if (hasTileAtLabel(3)) {
             moveToLabel(3)
@@ -130,13 +122,11 @@ class RobotImpl(node: Node, orientation: Int) :
     }
 
     private fun moveE() {
-        intArrayOf(2, 1)
-            .firstOrNull { label -> hasTileAtLabel(label) }
-            ?.let { label ->
-                moveToLabel(label)
-                phase = Phase.HasMovedE
-                return
-            }
+        intArrayOf(2, 1).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+            moveToLabel(label)
+            phase = Phase.HasMovedE
+            return
+        }
 
         if (hasTileAtLabel(0)) {
             moveToLabel(0)
@@ -146,13 +136,12 @@ class RobotImpl(node: Node, orientation: Int) :
     }
 
     private fun hasMovedE() {
-        phase =
-            if (hasTileAtLabel(3)) {
-                moveToLabel(3)
-                Phase.SearchNextBranch
-            } else {
-                Phase.CheckOverhangs
-            }
+        phase = if (hasTileAtLabel(3)) {
+            moveToLabel(3)
+            Phase.SearchNextBranch
+        } else {
+            Phase.CheckOverhangs
+        }
     }
 
     private fun getTileN() {
@@ -185,14 +174,13 @@ class RobotImpl(node: Node, orientation: Int) :
             placeTile()
             return
         }
-        phase =
-            if (hasTileAtLabel(3) || hasTileAtLabel(2)) {
-                moveToLabel(1)
-                Phase.BringTile
-            } else {
-                moveToLabel(1)
-                Phase.GetTileNW
-            }
+        phase = if (hasTileAtLabel(3) || hasTileAtLabel(2)) {
+            moveToLabel(1)
+            Phase.BringTile
+        } else {
+            moveToLabel(1)
+            Phase.GetTileNW
+        }
     }
 
     private fun bringTile() {
@@ -222,12 +210,11 @@ class RobotImpl(node: Node, orientation: Int) :
             placeTile()
             return
         }
-        phase =
-            if (hasTileAtLabel(3)) {
-                Phase.Initialize
-            } else {
-                moveToLabel(4)
-                Phase.GetTileN
-            }
+        phase = if (hasTileAtLabel(3)) {
+            Phase.Initialize
+        } else {
+            moveToLabel(4)
+            Phase.GetTileN
+        }
     }
 }

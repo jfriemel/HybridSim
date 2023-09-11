@@ -7,7 +7,7 @@ class GeneratorImpl : Generator() {
     override fun generate(
         numTiles: Int,
         numRobots: Int,
-        numOverhang: Int
+        numOverhang: Int,
     ): ConfigurationDescriptor {
         val descriptor = ConfigurationDescriptor(mutableSetOf(), mutableSetOf(), mutableSetOf())
 
@@ -68,7 +68,7 @@ class GeneratorImpl : Generator() {
             } while (!isValidCandidate(nextNode, descriptor.targetNodes))
             descriptor.targetNodes.add(nextNode)
             targetTileCandidates.addAll(
-                nextNode.neighbors().minus(descriptor.targetNodes).intersect(descriptor.tileNodes)
+                nextNode.neighbors().minus(descriptor.targetNodes).intersect(descriptor.tileNodes),
             )
             targetTileCandidates.remove(nextNode)
         }
@@ -86,7 +86,7 @@ class GeneratorImpl : Generator() {
             } while (!isValidCandidate(nextNode, descriptor.targetNodes))
             descriptor.targetNodes.add(nextNode)
             demandNodeCandidates.addAll(
-                nextNode.neighbors().minus(descriptor.targetNodes).minus(descriptor.tileNodes)
+                nextNode.neighbors().minus(descriptor.targetNodes).minus(descriptor.tileNodes),
             )
             demandNodeCandidates.remove(nextNode)
         }

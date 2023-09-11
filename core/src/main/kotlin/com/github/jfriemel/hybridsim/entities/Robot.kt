@@ -15,7 +15,8 @@ open class Robot(
     @Json(ignored = true) var carrySprite: Sprite? = null,
 ) : Entity(node, sprite) {
 
-    @Json(ignored = true) val labels = intArrayOf(0, 1, 2, 3, 4, 5)
+    @Json(ignored = true)
+    val labels = intArrayOf(0, 1, 2, 3, 4, 5)
 
     /**
      * The code executed by the robot when it is activated. The function is overriden by imported

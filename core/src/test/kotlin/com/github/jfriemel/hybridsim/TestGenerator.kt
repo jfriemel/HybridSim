@@ -66,7 +66,7 @@ class TestGenerator {
     fun `generate valid shape reconfiguration instance`(
         numTiles: Int,
         numRobots: Int,
-        numOverhang: Int
+        numOverhang: Int,
     ) {
         Configuration.generate(numTiles, numRobots, numOverhang)
         Assertions.assertEquals(numTiles, Configuration.tiles.size)
@@ -74,7 +74,7 @@ class TestGenerator {
         Assertions.assertTrue(Configuration.tiles.keys.containsAll(Configuration.robots.keys))
         Assertions.assertEquals(
             numOverhang,
-            Configuration.targetNodes.minus(Configuration.tiles.keys).size
+            Configuration.targetNodes.minus(Configuration.tiles.keys).size,
         )
     }
 
@@ -90,7 +90,7 @@ class TestGenerator {
         Assertions.assertTrue(Configuration.tiles.keys.containsAll(Configuration.robots.keys))
         Assertions.assertEquals(
             numTiles - 1,
-            Configuration.targetNodes.minus(Configuration.tiles.keys).size
+            Configuration.targetNodes.minus(Configuration.tiles.keys).size,
         )
     }
 
@@ -99,11 +99,11 @@ class TestGenerator {
         Configuration.generate(1000, 25, 350)
         Assertions.assertEquals(
             Configuration.tiles.keys,
-            getConnectedComponent(Configuration.tiles.keys)
+            getConnectedComponent(Configuration.tiles.keys),
         )
         Assertions.assertEquals(
             Configuration.targetNodes,
-            getConnectedComponent(Configuration.targetNodes)
+            getConnectedComponent(Configuration.targetNodes),
         )
     }
 

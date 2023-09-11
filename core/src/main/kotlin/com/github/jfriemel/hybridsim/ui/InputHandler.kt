@@ -35,6 +35,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 menu.untoggleToggleButtons()
                 Scheduler.toggle()
             }
+
             Input.Keys.ESCAPE -> { // Emergency handbrake, basically stop everything
                 Scheduler.stop()
                 menu.untoggleToggleButtons()
@@ -46,8 +47,10 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                 }
                 screen.resetCamera()
             }
+
             Input.Keys.Y,
-            Input.Keys.Z -> {
+            Input.Keys.Z,
+            -> {
                 // Undo with Ctrl+Y or Ctrl+Z, redo with Ctrl+Shift+Y or Ctrl+Shift+Z
                 // I strongly dislike this, but I see no alternative as I cannot access the user's
                 // keyboard layout
@@ -60,6 +63,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     }
                 }
             }
+
             Input.Keys.F2 -> { // Take a screenshot
                 try {
                     val time = LocalDateTime.now().toString().split(".")[0].replace(':', '-')
@@ -81,9 +85,12 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         // layout
         when (keycode) {
             Input.Keys.UP,
-            Input.Keys.DOWN -> screen.yMomentum = 0
+            Input.Keys.DOWN,
+            -> screen.yMomentum = 0
+
             Input.Keys.LEFT,
-            Input.Keys.RIGHT -> screen.xMomentum = 0
+            Input.Keys.RIGHT,
+            -> screen.xMomentum = 0
         }
         return true
     }
@@ -94,29 +101,48 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
             '-' -> screen.zoom(1f)
             '0' -> screen.resetCamera()
             'f',
-            'F' -> toggleFullscreen()
+            'F',
+            -> toggleFullscreen()
+
             'm',
-            'M' -> menu.toggleActive()
+            'M',
+            -> menu.toggleActive()
+
             'l',
-            'L' -> menu.loadConfiguration()
+            'L',
+            -> menu.loadConfiguration()
+
             's' -> menu.saveConfiguration(false)
             'S' -> menu.saveConfiguration(true)
             'a',
-            'A' -> menu.loadAlgorithm()
+            'A',
+            -> menu.loadAlgorithm()
+
             't',
-            'T' -> menu.togglePutTiles()
+            'T',
+            -> menu.togglePutTiles()
+
             'r',
-            'R' -> menu.togglePutRobots()
+            'R',
+            -> menu.togglePutRobots()
+
             'z',
-            'Z' -> menu.toggleSelectTarget()
+            'Z',
+            -> menu.toggleSelectTarget()
+
             'h',
-            'H' -> menu.loadGenerator()
+            'H',
+            -> menu.loadGenerator()
+
             'g',
-            'G' -> menu.generateConfiguration()
+            'G',
+            -> menu.generateConfiguration()
+
             '<',
-            '>' ->
+            '>',
+            ->
                 Configuration.targetNodes.addAll(
-                    Configuration.tiles.keys
+                    Configuration.tiles.keys,
                 ) // Sometimes helpful for testing
         }
         return true
@@ -144,6 +170,7 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
                     touchDragged(screenX, screenY, pointer)
                 }
             }
+
             Input.Buttons.RIGHT -> {
                 if (
                     Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)

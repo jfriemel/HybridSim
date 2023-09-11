@@ -14,11 +14,7 @@ import com.github.jfriemel.hybridsim.system.Configuration
 import ktx.app.KtxScreen
 import ktx.graphics.use
 import ktx.log.logger
-import kotlin.math.ceil
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.round
-import kotlin.math.sqrt
+import kotlin.math.*
 
 private val logger = logger<SimScreen>()
 
@@ -37,7 +33,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
             setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
             setWrap(
                 Texture.TextureWrap.Repeat,
-                Texture.TextureWrap.Repeat
+                Texture.TextureWrap.Repeat,
             ) // Grid should be infinite
         }
     private val bkgSprite = Sprite(bkgTexture)
@@ -125,7 +121,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         // Update texture cutout to fit new window size
         bkgSprite.setSize(
             ceil(viewport.unitsPerPixel * width),
-            ceil(viewport.unitsPerPixel * height)
+            ceil(viewport.unitsPerPixel * height),
         )
         moveBackground()
 
@@ -134,8 +130,10 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     override fun dispose() {
-        for (texture in
-            arrayOf(bkgTexture, robotTexture, tileTexture, tilePebbleTexture, emptyTargetTexture)) {
+        for (
+        texture in
+        arrayOf(bkgTexture, robotTexture, tileTexture, tilePebbleTexture, emptyTargetTexture)
+        ) {
             texture.dispose()
         }
     }
@@ -151,7 +149,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         viewport.update(width, height, true)
         bkgSprite.setSize(
             ceil(viewport.unitsPerPixel * width),
-            ceil(viewport.unitsPerPixel * height)
+            ceil(viewport.unitsPerPixel * height),
         )
 
         val zoomFactor = previousUPP / viewport.unitsPerPixel - 1f
@@ -262,7 +260,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
                 }
                 entity.carrySprite?.setPosition(
                     x - tileTexture.width / 2f,
-                    y - tileTexture.height / 2f
+                    y - tileTexture.height / 2f,
                 )
             }
         }
@@ -283,7 +281,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
             val y = viewport.unitsPerPixel * (height - coords.second)
             emptyTargetSprites[targetNode]?.setPosition(
                 x - emptyTargetTexture.width / 2,
-                y - emptyTargetTexture.height / 2
+                y - emptyTargetTexture.height / 2,
             )
         }
     }

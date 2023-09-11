@@ -25,12 +25,12 @@ class MainCLI(private val args: CLIArguments) {
 
     fun main() {
         if (
-            args.algFile == null
-            || (args.genFile == null && args.configFile == null && args.configDir == null)
+            args.algFile == null ||
+            (args.genFile == null && args.configFile == null && args.configDir == null)
         ) {
             System.err.println(
                 "Cannot run without algorithm script and either generator script or " +
-                    "configuration file or directory!"
+                    "configuration file or directory!",
             )
             return
         }

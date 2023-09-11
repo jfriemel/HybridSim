@@ -1,1 +1,20 @@
-{"robots" : {"Node(x=0, y=0)": {"orientation" : 3, "node" : {"x" : 0, "y" : 0}}}, "targetNodes" : [], "tiles" : {"Node(x=0, y=0)": {"node" : {"x" : 0, "y" : 0}}}}
+{
+  "robots": {
+    "Node(x=0, y=0)": {
+      "orientation": 3,
+      "node": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "targetNodes": [],
+  "tiles": {
+    "Node(x=0, y=0)": {
+      "node": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  }
+}

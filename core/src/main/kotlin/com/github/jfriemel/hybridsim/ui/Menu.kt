@@ -27,14 +27,7 @@ import ktx.actors.onClick
 import ktx.actors.onKeyUp
 import ktx.log.logger
 import ktx.scene2d.actors
-import ktx.scene2d.vis.KVisTextButton
-import ktx.scene2d.vis.visCheckBox
-import ktx.scene2d.vis.visImage
-import ktx.scene2d.vis.visLabel
-import ktx.scene2d.vis.visSlider
-import ktx.scene2d.vis.visTable
-import ktx.scene2d.vis.visTextButton
-import ktx.scene2d.vis.visTextField
+import ktx.scene2d.vis.*
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.JFrame
@@ -89,13 +82,13 @@ class Menu(batch: Batch) {
         TextureRegionDrawable(
             Texture(Gdx.files.internal("ui/scheduler_on.png"), true).apply {
                 setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
-            }
+            },
         )
     private val schedulerOffDrawable =
         TextureRegionDrawable(
             Texture(Gdx.files.internal("ui/scheduler_off.png"), true).apply {
                 setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.Linear)
-            }
+            },
         )
     private var undoTexture =
         Texture(Gdx.files.internal("ui/undo.png"), true).apply {
@@ -128,7 +121,7 @@ class Menu(batch: Batch) {
                         TextraLabel("[*]Menu (M)", KnownFonts.getGoNotoUniversal()).apply {
                             color = Color.BLACK
                             alignment = Align.center
-                        }
+                        },
                     )
                     row()
                     buttonLoadConfig = visTextButton("Load Configuration (L)")
@@ -154,7 +147,7 @@ class Menu(batch: Batch) {
                             cell(
                                 colspan = 1,
                                 width = schedulerButtonImage.width,
-                                align = Align.center
+                                align = Align.center,
                             )
                         }
                     buttonRedo =
@@ -189,7 +182,7 @@ class Menu(batch: Batch) {
                         cell(
                             colspan = 2,
                             width = undoButtonImage.width + schedulerButtonImage.width,
-                            align = Align.left
+                            align = Align.left,
                         )
                         color = Color.BLACK
                     }

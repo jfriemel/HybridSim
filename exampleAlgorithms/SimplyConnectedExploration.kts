@@ -24,7 +24,7 @@ class RobotImpl(node: Node, orientation: Int) :
     override fun activate() {
         tileBelow()
             ?.setColor(
-                Color.SKY
+                Color.SKY,
             ) // Only a visual indicator for the user to see which tiles have been visited
         when (phase) {
             Phase.TraverseColumn -> traverseColumn()
@@ -69,8 +69,10 @@ class RobotImpl(node: Node, orientation: Int) :
     private fun traverseBoundary() {
         if (
             (enterLabel in 0..2 && !hasTileAtLabel(3) && (enterLabel == 2 || !hasTileAtLabel(2))) ||
-                ((enterLabel == 4 || enterLabel == 5) &&
-                    intArrayOf(0, 1, 2, 3).all { !hasTileAtLabel(it) })
+            (
+                (enterLabel == 4 || enterLabel == 5) &&
+                    intArrayOf(0, 1, 2, 3).all { !hasTileAtLabel(it) }
+                )
         ) {
             phase = Phase.TraverseColumn
             return

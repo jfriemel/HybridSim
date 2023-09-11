@@ -36,7 +36,7 @@ object GeneratorLoader {
                 "import com.github.jfriemel.hybridsim.entities.Node; " +
                     "import com.github.jfriemel.hybridsim.system.Commons; " +
                     "import com.github.jfriemel.hybridsim.system.ConfigurationDescriptor; " +
-                    "import com.github.jfriemel.hybridsim.system.Generator"
+                    "import com.github.jfriemel.hybridsim.system.Generator",
             )
             .eval()
         engine.compile(script).eval()
