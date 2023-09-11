@@ -8,6 +8,8 @@ working on my master's thesis "Shape Reconfiguration by Hybrid Programmable
 Matter" in the Theory of Distributed Systems research group at Paderborn 
 University.
 
+![A screenshot of the main screen of the simulator.](doc/screenshot_gui.png "GUI screenshot")
+
 
 ## Usage
 
