@@ -1,7 +1,7 @@
 # HybridSim
 
 *HybridSim* is a simulator for the hybrid model for programmable matter. If 
-you are unfamiliar with the hybrid model, check out chapters 6 and 7 of
+you are unfamiliar with the model, you can read up on it in chapters 6 and 7 of
 "Computing by Programmable Particles" by Daymude et al. [1]. I developed 
 this program to aid with the development of hybrid model algorithms while 
 working on my master's thesis "Shape Reconfiguration by Hybrid Programmable 
@@ -34,17 +34,17 @@ Using the appropriate buttons in the GUI, you can:
   nodes,
 - load a configuration generator script from
   [`exampleGenerators`](exampleGenerators), and
-- generate a configuration with the specified number of tiles, robots, and 
+- generate a configuration with the specified number of tiles, robots, and
   overhangs (tiles on non-target nodes).
 
 ### Custom Scripts
 
-Algorithms and configuration generators are implemented as Kotlin scripts. 
-Use the [`_Template.kts`](exampleAlgorithms/_Template.kts) file from the
-respective example directory as a starting point for writing your own scripts
-which can then be loaded as stated above. It may also be helpful for you to 
-look at example implementations such as the script for the
-[triangle formation algorithm](exampleAlgorithms/TriangleFormation.kts) by 
+Algorithms and configuration generators are implemented as Kotlin scripts.
+Use the [`_Template.kts`](exampleAlgorithms/_Template.kts) file from the respective example directory as a
+starting point for writing your own scripts which can then be loaded as stated
+above. It may also be helpful for you to look at example implementations such
+as the script for the
+[triangle formation algorithm](exampleAlgorithms/TriangleFormation.kts) by
 Gmyr et al. [2].
 
 ### CLI Mode
