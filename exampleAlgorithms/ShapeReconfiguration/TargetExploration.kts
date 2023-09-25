@@ -27,16 +27,21 @@ class RobotImpl(node: Node, orientation: Int) :
     Robot(
         node = node,
         orientation = orientation,
-        carriesTile = true, // Robot may carry initial tile, but this is not required
+        carriesTile = false, // Robot may carry initial tile, but this is not required
         numPebbles = 0,
         maxPebbles = 0,
     ) {
-    private var phase = Phase.TraverseColumn // Current phase
-    private var preDetectionPhase =
-        Phase.ReturnSouth // Phase before initiating unique point detection
-    private var prePebbleMovePhase = Phase.FindFirstCandidate // Phase before moving height pebbles
-    private var prePebbleTogglePhase =
-        Phase.DetectUniquePoint // Phase before lifting/placing a single pebble
+    // Current phase
+    private var phase = Phase.TraverseColumn
+
+    // Phase before initiating unique point detection
+    private var preDetectionPhase = Phase.ReturnSouth
+
+    // Phase before moving height pebbles
+    private var prePebbleMovePhase = Phase.FindFirstCandidate
+
+    // Phase before lifting/placing a single pebble
+    private var prePebbleTogglePhase = Phase.DetectUniquePoint
 
     // Keep track of turn-directions mod 5 for tracking horizontal displacement
     private var delta = 0 // Acceptable values: {0, 1, 2, 3, 4}
@@ -54,25 +59,20 @@ class RobotImpl(node: Node, orientation: Int) :
     private var numEmulatedPebbles = 2 // Acceptable values: {0, 1, 2}
 
     // If the robot wants to place a pebble next to another pebble, it emulates the new pebble by
-    // saving a direction
-    // marker its pebble neighbor
+    // saving a direction marker its pebble neighbor
     private var pebbleNbr = -1 // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
 
     // If the robot wants to place an overhang tile to emulate a pebble, but the boundary is already
-    // blocked by a
-    // different pebble, the robot moves the new overhang tile over the existing overhang tile and
-    // remembers the
-    // movement direction
+    // blocked by a different pebble, the robot moves the new overhang tile over the existing
+    // overhang tile and remembers the movement direction
     private var pebbleOverhangNbr = -1 // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
 
     // Last movement direction when placing/lifting a pebble; used to ensure that the robot returns
-    // to
-    // its original node
+    // to its original node
     private var pebbleToggleDir = 0 // Acceptable values: {0, 1, 2, 3, 4, 5}
 
     // Distance by which the robot needs to move the B pebble to keep the correct distance between
-    // the
-    // pebbles
+    // the pebbles
     private var pebbleMoveDist = 0 // Acceptable values: {-1, 0, 1, 2, 3}
 
     // Pebble currently being placed/lifted; 0 for A pebble, 1 for B pebble
@@ -84,10 +84,8 @@ class RobotImpl(node: Node, orientation: Int) :
     // Direction of the overhang tile placed for emulating pebble B
     private var pebbleBDir = -1 // Acceptable values: {-1, 0, 1, 2, 3, 4, 5}
 
-    private var pebbleMoveStep =
-        0 // Acceptable values depend on context, but only finitely many possible
-    private var pebbleToggleStep =
-        0 // Acceptable values depend on context, but only finitely many possible
+    private var pebbleMoveStep = 0 // Acceptable values depend on context
+    private var pebbleToggleStep = 0 // Acceptable values depend on context
 
     private var withTile = carriesTile
     private var hasMoved = false
@@ -96,10 +94,6 @@ class RobotImpl(node: Node, orientation: Int) :
     private var prevLhr = true
 
     override fun activate() {
-        if (isOnTarget() && !isOnEmulatedPebble()) {
-            // A visual indicator for the user to see which tiles have been visited
-            tileBelow()?.setColor(Color.SKY)
-        }
         when (phase) {
             Phase.TraverseColumn -> traverseColumn()
             Phase.ReturnSouth -> returnSouth()
@@ -114,11 +108,6 @@ class RobotImpl(node: Node, orientation: Int) :
             Phase.PlaceEmulatedPebble -> placeEmulatedPebble()
             Phase.LiftEmulatedPebble -> liftEmulatedPebble()
         }
-        // Debugging:
-        // println("p=$phase  d=$pebbleMoveDist  m=$pebbleMoveStep  t=$pebbleToggleStep
-        // h=$heightSign
-        // n=$numEmulatedPebbles  e=$enterLabel  del=$delta  o=$pebbleOverhangNbr
-        // dirs=[$pebbleADir,$pebbleBDir]")
     }
 
     override fun getColor(): Color {
@@ -427,7 +416,6 @@ class RobotImpl(node: Node, orientation: Int) :
                     pebbleNbr = pebbleNbrCandidate
                     numEmulatedPebbles--
                     phase = prePebbleTogglePhase
-                    tileBelow()?.setColor(Color.PURPLE)
                 } else if (withTile) {
                     val tmp =
                         labels.firstOrNull { label ->

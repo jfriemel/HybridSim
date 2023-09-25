@@ -29,13 +29,10 @@ class RobotImpl(node: Node) :
 
     override fun activate() {
         when (phase) {
-            Phase.FindBoundary,
-            Phase.LeaveOverhang,
-            Phase.FindOverhang,
-            Phase.FindDemandComponent,
-            ->
-                move() // No extra functionality needed on top of move() with updatePhase() and
-            // updateMoveDir()
+            // No extra functionality needed on top of move() with updatePhase() and updateMoveDir()
+            Phase.FindBoundary, Phase.LeaveOverhang, Phase.FindOverhang, Phase.FindDemandComponent,
+            -> move()
+
             Phase.FindRemovableOverhang -> findRemovableOverhang()
             Phase.Hanging -> hanging()
             Phase.PlaceTargetTile -> placeTargetTile()
