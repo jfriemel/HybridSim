@@ -1,5 +1,8 @@
 /** Single-robot triangle formation algorithm from https://doi.org/10.1007/s11047-019-09774-2 */
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
@@ -57,15 +60,13 @@ class RobotImpl(node: Node, orientation: Int) :
     }
 
     private fun findBlockTile() {
-        intArrayOf(5, 4, 0)
-            .firstOrNull { label -> hasTileAtLabel(label) }
-            ?.let { label ->
-                moveToLabel(label)
-                if (label == 4) {
-                    numMovementsSW++
-                }
-                return
+        intArrayOf(5, 4, 0).firstOrNull(::hasTileAtLabel)?.let { label ->
+            moveToLabel(label)
+            if (label == 4) {
+                numMovementsSW++
             }
+            return
+        }
 
         liftTile()
         if (!hasTileAtLabel(1) && !testActive) {
@@ -146,12 +147,10 @@ class RobotImpl(node: Node, orientation: Int) :
     }
 
     private fun buildTriangle() {
-        intArrayOf(5, 3)
-            .firstOrNull { label -> hasTileAtLabel(label) }
-            ?.let { label ->
-                moveToLabel(label)
-                return
-            }
+        intArrayOf(5, 3).firstOrNull(::hasTileAtLabel)?.let { label ->
+            moveToLabel(label)
+            return
+        }
 
         if (hasTileAtLabel(2)) {
             moveToLabel(3)
@@ -182,10 +181,11 @@ class RobotImpl(node: Node, orientation: Int) :
             moveToLabel(2)
             return
         }
-        phase = if (hasTileAtLabel(1)) {
-            Phase.CarryTileToVertex
-        } else {
-            Phase.Finished
-        }
+        phase =
+            if (hasTileAtLabel(1)) {
+                Phase.CarryTileToVertex
+            } else {
+                Phase.Finished
+            }
     }
 }

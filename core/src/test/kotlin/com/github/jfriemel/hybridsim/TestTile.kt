@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 
 /** Test [Tile] functionality. */
 class TestTile {
-
     @Test
     fun `has pebble`() {
         val tile = Tile(Node(1, -1), numPebbles = 1)

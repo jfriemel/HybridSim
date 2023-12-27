@@ -1,5 +1,6 @@
 package com.github.jfriemel.hybridsim.system
 
+import com.github.jfriemel.hybridsim.entities.Robot
 import kotlinx.coroutines.delay
 import ktx.log.logger
 import java.lang.Long.max
@@ -7,7 +8,6 @@ import java.lang.Long.max
 private val logger = logger<Scheduler>()
 
 object Scheduler {
-
     private var active = false
     private var cycleDelay = 120L // Delay after completion of each activation cycle in ms
     private var activationsPerCycle = 1 // Number of activations per scheduler cycle
@@ -94,7 +94,7 @@ object Scheduler {
 
             try {
                 // Stop when all robots are finished
-                if (robots.all { robot -> robot.finished() }) {
+                if (robots.all(Robot::finished)) {
                     stop()
                 }
             } catch (e: Exception) {

@@ -1,10 +1,26 @@
 /** Single-robot triangle formation algorithm from https://doi.org/10.1007/s11047-019-09774-2 */
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
 private enum class Phase {
-    Initialize, SearchNextBranch, SearchNextBranchMoveN, CheckOverhangs, CheckOverhangsAfterN, MoveE, HasMovedE, GetTileN, GetTileNW, GetTileNWAfterLift, BringTile, BringTileMoveS, BringTileFinalize, Finished,
+    Initialize,
+    SearchNextBranch,
+    SearchNextBranchMoveN,
+    CheckOverhangs,
+    CheckOverhangsAfterN,
+    MoveE,
+    HasMovedE,
+    GetTileN,
+    GetTileNW,
+    GetTileNWAfterLift,
+    BringTile,
+    BringTileMoveS,
+    BringTileFinalize,
+    Finished,
 }
 
 class RobotImpl(node: Node, orientation: Int) : Robot(
@@ -69,15 +85,16 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun initialize() {
-        intArrayOf(1, 2, 0).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+        intArrayOf(1, 2, 0).firstOrNull(::hasTileAtLabel)?.let { label ->
             moveToLabel(label)
             return
         }
+
         phase = Phase.SearchNextBranch
     }
 
     private fun searchNextBranch() {
-        intArrayOf(5, 4).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+        intArrayOf(5, 4).firstOrNull(::hasTileAtLabel)?.let { label ->
             moveToLabel(label)
             phase = Phase.SearchNextBranchMoveN
             return
@@ -122,7 +139,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun moveE() {
-        intArrayOf(2, 1).firstOrNull { label -> hasTileAtLabel(label) }?.let { label ->
+        intArrayOf(2, 1).firstOrNull(::hasTileAtLabel)?.let { label ->
             moveToLabel(label)
             phase = Phase.HasMovedE
             return
@@ -136,12 +153,13 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
     }
 
     private fun hasMovedE() {
-        phase = if (hasTileAtLabel(3)) {
-            moveToLabel(3)
-            Phase.SearchNextBranch
-        } else {
-            Phase.CheckOverhangs
-        }
+        phase =
+            if (hasTileAtLabel(3)) {
+                moveToLabel(3)
+                Phase.SearchNextBranch
+            } else {
+                Phase.CheckOverhangs
+            }
     }
 
     private fun getTileN() {
@@ -174,13 +192,14 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             placeTile()
             return
         }
-        phase = if (hasTileAtLabel(3) || hasTileAtLabel(2)) {
-            moveToLabel(1)
-            Phase.BringTile
-        } else {
-            moveToLabel(1)
-            Phase.GetTileNW
-        }
+        phase =
+            if (hasTileAtLabel(3) || hasTileAtLabel(2)) {
+                moveToLabel(1)
+                Phase.BringTile
+            } else {
+                moveToLabel(1)
+                Phase.GetTileNW
+            }
     }
 
     private fun bringTile() {
@@ -192,7 +211,7 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             phase = Phase.BringTileMoveS
             return
         }
-        val moveLabel = intArrayOf(3, 2).first { label -> hasTileAtLabel(label) }
+        val moveLabel = intArrayOf(3, 2).first(::hasTileAtLabel)
         moveToLabel(moveLabel)
     }
 
@@ -210,11 +229,12 @@ class RobotImpl(node: Node, orientation: Int) : Robot(
             placeTile()
             return
         }
-        phase = if (hasTileAtLabel(3)) {
-            Phase.Initialize
-        } else {
-            moveToLabel(4)
-            Phase.GetTileN
-        }
+        phase =
+            if (hasTileAtLabel(3)) {
+                Phase.Initialize
+            } else {
+                moveToLabel(4)
+                Phase.GetTileN
+            }
     }
 }

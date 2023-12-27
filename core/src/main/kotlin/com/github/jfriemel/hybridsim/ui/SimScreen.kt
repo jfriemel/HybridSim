@@ -93,7 +93,7 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
 
             // Draw empty target nodes
             Configuration.targetNodes
-                .filter { node -> node !in Configuration.tiles }
+                .filterNot { node -> node in Configuration.tiles }
                 .forEach { node -> emptyTargetSprites[node]?.draw(batch) }
 
             // Draw robots
@@ -109,7 +109,10 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         menu.draw()
     }
 
-    override fun resize(width: Int, height: Int) {
+    override fun resize(
+        width: Int,
+        height: Int,
+    ) {
         logger.debug { "Resized window: width = $width, height = $height" }
 
         // Update viewport and move to maintain center node
@@ -129,20 +132,24 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         menu.resize(width, height)
     }
 
-    override fun dispose() {
-        for (
-        texture in
-        arrayOf(bkgTexture, robotTexture, tileTexture, tilePebbleTexture, emptyTargetTexture)
-        ) {
-            texture.dispose()
-        }
-    }
+    override fun dispose() =
+        arrayOf(
+            bkgTexture,
+            robotTexture,
+            tileTexture,
+            tilePebbleTexture,
+            emptyTargetTexture,
+        ).forEach(Texture::dispose)
 
     /**
      * Zoom towards ([amount] < 0) or away from ([amount] > 0) the screen center or the mouse if
      * mouse coordinates ([mouseX], [mouseY]) are given.
      */
-    fun zoom(amount: Float, mouseX: Int = width / 2, mouseY: Int = height / 2) {
+    fun zoom(
+        amount: Float,
+        mouseX: Int = width / 2,
+        mouseY: Int = height / 2,
+    ) {
         val previousUPP = viewport.unitsPerPixel
         viewport.unitsPerPixel = min(max(previousUPP + amount, 1f), 80f)
 
@@ -157,7 +164,10 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     /** Move the scene in specified direction ([xDir], [yDir]). */
-    fun move(xDir: Int, yDir: Int) {
+    fun move(
+        xDir: Int,
+        yDir: Int,
+    ) {
         xPos += viewport.unitsPerPixel * xDir / xScale
         yPos += viewport.unitsPerPixel * yDir
         setEntityScreenPositions(Configuration.tiles)
@@ -167,7 +177,10 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     }
 
     /** Convert screen / pixel coordinates ([screenX], [screenY]) to a [Node]. */
-    fun screenCoordsToNodeCoords(screenX: Int, screenY: Int): Node {
+    fun screenCoordsToNodeCoords(
+        screenX: Int,
+        screenY: Int,
+    ): Node {
         // Not exact, but good enough
         val x =
             round(((viewport.unitsPerPixel / xScale) * screenX + xPos) / pixelUnitDistance).toInt()
@@ -198,8 +211,8 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
             if (occupiedNodes.isEmpty()) {
                 Node.origin
             } else {
-                val centerX = (occupiedNodes.minOf { it.x } + occupiedNodes.maxOf { it.x }) / 2
-                val centerY = (occupiedNodes.minOf { it.y } + occupiedNodes.maxOf { it.y }) / 2
+                val centerX = (occupiedNodes.minOf(Node::x) + occupiedNodes.maxOf(Node::x)) / 2
+                val centerY = (occupiedNodes.minOf(Node::y) + occupiedNodes.maxOf(Node::y)) / 2
                 Node(centerX, centerY)
             }
         val coords = nodeCoordsToScreenCoords(centerNode.x, centerNode.y)
@@ -210,7 +223,10 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
      * Convert [Node] coordinates ([nodeX], [nodeY]) to a [Pair] of screen / pixel coordinates (x,
      * y).
      */
-    private fun nodeCoordsToScreenCoords(nodeX: Int, nodeY: Int): Pair<Int, Int> {
+    private fun nodeCoordsToScreenCoords(
+        nodeX: Int,
+        nodeY: Int,
+    ): Pair<Int, Int> {
         val offset = if (nodeX.mod(2) == 0) 0f else 0.5f // Every second column is slightly offset
         val x = round((nodeX * pixelUnitDistance - xPos) * xScale / viewport.unitsPerPixel)
         val y = round(((nodeY - offset) * pixelUnitDistance - yPos) / viewport.unitsPerPixel)

@@ -20,7 +20,6 @@ class GeneratorImpl(): Generator() {
 
 /** Test [GeneratorLoader] functionality. */
 class TestGeneratorLoader {
-
     @BeforeEach
     fun init() {
         Configuration.clear()

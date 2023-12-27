@@ -11,7 +11,6 @@ import org.junit.jupiter.params.provider.CsvSource
 
 /** Test [Generator] functionality. */
 class TestGenerator {
-
     @BeforeEach
     fun init() {
         Configuration.clear()
@@ -25,7 +24,10 @@ class TestGenerator {
         "255, 254",
         "805, 571",
     )
-    fun `generate valid configuration`(numTiles: Int, numRobots: Int) {
+    fun `generate valid configuration`(
+        numTiles: Int,
+        numRobots: Int,
+    ) {
         Configuration.generate(numTiles, numRobots)
         Assertions.assertEquals(numTiles, Configuration.tiles.size)
         Assertions.assertEquals(numRobots, Configuration.robots.size)
@@ -37,7 +39,10 @@ class TestGenerator {
         "100, 101",
         "676, 917",
     )
-    fun `generate too many robots`(numTiles: Int, numRobots: Int) {
+    fun `generate too many robots`(
+        numTiles: Int,
+        numRobots: Int,
+    ) {
         Configuration.generate(numTiles, numRobots)
         Assertions.assertEquals(numTiles, Configuration.tiles.size)
         Assertions.assertEquals(numTiles, Configuration.robots.size)
@@ -50,7 +55,10 @@ class TestGenerator {
         "0, 100",
         "-138, 25",
     )
-    fun `generate fewer than one tile`(numTiles: Int, numRobots: Int) {
+    fun `generate fewer than one tile`(
+        numTiles: Int,
+        numRobots: Int,
+    ) {
         Configuration.generate(numTiles, numRobots)
         Assertions.assertEquals(0, Configuration.tiles.size)
         Assertions.assertEquals(0, Configuration.robots.size)
@@ -83,7 +91,11 @@ class TestGenerator {
         "10, 4, 10",
         "913, 273, 1045",
     )
-    fun `generate too many overhang tiles`(numTiles: Int, numRobots: Int, numOverhang: Int) {
+    fun `generate too many overhang tiles`(
+        numTiles: Int,
+        numRobots: Int,
+        numOverhang: Int,
+    ) {
         Configuration.generate(numTiles, numRobots, numOverhang)
         Assertions.assertEquals(numTiles, Configuration.tiles.size)
         Assertions.assertEquals(numRobots, Configuration.robots.size)

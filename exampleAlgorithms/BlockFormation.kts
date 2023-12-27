@@ -1,6 +1,9 @@
-/* Single-robot block formation algorithm from https://doi.org/10.1007/s11047-019-09774-2 */
+// Single-robot block formation algorithm from https://doi.org/10.1007/s11047-019-09774-2
 
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
@@ -44,7 +47,7 @@ class RobotImpl(node: Node, orientation: Int) :
 
     private fun findTile() {
         intArrayOf(5, 4, 0)
-            .firstOrNull { label -> hasTileAtLabel(label) }
+            .firstOrNull(::hasTileAtLabel)
             ?.let { label ->
                 moveToLabel(label)
                 if (label == 4) {

@@ -16,7 +16,6 @@ private const val TEST_SCRIPT =
 
 /** Test [AlgorithmLoader] functionality. */
 class TestAlgorithmLoader {
-
     @BeforeEach
     fun init() {
         Configuration.clear()

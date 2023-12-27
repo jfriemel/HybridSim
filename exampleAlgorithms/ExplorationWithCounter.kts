@@ -4,7 +4,10 @@
  * https://doi.org/10.1109/SFCS.1978.30 Modification: Using O(log n) height counter instead of
  * pebbles for simplicity
  */
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
@@ -101,15 +104,10 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         // Move one step
-        intArrayOf(4, 5, 0, 1, 2)
-            .firstOrNull { label -> hasTileAtLabel(label) }
-            ?.let { label ->
-                moveAndUpdate(label)
-                phase = Phase.TraverseBoundary
-                return
-            }
-
-        phase = Phase.TraverseColumn
+        phase = intArrayOf(4, 5, 0, 1, 2).firstOrNull(::hasTileAtLabel)?.let { label ->
+            moveAndUpdate(label)
+            Phase.TraverseBoundary
+        } ?: Phase.TraverseColumn
     }
 
     private fun traverseBoundary() {
@@ -131,18 +129,14 @@ class RobotImpl(node: Node, orientation: Int) :
 
         if (
             (enterLabel in 0..2 && !hasTileAtLabel(3) && (enterLabel == 2 || !hasTileAtLabel(2))) ||
-            (
-                (enterLabel == 4 || enterLabel == 5) &&
-                    intArrayOf(0, 1, 2, 3).all { !hasTileAtLabel(it) }
-                )
+            ((enterLabel == 4 || enterLabel == 5) && !intArrayOf(0, 1, 2, 3).any(::hasTileAtLabel))
         ) {
             phase = Phase.TraverseColumn
             return
         }
 
         // Move around the boundary by LHR
-        val moveLabel =
-            (1..6).map { (enterLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
+        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first(::hasTileAtLabel)
         moveAndUpdate(moveLabel)
     }
 
@@ -174,8 +168,7 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         // Move around the boundary by RHR
-        val moveLabel =
-            (1..6).map { (enterLabel - it).mod(6) }.first { label -> hasTileAtLabel(label) }
+        val moveLabel = (1..6).map { (enterLabel - it).mod(6) }.first(::hasTileAtLabel)
         moveAndUpdate(moveLabel)
     }
 
@@ -192,8 +185,7 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         // Move around the boundary by RHR
-        val moveLabel =
-            (1..6).map { (enterLabel - it).mod(6) }.first { label -> hasTileAtLabel(label) }
+        val moveLabel = (1..6).map { (enterLabel - it).mod(6) }.first(::hasTileAtLabel)
         moveAndUpdate(moveLabel)
     }
 
@@ -210,8 +202,7 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         // Move around the boundary by LHR
-        val moveLabel =
-            (1..6).map { (enterLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
+        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first(::hasTileAtLabel)
         moveAndUpdate(moveLabel)
     }
 
@@ -229,8 +220,7 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         // Move around the boundary by LHR
-        val moveLabel =
-            (1..6).map { (enterLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
+        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first(::hasTileAtLabel)
         moveAndUpdate(moveLabel)
     }
 
@@ -247,8 +237,7 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         // Move around the boundary by LHR
-        val moveLabel =
-            (1..6).map { (enterLabel + it).mod(6) }.first { label -> hasTileAtLabel(label) }
+        val moveLabel = (1..6).map { (enterLabel + it).mod(6) }.first(::hasTileAtLabel)
         moveAndUpdate(moveLabel)
     }
 

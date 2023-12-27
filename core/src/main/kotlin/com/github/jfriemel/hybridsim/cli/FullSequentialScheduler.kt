@@ -5,7 +5,6 @@ import com.github.jfriemel.hybridsim.system.Configuration
 import kotlin.math.max
 
 object FullSequentialScheduler {
-
     /**
      * Sequentially actives robots (every robot exactly once per round) until all robots are
      * finished or all target nodes are occupied by tiles or the number of rounds reaches [limit].

@@ -35,7 +35,6 @@ fun getGenerator(): Generator {
 }
 
 class GeneratorImpl : Generator() {
-
     /**
      * This function is called by the Configuration object, when a new configuration needs to be
      * generated. Please modify the contents of the function, but do not remove it or change its

@@ -14,7 +14,6 @@ open class Robot(
     @Json(ignored = true) val maxPebbles: Int = 2,
     @Json(ignored = true) var carrySprite: Sprite? = null,
 ) : Entity(node, sprite) {
-
     @Json(ignored = true)
     val labels = intArrayOf(0, 1, 2, 3, 4, 5)
 
@@ -162,13 +161,13 @@ open class Robot(
     fun tileAtLabel(label: Int): Tile? = Configuration.tiles[nodeAtLabel(label)]
 
     /** @return Label of a [Tile] neighbor or null if there is no tile neighbor. */
-    fun tileNbrLabel(): Int? = labels.firstOrNull { label -> hasTileAtLabel(label) }
+    fun tileNbrLabel(): Int? = labels.firstOrNull(::hasTileAtLabel)
 
     /** Checks whether the robot has a neighboring [Tile] at any label. */
     fun hasTileNbr(): Boolean = tileNbrLabel() != null
 
     /** @return A [Tile] neighbor or null if there is no tile neighbor. */
-    fun tileNbr(): Tile? = tileNbrLabel()?.let { label -> tileAtLabel(label) }
+    fun tileNbr(): Tile? = tileNbrLabel()?.let(::tileAtLabel)
 
     /** Checks whether the robot has a [Robot] neighbor at the given [label]. */
     fun hasRobotAtLabel(label: Int): Boolean = nodeAtLabel(label) in Configuration.robots
@@ -177,13 +176,13 @@ open class Robot(
     fun robotAtLabel(label: Int): Robot? = Configuration.robots[nodeAtLabel(label)]
 
     /** @return Label of a [Robot] neighbor or null if there is no robot neighbor. */
-    fun robotNbrLabel(): Int? = labels.firstOrNull { label -> hasRobotAtLabel(label) }
+    fun robotNbrLabel(): Int? = labels.firstOrNull(::hasRobotAtLabel)
 
     /** Checks whether the robot is neighbor to another [Robot]. */
-    fun hasRobotNbr(): Boolean = labels.any { label -> hasRobotAtLabel(label) }
+    fun hasRobotNbr(): Boolean = labels.any(::hasRobotAtLabel)
 
     /** @return A [Robot] neighbor or null if there is no robot neighbor. */
-    fun robotNbr(): Robot? = robotNbrLabel()?.let { label -> robotAtLabel(label) }
+    fun robotNbr(): Robot? = robotNbrLabel()?.let(::robotAtLabel)
 
     /** @return Label of a [Robot] neighbor that is not on a tile (i.e., "hanging"). */
     fun hangingRobotNbrLabel(): Int? =
@@ -193,17 +192,16 @@ open class Robot(
     fun hasHangingRobotNbr(): Boolean = hangingRobotNbrLabel() != null
 
     /** @return [Robot] neighbor that is not on a tile (i.e., "hanging"). */
-    fun hangingRobotNbr(): Robot? = hangingRobotNbrLabel()?.let { label -> robotAtLabel(label) }
+    fun hangingRobotNbr(): Robot? = hangingRobotNbrLabel()?.let(::robotAtLabel)
 
     /** @return A list of all labels with [Robot] neighbors. */
-    fun allRobotNbrLabels(): List<Int> = labels.filter { label -> hasRobotAtLabel(label) }
+    fun allRobotNbrLabels(): List<Int> = labels.filter(::hasRobotAtLabel)
 
     /** @return A list of all [Robot] neighbors. */
     fun allRobotNbrs(): List<Robot> = allRobotNbrLabels().map { label -> robotAtLabel(label)!! }
 
     /** @return A list of all labels with hanging [Robot] neighbors. */
-    fun allHangingRobotNbrLabels(): List<Int> =
-        allRobotNbrLabels().filter { label -> !hasTileAtLabel(label) }
+    fun allHangingRobotNbrLabels(): List<Int> = allRobotNbrLabels().filterNot(::hasTileAtLabel)
 
     /** @return A list of all hanging [Robot] neighbors. */
     fun allHangingRobotNbrs(): List<Robot> =
@@ -228,7 +226,7 @@ open class Robot(
     /**
      * @return A [Tile] neighbor that is on a target [Node] or null if there is no such neighbor.
      */
-    fun targetTileNbr(): Tile? = targetTileNbrLabel()?.let { label -> tileAtLabel(label) }
+    fun targetTileNbr(): Tile? = targetTileNbrLabel()?.let(::tileAtLabel)
 
     /**
      * @return Label of an empty [Node] neighbor that is a target or null if there is no such
@@ -264,7 +262,7 @@ open class Robot(
      * @return A [Tile] neighbor that is not on a target [Node] or null if there is no such
      *   neighbor.
      */
-    fun overhangNbr(): Tile? = overhangNbrLabel()?.let { label -> tileAtLabel(label) }
+    fun overhangNbr(): Tile? = overhangNbrLabel()?.let(::tileAtLabel)
 
     /**
      * By default, counts and returns the number of connected components of empty nodes adjacent to

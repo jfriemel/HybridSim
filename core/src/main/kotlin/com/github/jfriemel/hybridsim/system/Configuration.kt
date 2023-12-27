@@ -23,7 +23,6 @@ data class ConfigurationDescriptor(
 private const val MAX_UNDO_STATES = 1000
 
 object Configuration {
-
     var tiles: MutableMap<Node, Tile> = HashMap()
     var robots: MutableMap<Node, Robot> = HashMap()
     var targetNodes: MutableSet<Node> = HashSet()
@@ -41,7 +40,11 @@ object Configuration {
      * ([numRobots]), and overhang tiles ([numOverhang]). Does not generate target nodes if
      * [numOverhang] < 0.
      */
-    fun generate(numTiles: Int, numRobots: Int, numOverhang: Int = -1) {
+    fun generate(
+        numTiles: Int,
+        numRobots: Int,
+        numOverhang: Int = -1,
+    ) {
         Scheduler.stop()
         addUndoStep()
         clear(clearQueues = false)
@@ -55,7 +58,10 @@ object Configuration {
     }
 
     /** Add a [tile] to the configuration at the [tile]'s node. */
-    fun addTile(tile: Tile, addUndoStep: Boolean = false) {
+    fun addTile(
+        tile: Tile,
+        addUndoStep: Boolean = false,
+    ) {
         if (addUndoStep) {
             addUndoStep()
         }
@@ -63,7 +69,10 @@ object Configuration {
     }
 
     /** Remove the [Tile] at the given [node] if it exists. */
-    fun removeTile(node: Node, addUndoStep: Boolean = false) {
+    fun removeTile(
+        node: Node,
+        addUndoStep: Boolean = false,
+    ) {
         if (addUndoStep) {
             addUndoStep()
         }
@@ -71,7 +80,10 @@ object Configuration {
     }
 
     /** Add a [robot] to the configuration at the [robot]'s node. */
-    fun addRobot(robot: Robot, addUndoStep: Boolean = false) {
+    fun addRobot(
+        robot: Robot,
+        addUndoStep: Boolean = false,
+    ) {
         if (addUndoStep) {
             addUndoStep()
         }
@@ -79,7 +91,10 @@ object Configuration {
     }
 
     /** Remove the [Robot] at the given [node] if it exists. */
-    fun removeRobot(node: Node, addUndoStep: Boolean = false) {
+    fun removeRobot(
+        node: Node,
+        addUndoStep: Boolean = false,
+    ) {
         if (addUndoStep) {
             addUndoStep()
         }
@@ -87,7 +102,11 @@ object Configuration {
     }
 
     /** Move the [Robot] at [startNode] to [nextNode] if it exists. */
-    fun moveRobot(startNode: Node, nextNode: Node, addUndoStep: Boolean = false) {
+    fun moveRobot(
+        startNode: Node,
+        nextNode: Node,
+        addUndoStep: Boolean = false,
+    ) {
         if (addUndoStep) {
             addUndoStep()
         }
@@ -96,7 +115,11 @@ object Configuration {
     }
 
     /** Switches the [Robot] at [nodeA] with the [Robot] at [nodeB] if both robots exist. */
-    fun switchRobots(nodeA: Node, nodeB: Node, addUndoStep: Boolean = false) {
+    fun switchRobots(
+        nodeA: Node,
+        nodeB: Node,
+        addUndoStep: Boolean = false,
+    ) {
         if (addUndoStep) {
             addUndoStep()
         }
@@ -107,7 +130,10 @@ object Configuration {
     }
 
     /** Add the given [node] to the target area. */
-    fun addTarget(node: Node, addUndoStep: Boolean = false) {
+    fun addTarget(
+        node: Node,
+        addUndoStep: Boolean = false,
+    ) {
         if (addUndoStep) {
             addUndoStep()
         }
@@ -115,7 +141,10 @@ object Configuration {
     }
 
     /** Remove the given [node] from the target area. */
-    fun removeTarget(node: Node, addUndoStep: Boolean = false) {
+    fun removeTarget(
+        node: Node,
+        addUndoStep: Boolean = false,
+    ) {
         if (addUndoStep) {
             addUndoStep()
         }
@@ -143,7 +172,10 @@ object Configuration {
      *
      * @return True if undo/redo was successful.
      */
-    private fun undo(uq: ArrayDeque<TimeState>, rq: ArrayDeque<TimeState>): Boolean {
+    private fun undo(
+        uq: ArrayDeque<TimeState>,
+        rq: ArrayDeque<TimeState>,
+    ): Boolean {
         if (uq.size == 0) {
             return false
         }
@@ -166,9 +198,9 @@ object Configuration {
         // immutable, so we make them mutable.
         // There is probably a much cleaner way to do this (with Klaxon Converters), but this works
         // well enough.
-        tiles = tiles.values.associateBy { it.node }.toMutableMap()
-        robots = robots.values.associateBy { it.node }.toMutableMap()
-        robots.values.forEach { AlgorithmLoader.replaceRobot(it.node) }
+        tiles = tiles.values.associateBy(Tile::node).toMutableMap()
+        robots = robots.values.associateBy(Robot::node).toMutableMap()
+        robots.values.forEach { robot -> AlgorithmLoader.replaceRobot(robot.node) }
         targetNodes = targetNodes.toMutableSet()
     }
 

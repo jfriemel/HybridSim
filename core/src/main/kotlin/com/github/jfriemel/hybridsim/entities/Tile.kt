@@ -9,7 +9,6 @@ const val MAX_PEBBLES_TILE: Int = 1
 
 class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) :
     Entity(node, sprite) {
-
     private var tileColor: Color? = null
 
     /**

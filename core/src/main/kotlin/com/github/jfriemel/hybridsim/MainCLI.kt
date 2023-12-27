@@ -22,7 +22,6 @@ data class CLIArguments(
 )
 
 class MainCLI(private val args: CLIArguments) {
-
     fun main() {
         if (
             args.algFile == null ||
@@ -36,10 +35,10 @@ class MainCLI(private val args: CLIArguments) {
         }
 
         // Load algorithm
-        args.algFile.let { file -> AlgorithmLoader.loadAlgorithm(file) }
+        args.algFile.let(AlgorithmLoader::loadAlgorithm)
 
         // Load generator
-        args.genFile?.let { file -> GeneratorLoader.loadGenerator(file) }
+        args.genFile?.let(GeneratorLoader::loadGenerator)
 
         // Write CSV header
         args.outputFile?.let { file ->
@@ -106,7 +105,14 @@ class MainCLI(private val args: CLIArguments) {
  * until the number of rounds reaches the specified [limit]. Finally, writes the number of rounds
  * for the current configuration to the [outputFile] csv file.
  */
-private fun singleRun(id: Int, n: Int, k: Int, m: Int, limit: Int, outputFile: File?) {
+private fun singleRun(
+    id: Int,
+    n: Int,
+    k: Int,
+    m: Int,
+    limit: Int,
+    outputFile: File?,
+) {
     val rounds: Int? = FullSequentialScheduler.run(limit)
     if (rounds == null) {
         println("id=$id, n=$n, k=$k, m=$m, rounds=$limit (limit!)")

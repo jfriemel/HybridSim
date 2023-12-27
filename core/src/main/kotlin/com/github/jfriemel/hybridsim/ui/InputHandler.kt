@@ -17,7 +17,6 @@ import java.time.LocalDateTime
 private val logger = logger<InputHandler>()
 
 class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxInputAdapter {
-
     private var mousePressed = false
     private var mouseX = 0
     private var mouseY = 0
@@ -148,7 +147,12 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         return true
     }
 
-    override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+    override fun touchDown(
+        screenX: Int,
+        screenY: Int,
+        pointer: Int,
+        button: Int,
+    ): Boolean {
         val node = screen.screenCoordsToNodeCoords(screenX, screenY)
         when (button) {
             Input.Buttons.LEFT -> {
@@ -185,12 +189,21 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         return true
     }
 
-    override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+    override fun touchUp(
+        screenX: Int,
+        screenY: Int,
+        pointer: Int,
+        button: Int,
+    ): Boolean {
         mousePressed = false
         return true
     }
 
-    override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
+    override fun touchDragged(
+        screenX: Int,
+        screenY: Int,
+        pointer: Int,
+    ): Boolean {
         val node = screen.screenCoordsToNodeCoords(screenX, screenY)
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
             if (mousePressed) {
@@ -223,9 +236,15 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
         return true
     }
 
-    override fun mouseMoved(screenX: Int, screenY: Int): Boolean = false
+    override fun mouseMoved(
+        screenX: Int,
+        screenY: Int,
+    ): Boolean = false
 
-    override fun scrolled(amountX: Float, amountY: Float): Boolean {
+    override fun scrolled(
+        amountX: Float,
+        amountY: Float,
+    ): Boolean {
         screen.zoom(amountY, Gdx.input.x, Gdx.input.y)
         return true
     }

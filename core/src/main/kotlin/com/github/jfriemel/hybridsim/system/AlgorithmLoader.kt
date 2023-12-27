@@ -11,7 +11,6 @@ import javax.script.ScriptEngineManager
 private val logger = logger<AlgorithmLoader>()
 
 object AlgorithmLoader {
-
     private var invocator: Invocable? = null
 
     /**
@@ -24,7 +23,10 @@ object AlgorithmLoader {
      * If this function is absent, or there is a syntax error in the script, or the script could not
      * be loaded for any other reason, the program crashes.
      */
-    fun loadAlgorithm(scriptFile: File? = null, scriptString: String? = null) {
+    fun loadAlgorithm(
+        scriptFile: File? = null,
+        scriptString: String? = null,
+    ) {
         val script = scriptFile?.readText()?.trim() ?: scriptString
         if (script == null) {
             logger.error { "No arguments provided for loadAlgorithm()" }
@@ -47,7 +49,7 @@ object AlgorithmLoader {
 
         // Replace robots in the configuration with robots from the loaded script
         invocator = engine as Invocable
-        Configuration.robots.keys.forEach { node -> replaceRobot(node) }
+        Configuration.robots.keys.forEach(::replaceRobot)
         Configuration.clearUndoQueues()
     }
 
@@ -65,12 +67,10 @@ object AlgorithmLoader {
      * Returns a [Robot] with the most recently loaded algorithm and the same properties as the
      * given [robot].
      */
-    fun getAlgorithmRobot(robot: Robot): Robot {
-        return invocator?.let { inv ->
+    fun getAlgorithmRobot(robot: Robot): Robot =
+        invocator?.let { inv ->
             inv.invokeFunction("getRobot", robot.node, robot.orientation) as Robot
-        }
-            ?: robot
-    }
+        } ?: robot
 
     /**
      * Resets to the default algorithm and replaces all [Robot]s in the [Configuration] with default

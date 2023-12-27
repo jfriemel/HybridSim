@@ -1,4 +1,7 @@
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
@@ -168,8 +171,7 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         traverseBoundary { label ->
-            canMoveToLabel(label) &&
-                hasTileAtLabel(label) &&
+            canMoveToLabel(label) && hasTileAtLabel(label) &&
                 (!isOnTarget() || labelIsTarget(label))
         }
     }
@@ -241,9 +243,10 @@ class RobotImpl(node: Node, orientation: Int) :
      * Checks whether the robot is at a border of an overhang component where a tile can safely be
      * removed.
      */
-    private fun isAtOverhangBorder(): Boolean = isAtBorder { label ->
-        labelIsTarget(label) || !hasTileAtLabel(label)
-    }
+    private fun isAtOverhangBorder(): Boolean =
+        isAtBorder { label ->
+            labelIsTarget(label) || !hasTileAtLabel(label)
+        }
 
     /**
      * Helper function
@@ -252,9 +255,7 @@ class RobotImpl(node: Node, orientation: Int) :
      * component of demand nodes where a tile can safely be placed.
      */
     private fun isAtDemandBorder(): Boolean =
-        isOnTarget() &&
-            !isOnTile() &&
-            hasTargetTileNbr() &&
+        isOnTarget() && !isOnTile() && hasTargetTileNbr() &&
             isAtBorder { label -> !(hasTileAtLabel(label) && labelIsTarget(label)) }
 
     /**
@@ -266,10 +267,10 @@ class RobotImpl(node: Node, orientation: Int) :
     private fun isAtBorder(isLabelBoundary: (Int) -> Boolean): Boolean {
         val boundaryLabels = labels.filter(isLabelBoundary)
 
-        if (boundaryLabels.size == 6) {
-            return true
+        return if (boundaryLabels.size == 6) {
+            true
+        } else {
+            boundaryLabels.filterNot { label -> (label + 1).mod(6) in boundaryLabels }.size == 1
         }
-
-        return boundaryLabels.filter { label -> (label + 1).mod(6) !in boundaryLabels }.size == 1
     }
 }

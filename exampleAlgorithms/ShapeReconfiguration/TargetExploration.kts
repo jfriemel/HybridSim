@@ -4,7 +4,10 @@
  * on maze exploration algorithm from https://doi.org/10.1109/SFCS.1978.30 Pebbles are simulated by
  * moving tiles from target nodes to non-target nodes at boundaries.
  */
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
@@ -157,16 +160,11 @@ class RobotImpl(node: Node, orientation: Int) :
             return
         }
 
-        // Move one step
-        intArrayOf(4, 5, 0, 1, 2)
-            .firstOrNull { label -> labelIsTarget(label) }
-            ?.let { label ->
-                moveAndUpdate(label)
-                phase = Phase.TraverseBoundary
-                return
-            }
-
-        phase = Phase.TraverseColumn
+        // Move one step or switch to next phase
+        phase = intArrayOf(4, 5, 0, 1, 2).firstOrNull(::labelIsTarget)?.let { label ->
+            moveAndUpdate(label)
+            Phase.TraverseBoundary
+        } ?: Phase.TraverseColumn
     }
 
     private fun traverseBoundary() {
@@ -188,10 +186,7 @@ class RobotImpl(node: Node, orientation: Int) :
 
         if (
             (enterLabel in 0..2 && !labelIsTarget(3) && (enterLabel == 2 || !labelIsTarget(2))) ||
-            (
-                (enterLabel == 4 || enterLabel == 5) &&
-                    intArrayOf(0, 1, 2, 3).all { !labelIsTarget(it) }
-                )
+            ((enterLabel == 4 || enterLabel == 5) && !intArrayOf(0, 1, 2, 3).any(::labelIsTarget))
         ) {
             phase = Phase.TraverseColumn
             return
@@ -419,12 +414,8 @@ class RobotImpl(node: Node, orientation: Int) :
                 } else if (withTile) {
                     val tmp =
                         labels.firstOrNull { label ->
-                            !labelIsTarget(label) &&
-                                !hasTileAtLabel(label) &&
-                                (
-                                    labelIsTarget((label - 1).mod(6)) ||
-                                        labelIsTarget((label + 1).mod(6))
-                                    )
+                            !labelIsTarget(label) && !hasTileAtLabel(label) &&
+                                (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
                         }
                     if (tmp == null) {
                         pebbleToggleDir =
@@ -433,7 +424,7 @@ class RobotImpl(node: Node, orientation: Int) :
                                     (
                                         labelIsTarget((label - 1).mod(6)) ||
                                             labelIsTarget((label + 1).mod(6))
-                                        )
+                                    )
                             }
                         pebbleToggleStep = 19
                     } else {
@@ -452,7 +443,7 @@ class RobotImpl(node: Node, orientation: Int) :
 
             1 -> {
                 if (withTile) {
-                    if (labels.filter { label -> !labelIsTarget(label) }.isEmpty()) {
+                    if (labels.filterNot(::labelIsTarget).isEmpty()) {
                         moveToLabel((pebbleToggleDir + 3).mod(6))
                         result = true
                         hasResult = true
@@ -463,12 +454,8 @@ class RobotImpl(node: Node, orientation: Int) :
                 } else {
                     val tmp =
                         labels.firstOrNull { label ->
-                            !labelIsTarget(label) &&
-                                !hasTileAtLabel(label) &&
-                                (
-                                    labelIsTarget((label - 1).mod(6)) ||
-                                        labelIsTarget((label + 1).mod(6))
-                                    )
+                            !labelIsTarget(label) && !hasTileAtLabel(label) &&
+                                (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
                         }
                     if (tmp == null) {
                         pebbleToggleDir =
@@ -477,7 +464,7 @@ class RobotImpl(node: Node, orientation: Int) :
                                     (
                                         labelIsTarget((label - 1).mod(6)) ||
                                             labelIsTarget((label + 1).mod(6))
-                                        )
+                                    )
                             }
                         pebbleToggleStep = 19
                     } else {
@@ -496,7 +483,7 @@ class RobotImpl(node: Node, orientation: Int) :
                 if (withTile) {
                     moveToLabel((pebbleToggleDir + 3).mod(6))
                 } else {
-                    if (labels.filter { label -> !labelIsTarget(label) }.isEmpty()) {
+                    if (labels.all(::labelIsTarget)) {
                         moveToLabel((pebbleToggleDir + 3).mod(6))
                         pebbleToggleStep = 9
                     } else {
@@ -525,8 +512,7 @@ class RobotImpl(node: Node, orientation: Int) :
             20 -> {
                 pebbleOverhangNbr =
                     labels.first { label ->
-                        !labelIsTarget(label) &&
-                            !hasTileAtLabel(label) &&
+                        !labelIsTarget(label) && !hasTileAtLabel(label) &&
                             (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
                     }
                 moveToLabel(pebbleOverhangNbr)
@@ -622,12 +608,8 @@ class RobotImpl(node: Node, orientation: Int) :
                 if (withTile) {
                     pebbleToggleDir =
                         labels.first { label ->
-                            !labelIsTarget(label) &&
-                                !hasTileAtLabel(label) &&
-                                (
-                                    labelIsTarget((label - 1).mod(6)) ||
-                                        labelIsTarget((label + 1).mod(6))
-                                    )
+                            !labelIsTarget(label) && !hasTileAtLabel(label) &&
+                                (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
                         }
                     if (currentPebble == 0) {
                         pebbleBDir = pebbleToggleDir
@@ -646,12 +628,8 @@ class RobotImpl(node: Node, orientation: Int) :
                 } else {
                     pebbleToggleDir =
                         labels.first { label ->
-                            !labelIsTarget(label) &&
-                                !hasTileAtLabel(label) &&
-                                (
-                                    labelIsTarget((label - 1).mod(6)) ||
-                                        labelIsTarget((label + 1).mod(6))
-                                    )
+                            !labelIsTarget(label) && !hasTileAtLabel(label) &&
+                                (labelIsTarget((label - 1).mod(6)) || labelIsTarget((label + 1).mod(6)))
                         }
                     if (currentPebble == 0) {
                         pebbleBDir = pebbleToggleDir
@@ -711,9 +689,9 @@ class RobotImpl(node: Node, orientation: Int) :
     ) {
         val moveLabel =
             if (lhr && prevLhr) {
-                (1..6).map { (enterLabel + it).mod(6) }.first { label -> labelIsTarget(label) }
+                (1..6).map { (enterLabel + it).mod(6) }.first(::labelIsTarget)
             } else if (!lhr && !prevLhr) {
-                (1..6).map { (enterLabel - it).mod(6) }.first { label -> labelIsTarget(label) }
+                (1..6).map { (enterLabel - it).mod(6) }.first(::labelIsTarget)
             } else {
                 enterLabel
             }
@@ -728,7 +706,10 @@ class RobotImpl(node: Node, orientation: Int) :
         }
     }
 
-    private fun moveAndUpdate(label: Int, updateDelta: Boolean = true) {
+    private fun moveAndUpdate(
+        label: Int,
+        updateDelta: Boolean = true,
+    ) {
         val turnDegree = (label - (enterLabel + 3)).mod(6)
         // Update turn-delta
         if (phase in arrayOf(Phase.FindFirstCandidate, Phase.FindLoop)) { // RHR traversal

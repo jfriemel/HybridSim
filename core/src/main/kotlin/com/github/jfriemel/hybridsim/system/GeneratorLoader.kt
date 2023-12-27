@@ -8,7 +8,6 @@ import javax.script.ScriptEngineManager
 private val logger = ktx.log.logger<GeneratorLoader>()
 
 object GeneratorLoader {
-
     /**
      * Loads a new [Generator] from either the [scriptFile] or the [scriptString] (kts script, see
      * examples). A [Generator] is used to randomly generate a new [Configuration].
@@ -22,7 +21,10 @@ object GeneratorLoader {
      * If either function is absent, or there is a syntax error in the script, or the script could
      * not be loaded for any other reason, the program crashes.
      */
-    fun loadGenerator(scriptFile: File? = null, scriptString: String? = null) {
+    fun loadGenerator(
+        scriptFile: File? = null,
+        scriptString: String? = null,
+    ) {
         val script = scriptFile?.readText()?.trim() ?: scriptString
         if (script == null) {
             logger.error { "No arguments provided for loadGenerator()" }

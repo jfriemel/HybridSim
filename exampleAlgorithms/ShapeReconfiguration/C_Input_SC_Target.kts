@@ -1,4 +1,7 @@
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
@@ -97,12 +100,10 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         // If possible, move in direction 5, 4, or 0
-        intArrayOf(5, 4, 0)
-            .firstOrNull { label -> hasTileAtLabel(label) }
-            ?.let { label ->
-                moveToLabel(label)
-                return
-            }
+        intArrayOf(5, 4, 0).firstOrNull(::hasTileAtLabel)?.let { label ->
+            moveToLabel(label)
+            return
+        }
 
         // Cannot move further, lift tile and enter [Phase.BlockMoveTile]
         liftTile()
@@ -204,8 +205,10 @@ class RobotImpl(node: Node, orientation: Int) :
             return
         }
 
-        val validLabel = { label: Int -> hasTileAtLabel(label) && !labelIsTarget(label) }
-        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.first(validLabel)
+        val moveLabel =
+            (1..6).map { (outerLabel + it).mod(6) }.first { label ->
+                hasTileAtLabel(label) && !labelIsTarget(label)
+            }
 
         if (
             !entryTile &&
@@ -246,7 +249,9 @@ class RobotImpl(node: Node, orientation: Int) :
         }
         if (carriesTile) {
             val invalidNbrs =
-                labels.filter { label -> !hasTileAtLabel(label) || labelIsTarget(label) }
+                labels.filter { label ->
+                    !hasTileAtLabel(label) || labelIsTarget(label)
+                }
             if (
                 (hasTileAtLabel(compactionDir) && !labelIsTarget(compactionDir)) &&
                 (invalidNbrs.size > 2 && (compactionDir + 1).mod(6) in invalidNbrs)
@@ -287,9 +292,9 @@ class RobotImpl(node: Node, orientation: Int) :
             return
         }
         val moveLabel =
-            (1..6)
-                .map { (outerLabel + it).mod(6) }
-                .first { label -> hasTileAtLabel(label) && !labelIsTarget(label) }
+            (1..6).map { (outerLabel + it).mod(6) }.first { label ->
+                hasTileAtLabel(label) && !labelIsTarget(label)
+            }
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
     }
@@ -340,13 +345,10 @@ class RobotImpl(node: Node, orientation: Int) :
             return
         }
 
-        (1..6)
-            .map { (outerLabel + it).mod(6) }
-            .firstOrNull { label -> labelIsTarget(label) }
-            ?.let { label ->
-                moveToLabel(label)
-                outerLabel = (label - 2).mod(6)
-            }
+        (1..6).map { (outerLabel + it).mod(6) }.firstOrNull(::labelIsTarget)?.let { label ->
+            moveToLabel(label)
+            outerLabel = (label - 2).mod(6)
+        }
 
         phase = Phase.ExploreBoundary
     }
@@ -371,10 +373,7 @@ class RobotImpl(node: Node, orientation: Int) :
             return
         }
 
-        val moveLabel =
-            (1..6)
-                .map { offset -> (outerLabel + offset).mod(6) }
-                .first { label -> labelIsTarget(label) }
+        val moveLabel = (1..6).map { offset -> (outerLabel + offset).mod(6) }.first(::labelIsTarget)
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
     }
@@ -394,14 +393,10 @@ class RobotImpl(node: Node, orientation: Int) :
         }
 
         val moveLabel =
-            (1..6)
-                .map { (outerLabel + it).mod(6) }
-                .firstOrNull { label ->
-                    canMoveToLabel(label) &&
-                        hasTileAtLabel(label) &&
-                        (labelIsTarget(label) || !isOnTarget())
-                }
-                ?: return
+            (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label ->
+                canMoveToLabel(label) && hasTileAtLabel(label) &&
+                    (labelIsTarget(label) || !isOnTarget())
+            } ?: return
         moveToLabel(moveLabel)
         outerLabel = (moveLabel - 2).mod(6)
     }
@@ -418,10 +413,10 @@ class RobotImpl(node: Node, orientation: Int) :
                 (labelIsTarget(label) != isOnTarget()) || !hasTileAtLabel(label)
             }
 
-        if (boundaryLabels.size == 6) {
-            return true
+        return if (boundaryLabels.size == 6) {
+            true
+        } else {
+            boundaryLabels.filterNot { label -> (label + 1).mod(6) in boundaryLabels }.size == 1
         }
-
-        return boundaryLabels.filter { label -> (label + 1).mod(6) !in boundaryLabels }.size == 1
     }
 }

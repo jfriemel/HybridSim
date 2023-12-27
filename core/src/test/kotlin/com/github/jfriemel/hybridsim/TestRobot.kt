@@ -26,7 +26,6 @@ private class RobotTestImpl(node: Node, orientation: Int) : Robot(node, orientat
 
 /** Test [Robot] functionality. */
 class TestRobot {
-
     @BeforeEach
     fun init() {
         Configuration.clear()
@@ -78,7 +77,11 @@ class TestRobot {
         "4, -6, 4",
         "5, -6, 3",
     )
-    fun `can move to free node from tile`(label: Int, endNodeX: Int, endNodeY: Int) {
+    fun `can move to free node from tile`(
+        label: Int,
+        endNodeX: Int,
+        endNodeY: Int,
+    ) {
         val robot = Robot(tileNode, orientation = 0)
         Assertions.assertFalse(robot.hasRobotAtLabel(label))
         Assertions.assertTrue(robot.canMoveToLabel(label))
@@ -95,7 +98,11 @@ class TestRobot {
         "-4, 3, 4",
         "-4, 4, 5",
     )
-    fun `can move to tile`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can move to tile`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasTileAtLabel(label))
         Assertions.assertTrue(robot.canMoveToLabel(label))
@@ -167,7 +174,11 @@ class TestRobot {
         "14, 26, 4",
         "14, 27, 5",
     )
-    fun `can switch with robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can switch with robot neighbor`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         // Initialize
         val startNode = Node(startNodeX, startNodeY)
         val robot = Robot(startNode, 0)
@@ -190,6 +201,7 @@ class TestRobot {
     fun `cannot switch with non-existent robot neighbor`() {
         val robotNode = Node(744, -380)
         val robot = Robot(robotNode)
+        robot.labels.firstOrNull { label -> robot.hasTileAtLabel(label) }?.let {  } ?: println("no")
         robot.labels.forEach { label ->
             Assertions.assertFalse(robot.switchWithRobotNbr(label))
             Assertions.assertEquals(robotNode, robot.node)
@@ -217,7 +229,11 @@ class TestRobot {
         "14, 26, 4",
         "14, 27, 5",
     )
-    fun `can interact with robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can interact with robot neighbor`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val startNode = Node(startNodeX, startNodeY)
         val robot = Robot(startNode, 0)
         Assertions.assertTrue(robot.hasRobotAtLabel(label))
@@ -238,7 +254,11 @@ class TestRobot {
         "14, 26, 4",
         "14, 27, 5",
     )
-    fun `can interact with hanging robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can interact with hanging robot neighbor`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertTrue(robot.hasHangingRobotNbr())
         Assertions.assertEquals(label, robot.hangingRobotNbrLabel())
@@ -259,7 +279,11 @@ class TestRobot {
         "70, 45, 4",
         "70, 46, 5",
     )
-    fun `can distinguish non-hanging robot neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can distinguish non-hanging robot neighbor`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY), 0)
 
         // Checks for robot neighbor
@@ -305,7 +329,11 @@ class TestRobot {
         "14, 26, 4",
         "14, 27, 5",
     )
-    fun `cannot move to occupied node`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `cannot move to occupied node`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val startNode = Node(startNodeX, startNodeY)
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertFalse(robot.moveToLabel(label))
@@ -321,7 +349,11 @@ class TestRobot {
         "-4, 3, 4",
         "-4, 4, 5",
     )
-    fun `can see tile neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `can see tile neighbor`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY), 0)
         Assertions.assertTrue(robot.hasTileAtLabel(label))
         Assertions.assertEquals(Configuration.tiles[tileNode], robot.tileAtLabel(label))
@@ -424,7 +456,11 @@ class TestRobot {
         "-21, -6, 4",
         "-21, -5, 5",
     )
-    fun `label is target`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `label is target`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.labelIsTarget(label))
     }
@@ -444,7 +480,11 @@ class TestRobot {
         "255, 256, 2",
         "256, 256, 3",
     )
-    fun `correct number of empty boundaries`(startNodeX: Int, startNodeY: Int, numBoundaries: Int) {
+    fun `correct number of empty boundaries`(
+        startNodeX: Int,
+        startNodeY: Int,
+        numBoundaries: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY))
         Assertions.assertEquals(numBoundaries, robot.numBoundaries(tileBoundaries = false))
     }
@@ -457,7 +497,11 @@ class TestRobot {
         "255, 256, 2",
         "256, 256, 3",
     )
-    fun `correct number of tile boundaries`(startNodeX: Int, startNodeY: Int, numBoundaries: Int) {
+    fun `correct number of tile boundaries`(
+        startNodeX: Int,
+        startNodeY: Int,
+        numBoundaries: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY))
         Assertions.assertEquals(numBoundaries, robot.numBoundaries(tileBoundaries = true))
     }
@@ -471,7 +515,11 @@ class TestRobot {
         "9, -5, 4",
         "9, -4, 5",
     )
-    fun `has target tile neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `has target tile neighbor`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasTargetTileNbr())
         Assertions.assertFalse(robot.hasOverhangNbr())
@@ -496,7 +544,11 @@ class TestRobot {
         "-21, -6, 4",
         "-21, -5, 5",
     )
-    fun `has empty target node neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `has empty target node neighbor`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasEmptyTargetNbr())
         Assertions.assertEquals(label, robot.emptyTargetNbrLabel())
@@ -532,7 +584,11 @@ class TestRobot {
         "-4, 3, 4",
         "-4, 4, 5",
     )
-    fun `has overhang neighbor`(startNodeX: Int, startNodeY: Int, label: Int) {
+    fun `has overhang neighbor`(
+        startNodeX: Int,
+        startNodeY: Int,
+        label: Int,
+    ) {
         val robot = Robot(Node(startNodeX, startNodeY), orientation = 0)
         Assertions.assertTrue(robot.hasOverhangNbr())
         Assertions.assertFalse(robot.hasTargetTileNbr())

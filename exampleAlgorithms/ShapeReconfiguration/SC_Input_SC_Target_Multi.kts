@@ -1,4 +1,7 @@
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node)
 }
 
@@ -58,13 +61,10 @@ class RobotImpl(node: Node) :
     private fun hanging() {
         if (carriesTile) {
             val robotNbr =
-                labels
-                    .firstOrNull { label ->
-                        hasRobotAtLabel(label) &&
-                            robotAtLabel(label)!!.isOnTile() &&
-                            !robotAtLabel(label)!!.carriesTile
-                    }
-                    ?.let { label -> robotAtLabel(label)!! as RobotImpl }
+                labels.firstOrNull { label ->
+                    hasRobotAtLabel(label) && robotAtLabel(label)!!.isOnTile() &&
+                        !robotAtLabel(label)!!.carriesTile
+                }?.let { label -> robotAtLabel(label)!! as RobotImpl }
             if (robotNbr != null) {
                 carriesTile = false
                 robotNbr.carriesTile = true
@@ -111,16 +111,14 @@ class RobotImpl(node: Node) :
                 liftTile()
                 phase = Phase.Hanging
             } else {
-                allHangingRobotNbrs()
-                    .firstOrNull { robotNbr ->
-                        robotNbr.carriesTile && (robotNbr as RobotImpl).phase == Phase.Hanging
-                    }
-                    ?.let { robotNbr ->
-                        robotNbr.carriesTile = false
-                        carriesTile = true
-                        phase = Phase.LeaveOverhang
-                        return
-                    }
+                allHangingRobotNbrs().firstOrNull { robotNbr ->
+                    robotNbr.carriesTile && (robotNbr as RobotImpl).phase == Phase.Hanging
+                }?.let { robotNbr ->
+                    robotNbr.carriesTile = false
+                    carriesTile = true
+                    phase = Phase.LeaveOverhang
+                    return
+                }
             }
         } else {
             move()
@@ -162,7 +160,7 @@ class RobotImpl(node: Node) :
             (
                 (robotAtLabel(moveDir!!) as RobotImpl).moveDir == (moveDir!! + 3).mod(6) ||
                     (robotAtLabel(moveDir!!) as RobotImpl).phase == Phase.FindBoundary
-                )
+            )
         ) {
             if (
                 phase == Phase.FindRemovableOverhang &&
@@ -226,9 +224,7 @@ class RobotImpl(node: Node) :
                 val prevOuterLabel = outerLabel
                 val prevMoveDir = moveDir
                 allRobotNbrLabels()
-                    .map { label ->
-                        Pair<Int, RobotImpl>(label, robotAtLabel(label)!! as RobotImpl)
-                    }
+                    .map { label -> Pair(label, robotAtLabel(label)!! as RobotImpl) }
                     .forEach { (label, robotNbr) ->
                         robotNbr.updateMoveDir()
                         if (robotNbr.moveDir != (label + 3).mod(6)) {
@@ -402,13 +398,13 @@ class RobotImpl(node: Node) :
             Phase.FindBoundary -> { label -> label == 0 }
             Phase.FindOverhang,
             Phase.LeaveOverhang,
-            -> { label -> hasTileAtLabel(label) }
+            -> (::hasTileAtLabel)
 
             Phase.FindRemovableOverhang -> { label ->
                 hasTileAtLabel(label) && !labelIsTarget(label)
             }
 
-            Phase.FindDemandComponent -> { label -> labelIsTarget(label) }
+            Phase.FindDemandComponent -> (::labelIsTarget)
             Phase.PlaceTargetTile,
             Phase.Hanging,
             -> { label -> !hasTileAtLabel(label) }
@@ -421,9 +417,10 @@ class RobotImpl(node: Node) :
      * Checks whether the robot is at a border of an overhang component where a tile can safely be
      * removed.
      */
-    private fun isAtOverhangBorder(): Boolean = isAtBorder { label ->
-        labelIsTarget(label) || !hasTileAtLabel(label)
-    }
+    private fun isAtOverhangBorder(): Boolean =
+        isAtBorder { label ->
+            labelIsTarget(label) || !hasTileAtLabel(label)
+        }
 
     /**
      * Helper function
@@ -432,9 +429,7 @@ class RobotImpl(node: Node) :
      * component of demand nodes where a tile can safely be placed.
      */
     private fun isAtDemandBorder(): Boolean =
-        isOnTarget() &&
-            !isOnTile() &&
-            hasTargetTileNbr() &&
+        isOnTarget() && !isOnTile() && hasTargetTileNbr() &&
             isAtBorder { label -> !(hasTileAtLabel(label) && labelIsTarget(label)) }
 
     /**
@@ -446,10 +441,10 @@ class RobotImpl(node: Node) :
     private fun isAtBorder(isLabelBoundary: (Int) -> Boolean): Boolean {
         val boundaryLabels = labels.filter(isLabelBoundary)
 
-        if (boundaryLabels.size == 6) {
-            return true
+        return if (boundaryLabels.size == 6) {
+            true
+        } else {
+            boundaryLabels.filterNot { label -> (label + 1).mod(6) in boundaryLabels }.size == 1
         }
-
-        return boundaryLabels.filter { label -> (label + 1).mod(6) !in boundaryLabels }.size == 1
     }
 }

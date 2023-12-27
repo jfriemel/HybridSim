@@ -1,4 +1,7 @@
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
@@ -78,14 +81,12 @@ class RobotImpl(node: Node, orientation: Int) :
      * Exit phases: [Phase.MoveLineNorthWest] [Phase.MoveLineSouth] [Phase.MoveTile]
      */
     private fun findTile() {
-        tilesToSides = tilesToSides || intArrayOf(1, 2, 4, 5).any { label -> hasTileAtLabel(label) }
+        tilesToSides = tilesToSides || intArrayOf(1, 2, 4, 5).any(::hasTileAtLabel)
         containsTarget = containsTarget || isOnTarget()
-        intArrayOf(5, 4, 0)
-            .firstOrNull { label -> hasTileAtLabel(label) }
-            ?.let { label ->
-                moveToLabel(label)
-                return
-            }
+        intArrayOf(5, 4, 0).firstOrNull(::hasTileAtLabel)?.let { label ->
+            moveToLabel(label)
+            return
+        }
 
         if (!tilesToSides) {
             phase = if (containsTarget) Phase.MoveLineSouth else Phase.MoveLineNorthWest

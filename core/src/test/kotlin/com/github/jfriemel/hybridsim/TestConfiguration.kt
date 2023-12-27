@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test
 
 /** Test [Configuration] functionality. */
 class TestConfiguration {
-
     @BeforeEach
     fun init() {
         Configuration.clear()

@@ -4,7 +4,6 @@ import kotlin.math.min
 fun getGenerator(): Generator = GeneratorImpl()
 
 class GeneratorImpl : Generator() {
-
     override fun generate(
         numTiles: Int,
         numRobots: Int,
@@ -70,7 +69,7 @@ class GeneratorImpl : Generator() {
             // Overhang tiles
             val overhangCandidates =
                 descriptor.tileNodes
-                    .flatMap { node -> node.neighbors() }
+                    .flatMap(Node::neighbors)
                     .minus(descriptor.targetNodes)
                     .toMutableSet()
             repeat(min(numOverhang, numTiles - 1)) {
@@ -110,7 +109,7 @@ class GeneratorImpl : Generator() {
             // Add n/2 tiles, end up with n tiles, allow tiles to close holes
             val closingTileCandidates =
                 descriptor.tileNodes
-                    .flatMap { node -> node.neighbors() }
+                    .flatMap(Node::neighbors)
                     .minus(descriptor.tileNodes)
                     .toMutableSet()
             if (closingTileCandidates.isEmpty()) {
@@ -135,9 +134,12 @@ class GeneratorImpl : Generator() {
         return descriptor
     }
 
-    private fun isValidCandidate(candidate: Node, nodeSet: Set<Node>): Boolean {
-        val otherDirs = (0..5).filter { dir -> candidate.nodeInDir(dir) !in nodeSet }
+    private fun isValidCandidate(
+        candidate: Node,
+        nodeSet: Set<Node>,
+    ): Boolean {
+        val otherDirs = (0..5).filterNot { dir -> candidate.nodeInDir(dir) in nodeSet }
         return otherDirs.size == 6 ||
-            otherDirs.filter { label -> (label + 1).mod(6) !in otherDirs }.size == 1
+            otherDirs.filterNot { label -> (label + 1).mod(6) in otherDirs }.size == 1
     }
 }

@@ -55,10 +55,10 @@ class MainGUI(private val args: GUIArguments) : KtxGame<KtxScreen>() {
         Gdx.input.inputProcessor = inputMultiplexer
 
         // Load algorithm
-        args.algFile?.let { file -> AlgorithmLoader.loadAlgorithm(file) }
+        args.algFile?.let(AlgorithmLoader::loadAlgorithm)
 
         // Load generator
-        args.genFile?.let { file -> GeneratorLoader.loadGenerator(file) }
+        args.genFile?.let(GeneratorLoader::loadGenerator)
 
         // Load configuration or generate random configuration
         args.configFile?.let { file -> Configuration.loadConfiguration(file.readText()) }

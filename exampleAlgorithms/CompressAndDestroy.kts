@@ -5,7 +5,10 @@
  */
 import com.github.jfriemel.hybridsim.system.Configuration
 
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
@@ -58,14 +61,10 @@ class RobotImpl(node: Node, orientation: Int) :
      * Exit phase: [Phase.SearchAndDestroy]
      */
     private fun initialize() {
-        labels.forEach { label ->
-            if (!hasTileAtLabel(label)) {
-                outerLabel = label
-                phase = Phase.SearchAndDestroy
-                return
-            }
-        }
-        moveToLabel(0)
+        labels.firstOrNull { label -> !hasTileAtLabel(label) }?.let { label ->
+            outerLabel = label
+            phase = Phase.SearchAndDestroy
+        } ?: moveToLabel(0)
     }
 
     /**
@@ -84,8 +83,7 @@ class RobotImpl(node: Node, orientation: Int) :
             return
         }
 
-        val moveLabel =
-            (1..6).map { (outerLabel + it).mod(6) }.firstOrNull { label -> hasTileAtLabel(label) }
+        val moveLabel = (1..6).map { (outerLabel + it).mod(6) }.firstOrNull(::hasTileAtLabel)
         if (moveLabel == null) {
             phase = Phase.Finished
             return

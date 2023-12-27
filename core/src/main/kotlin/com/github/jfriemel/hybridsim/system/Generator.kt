@@ -5,7 +5,6 @@ import kotlin.math.ceil
 import kotlin.math.min
 
 open class Generator {
-
     /**
      * Generates a [Configuration] with [numTiles] tiles, [numRobots] robots, and [numOverhang]
      * overhangs. Does not generate target nodes if [numOverhang] is negative. You can write and
@@ -78,7 +77,7 @@ open class Generator {
             // Overhang tiles
             val overhangCandidates =
                 descriptor.tileNodes
-                    .flatMap { node -> node.neighbors() }
+                    .flatMap(Node::neighbors)
                     .minus(descriptor.targetNodes)
                     .toMutableSet()
             repeat(min(numOverhang, numTiles - 1)) {
@@ -118,7 +117,7 @@ open class Generator {
             // Add n/2 tiles, end up with n tiles, allow tiles to close holes
             val closingTileCandidates =
                 descriptor.tileNodes
-                    .flatMap { node -> node.neighbors() }
+                    .flatMap(Node::neighbors)
                     .minus(descriptor.tileNodes)
                     .toMutableSet()
             if (closingTileCandidates.isEmpty()) {
@@ -143,9 +142,12 @@ open class Generator {
         return descriptor
     }
 
-    private fun isValidCandidate(candidate: Node, nodeSet: Set<Node>): Boolean {
-        val otherDirs = (0..5).filter { dir -> candidate.nodeInDir(dir) !in nodeSet }
+    private fun isValidCandidate(
+        candidate: Node,
+        nodeSet: Set<Node>,
+    ): Boolean {
+        val otherDirs = (0..5).filterNot { dir -> candidate.nodeInDir(dir) in nodeSet }
         return otherDirs.size == 6 ||
-            otherDirs.filter { label -> (label + 1).mod(6) !in otherDirs }.size == 1
+            otherDirs.filterNot { label -> (label + 1).mod(6) in otherDirs }.size == 1
     }
 }

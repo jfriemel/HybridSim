@@ -48,7 +48,6 @@ private val buttonColorToggled = Color.ROYAL
 private val buttonColorDisabled = Color(1f, 1f, 1f, 0.5f)
 
 class Menu(batch: Batch) {
-
     var screen: SimScreen? = null
 
     // When active, tiles/robots/target nodes can be added/removed by mouse clicks
@@ -358,7 +357,10 @@ class Menu(batch: Batch) {
      * Called when the window is resized to ensure that the menu remains at the right-hand side of
      * the screen.
      */
-    fun resize(width: Int, height: Int) {
+    fun resize(
+        width: Int,
+        height: Int,
+    ) {
         menuStage.viewport.update(width, height, true)
         menuStage.actors.get(0).setPosition((width - BUTTON_WIDTH) / 2f - 6f, 0f)
     }
@@ -476,7 +478,10 @@ class Menu(batch: Batch) {
      * Opens a file selector window, [filter] specifies which file endings are allowed. Returns the
      * selected [File] or null if no file was selected.
      */
-    private fun getFile(filter: FileNameExtensionFilter, save: Boolean = false): File? {
+    private fun getFile(
+        filter: FileNameExtensionFilter,
+        save: Boolean = false,
+    ): File? {
         val fileChooser = JFileChooser()
         fileChooser.fileFilter = filter
         fileChooser.currentDirectory = File(System.getProperty("user.dir"))

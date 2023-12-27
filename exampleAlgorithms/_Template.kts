@@ -30,7 +30,10 @@ implementations) as its seed can be specified using a command-line argument (--s
  * This function must remain in your script (although you may change the implementation to fit your
  * needs).
  */
-fun getRobot(node: Node, orientation: Int): Robot {
+fun getRobot(
+    node: Node,
+    orientation: Int,
+): Robot {
     return RobotImpl(node, orientation)
 }
 
