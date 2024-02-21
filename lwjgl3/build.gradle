@@ -17,6 +17,7 @@ application {
 
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+  implementation "com.badlogicgames.gdx:gdx-lwjgl3-glfw-awt-macos:$gdxVersion"
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   implementation "com.github.ajalt.clikt:clikt:$cliktVersion"
   implementation project(':core')
@@ -27,11 +28,6 @@ def os = System.properties['os.name'].toString().toLowerCase()
 run {
   workingDir = rootProject.file('assets').path
   setIgnoreExitValue(true)
-
-  if (os.contains('mac')) {
-    // Required to run LWJGL3 Java apps on MacOS
-    jvmArgs += "-XstartOnFirstThread"
-  }
 }
 
 kotlin {
@@ -89,7 +85,7 @@ runtime {
     } else if (os.contains('nix') || os.contains('nux') || os.contains('bsd')) {
       imageOptions = ["--icon", "icons/logo.png"]
     } else if (os.contains('mac')) {
-      imageOptions = ["--icon", "icons/logo.icns", "--java-options", "\"-XstartOnFirstThread\""]
+      imageOptions = ["--icon", "icons/logo.icns"]
     }
   }
 }

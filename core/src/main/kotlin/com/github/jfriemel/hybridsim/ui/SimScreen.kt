@@ -72,6 +72,9 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
     private var width = 0
     private var height = 0
 
+    // Keep track of monitor, update frame rate if monitor changes
+    private var monitor = Gdx.graphics.monitor
+
     // How much the map moves per frame, only relevant when arrow keys are pressed
     var xMomentum = 0
     var yMomentum = 0
@@ -114,6 +117,12 @@ class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
         height: Int,
     ) {
         logger.debug { "Resized window: width = $width, height = $height" }
+
+        // Update frame rate when switching monitors
+        if (Gdx.graphics.monitor != monitor) {
+            monitor = Gdx.graphics.monitor
+            Gdx.graphics.setForegroundFPS(Gdx.graphics.displayMode.refreshRate)
+        }
 
         // Update viewport and move to maintain center node
         viewport.update(width, height, true)
