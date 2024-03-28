@@ -1,7 +1,7 @@
 buildscript {
   // Dependency versions
   ext.badassRuntimeVersion="1.13.1"
-  ext.cliktVersion="4.2.2"
+  ext.cliktVersion="4.3.0"
   ext.gdxVersion="1.12.1"
   ext.jUnitPlatformVersion="1.10.2"
   ext.jUnitVersion="5.10.2"
