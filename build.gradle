@@ -6,7 +6,7 @@ buildscript {
   ext.jUnitPlatformVersion="1.10.3"
   ext.jUnitVersion="5.10.3"
   ext.klaxonVersion="5.6"
-  ext.kotlinCsvVersion="1.9.3"
+  ext.kotlinCsvVersion="1.10.0"
   ext.kotlinVersion="2.0.0"
   ext.kotlinxCoroutinesVersion="1.8.1"
   ext.ktxVersion="1.12.1-rc1"
