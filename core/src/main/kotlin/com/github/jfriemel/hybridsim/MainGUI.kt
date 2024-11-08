@@ -32,7 +32,9 @@ data class GUIArguments(
     val numOverhang: Int,
 )
 
-class MainGUI(private val args: GUIArguments) : KtxGame<KtxScreen>() {
+class MainGUI(
+    private val args: GUIArguments,
+) : KtxGame<KtxScreen>() {
     override fun create() {
         // Enable logging
         Gdx.app.logLevel = Application.LOG_DEBUG

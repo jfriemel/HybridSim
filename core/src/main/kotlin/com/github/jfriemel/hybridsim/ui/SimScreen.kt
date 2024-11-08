@@ -20,7 +20,10 @@ private val logger = logger<SimScreen>()
 
 private const val INITIAL_ZOOM = 16f // Reasonable initial zoom level
 
-class SimScreen(private val batch: Batch, private val menu: Menu) : KtxScreen {
+class SimScreen(
+    private val batch: Batch,
+    private val menu: Menu,
+) : KtxScreen {
     // Squeeze factor to make the triangles equilateral (the texture is stretched horizontally)
     private val xScale = sqrt(3f) / 2f
 

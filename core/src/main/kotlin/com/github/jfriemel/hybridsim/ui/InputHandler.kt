@@ -16,7 +16,10 @@ import java.time.LocalDateTime
 
 private val logger = logger<InputHandler>()
 
-class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxInputAdapter {
+class InputHandler(
+    private val screen: SimScreen,
+    private val menu: Menu,
+) : KtxInputAdapter {
     private var mousePressed = false
     private var mouseX = 0
     private var mouseY = 0
@@ -65,7 +68,12 @@ class InputHandler(private val screen: SimScreen, private val menu: Menu) : KtxI
 
             Input.Keys.F2 -> { // Take a screenshot
                 try {
-                    val time = LocalDateTime.now().toString().split(".")[0].replace(':', '-')
+                    val time =
+                        LocalDateTime
+                            .now()
+                            .toString()
+                            .split(".")[0]
+                            .replace(':', '-')
                     val path = Paths.get(System.getProperty("user.dir"), "screenshots", "$time.png")
                     takeScreenshot(FileHandle(path.toFile()))
                     logger.debug { "Screenshot: $path" }

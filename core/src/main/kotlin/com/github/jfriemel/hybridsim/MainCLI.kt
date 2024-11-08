@@ -21,7 +21,9 @@ data class CLIArguments(
     val outputFile: File?,
 )
 
-class MainCLI(private val args: CLIArguments) {
+class MainCLI(
+    private val args: CLIArguments,
+) {
     fun main() {
         if (
             args.algFile == null ||
@@ -61,7 +63,10 @@ class MainCLI(private val args: CLIArguments) {
                 Configuration.loadConfiguration(configJson)
                 val n = Configuration.tiles.keys.size
                 val k = Configuration.robots.keys.size
-                val m = Configuration.tiles.keys.minus(Configuration.targetNodes).size
+                val m =
+                    Configuration.tiles.keys
+                        .minus(Configuration.targetNodes)
+                        .size
                 singleRun(id, n, k, m, args.limit, args.outputFile)
             }
             return
@@ -70,18 +75,23 @@ class MainCLI(private val args: CLIArguments) {
         // Run algorithm on all configurations in specified configuration directory
         var id = args.startID
         if (args.configDir != null) {
-            args.configDir.listFiles()?.filter { file ->
-                file.toString().endsWith(".json")
-            }?.forEach { file ->
-                val configJson = file.readText()
-                repeat(args.numRuns) {
-                    Configuration.loadConfiguration(configJson)
-                    val n = Configuration.tiles.keys.size
-                    val k = Configuration.robots.keys.size
-                    val m = Configuration.tiles.keys.minus(Configuration.targetNodes).size
-                    singleRun(id++, n, k, m, args.limit, args.outputFile)
+            args.configDir
+                .listFiles()
+                ?.filter { file ->
+                    file.toString().endsWith(".json")
+                }?.forEach { file ->
+                    val configJson = file.readText()
+                    repeat(args.numRuns) {
+                        Configuration.loadConfiguration(configJson)
+                        val n = Configuration.tiles.keys.size
+                        val k = Configuration.robots.keys.size
+                        val m =
+                            Configuration.tiles.keys
+                                .minus(Configuration.targetNodes)
+                                .size
+                        singleRun(id++, n, k, m, args.limit, args.outputFile)
+                    }
                 }
-            }
             return
         }
 
