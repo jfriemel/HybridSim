@@ -20,7 +20,8 @@ import kotlin.random.Random
 fun main(args: Array<String>) {
     // MacOS compatibility
     if (SharedLibraryLoader.os == Os.MacOsX) {
-        org.lwjgl.system.Configuration.GLFW_LIBRARY_NAME.set("glfw_async")
+        org.lwjgl.system.Configuration.GLFW_LIBRARY_NAME
+            .set("glfw_async")
     }
 
     Main().main(args)

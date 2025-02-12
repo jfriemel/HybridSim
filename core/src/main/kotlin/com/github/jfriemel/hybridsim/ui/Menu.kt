@@ -11,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
+import com.badlogic.gdx.utils.Os
+import com.badlogic.gdx.utils.SharedLibraryLoader
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
@@ -47,7 +49,9 @@ private val buttonColorDefault = Color.WHITE
 private val buttonColorToggled = Color.ROYAL
 private val buttonColorDisabled = Color(1f, 1f, 1f, 0.5f)
 
-class Menu(batch: Batch) {
+class Menu(
+    batch: Batch,
+) {
     var screen: SimScreen? = null
 
     // When active, tiles/robots/target nodes can be added/removed by mouse clicks
@@ -230,7 +234,11 @@ class Menu(batch: Batch) {
 
     init {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+            if (SharedLibraryLoader.os == Os.MacOsX) {
+                logger.error { "File selection currently not supported on MacOS!" }
+            } else {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+            }
         } catch (e: Exception) {
             logger.error { "Could not set UI look to system look" }
             logger.error { e.toString() }
@@ -315,12 +323,16 @@ class Menu(batch: Batch) {
     fun draw() {
         if (active) {
             // Enable / disable file chooser buttons
-            if (Gdx.graphics.isFullscreen && fileChooserButtons.any { it.isTouchable }) {
+            if ((Gdx.graphics.isFullscreen || SharedLibraryLoader.os == Os.MacOsX) &&
+                fileChooserButtons.any { it.isTouchable }
+            ) {
                 fileChooserButtons.forEach { button ->
                     button.color = buttonColorDisabled
                     button.touchable = Touchable.disabled
                 }
-            } else if (!Gdx.graphics.isFullscreen && fileChooserButtons.any { !it.isTouchable }) {
+            } else if ((!Gdx.graphics.isFullscreen && SharedLibraryLoader.os != Os.MacOsX) &&
+                fileChooserButtons.any { !it.isTouchable }
+            ) {
                 fileChooserButtons.forEach { button ->
                     button.color = buttonColorDefault
                     button.touchable = Touchable.enabled
@@ -482,6 +494,10 @@ class Menu(batch: Batch) {
         filter: FileNameExtensionFilter,
         save: Boolean = false,
     ): File? {
+        if (SharedLibraryLoader.os == Os.MacOsX) {
+            logger.error { "File selection currently not supported on MacOS!" }
+            return null
+        }
         val fileChooser = JFileChooser()
         fileChooser.fileFilter = filter
         fileChooser.currentDirectory = File(System.getProperty("user.dir"))
