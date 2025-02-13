@@ -384,7 +384,7 @@ class Menu(
     fun saveConfiguration(prettyPrint: Boolean) {
         if (Gdx.graphics.isFullscreen) return
 
-        var configFile = getFile(jsonFileName, jsonFileExtension, true) ?: return
+        var configFile = getFile(jsonFileName, jsonFileExtension) ?: return
         if (configFile.extension != "json") {
             configFile = File(configFile.absolutePath.plus(".json"))
         }
@@ -477,23 +477,14 @@ class Menu(
     private fun getFile(
         fileName: String,
         fileExtension: String,
-        save: Boolean = false,
     ): File? =
         runBlocking {
-            if (save) {
-                FileKit.saveFile(
-                    baseName = "configuration",
-                    extension = fileExtension,
-                    initialDirectory = System.getProperty("user.dir"),
-                    bytes = fileName.toByteArray(),
-                )
-            } else {
-                FileKit.pickFile(
+            FileKit
+                .pickFile(
                     type = PickerType.File(extensions = listOf(fileExtension)),
                     mode = PickerMode.Single,
                     title = fileName,
                     initialDirectory = System.getProperty("user.dir"),
-                )
-            }
-        }?.file
+                )?.file
+        }
 }
