@@ -11,8 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
-import com.badlogic.gdx.utils.Os
-import com.badlogic.gdx.utils.SharedLibraryLoader
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
@@ -24,6 +22,10 @@ import com.kotcrab.vis.ui.widget.VisCheckBox
 import com.kotcrab.vis.ui.widget.VisImage
 import com.kotcrab.vis.ui.widget.VisSlider
 import com.kotcrab.vis.ui.widget.VisTextField
+import io.github.vinceglb.filekit.core.FileKit
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
+import kotlinx.coroutines.runBlocking
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
@@ -31,10 +33,6 @@ import ktx.log.logger
 import ktx.scene2d.actors
 import ktx.scene2d.vis.*
 import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.JFrame
-import javax.swing.UIManager
-import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.math.cbrt
 import kotlin.math.max
 import kotlin.math.pow
@@ -104,11 +102,12 @@ class Menu(
     private var redoButtonImage: VisImage
 
     // File extension filters for the files used by the simulator
-    private val jsonFilter =
-        FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
-    private val algoFilter = FileNameExtensionFilter("HybridSim algorithm scripts (.kts)", "kts")
-    private val genFilter =
-        FileNameExtensionFilter("HybridSim configuration generator scripts (.kts)", "kts")
+    private val jsonFileName = "HybridSim configuration file (.json)"
+    private val jsonFileExtension = "json"
+    private val algoFileName = "HybridSim algorithm script (.kts)"
+    private val algoFileExtension = "kts"
+    private val genFileName = "HybridSim configuration generator script (.kts)"
+    private val genFileExtension = "kts"
 
     val menuStage =
         Stage(ScreenViewport(OrthographicCamera()), batch).apply {
@@ -233,17 +232,6 @@ class Menu(
     private val toggleButtons = arrayOf(buttonPutTiles, buttonPutRobots, buttonSelectTarget)
 
     init {
-        try {
-            if (SharedLibraryLoader.os == Os.MacOsX) {
-                logger.error { "File selection currently not supported on MacOS!" }
-            } else {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-            }
-        } catch (e: Exception) {
-            logger.error { "Could not set UI look to system look" }
-            logger.error { e.toString() }
-            logger.error { e.stackTraceToString() }
-        }
         buttonLoadConfig.onClick { if (active) loadConfiguration() }
         buttonSaveConfig.onClick {
             if (active) saveConfiguration(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
@@ -323,16 +311,12 @@ class Menu(
     fun draw() {
         if (active) {
             // Enable / disable file chooser buttons
-            if ((Gdx.graphics.isFullscreen || SharedLibraryLoader.os == Os.MacOsX) &&
-                fileChooserButtons.any { it.isTouchable }
-            ) {
+            if (Gdx.graphics.isFullscreen && fileChooserButtons.any { it.isTouchable }) {
                 fileChooserButtons.forEach { button ->
                     button.color = buttonColorDisabled
                     button.touchable = Touchable.disabled
                 }
-            } else if ((!Gdx.graphics.isFullscreen && SharedLibraryLoader.os != Os.MacOsX) &&
-                fileChooserButtons.any { !it.isTouchable }
-            ) {
+            } else if (!Gdx.graphics.isFullscreen && fileChooserButtons.any { !it.isTouchable }) {
                 fileChooserButtons.forEach { button ->
                     button.color = buttonColorDefault
                     button.touchable = Touchable.enabled
@@ -384,7 +368,7 @@ class Menu(
     fun loadConfiguration() {
         if (Gdx.graphics.isFullscreen) return
 
-        val configFile = getFile(jsonFilter) ?: return
+        val configFile = getFile(jsonFileName, jsonFileExtension) ?: return
         if (!configFile.exists()) {
             logger.error { "Cannot load configuration, selected file $configFile does not exist" }
             return
@@ -400,7 +384,7 @@ class Menu(
     fun saveConfiguration(prettyPrint: Boolean) {
         if (Gdx.graphics.isFullscreen) return
 
-        var configFile = getFile(jsonFilter, true) ?: return
+        var configFile = getFile(jsonFileName, jsonFileExtension, true) ?: return
         if (configFile.extension != "json") {
             configFile = File(configFile.absolutePath.plus(".json"))
         }
@@ -414,7 +398,7 @@ class Menu(
     fun loadAlgorithm() {
         if (Gdx.graphics.isFullscreen) return
 
-        val algorithmFile = getFile(algoFilter) ?: return
+        val algorithmFile = getFile(algoFileName, algoFileExtension) ?: return
         if (!algorithmFile.exists()) {
             logger.error { "Cannot load algorithm, selected file $algorithmFile does not exist" }
             return
@@ -429,7 +413,7 @@ class Menu(
     fun loadGenerator() {
         if (Gdx.graphics.isFullscreen) return
 
-        val generatorFile = getFile(genFilter) ?: return
+        val generatorFile = getFile(genFileName, genFileExtension) ?: return
         if (!generatorFile.exists()) {
             logger.error { "Cannot load generator, selected file $generatorFile does not exist" }
             return
@@ -487,41 +471,29 @@ class Menu(
     }
 
     /**
-     * Opens a file selector window, [filter] specifies which file endings are allowed. Returns the
-     * selected [File] or null if no file was selected.
+     * Opens a file selector window. [fileName] and [fileExtension] specify which file types are
+     * allowed. Returns the selected [File] or null if no file was selected.
      */
     private fun getFile(
-        filter: FileNameExtensionFilter,
+        fileName: String,
+        fileExtension: String,
         save: Boolean = false,
-    ): File? {
-        if (SharedLibraryLoader.os == Os.MacOsX) {
-            logger.error { "File selection currently not supported on MacOS!" }
-            return null
-        }
-        val fileChooser = JFileChooser()
-        fileChooser.fileFilter = filter
-        fileChooser.currentDirectory = File(System.getProperty("user.dir"))
-
-        // Make sure the file chooser is always visible by creating a proxy frame
-        val f = JFrame()
-        f.isVisible = true
-        f.toFront()
-        f.isAlwaysOnTop = true
-        f.isVisible = false
-
-        // Open either "Open" or "Save" dialog
-        val choice =
+    ): File? =
+        runBlocking {
             if (save) {
-                fileChooser.showSaveDialog(f)
+                FileKit.saveFile(
+                    baseName = "configuration",
+                    extension = fileExtension,
+                    initialDirectory = System.getProperty("user.dir"),
+                    bytes = fileName.toByteArray(),
+                )
             } else {
-                fileChooser.showOpenDialog(f)
+                FileKit.pickFile(
+                    type = PickerType.File(extensions = listOf(fileExtension)),
+                    mode = PickerMode.Single,
+                    title = fileName,
+                    initialDirectory = System.getProperty("user.dir"),
+                )
             }
-        f.dispose()
-
-        return if (choice == JFileChooser.APPROVE_OPTION) {
-            fileChooser.selectedFile
-        } else {
-            null
-        }
-    }
+        }?.file
 }

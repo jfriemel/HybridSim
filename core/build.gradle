@@ -15,6 +15,7 @@ dependencies {
   implementation "com.beust:klaxon:$klaxonVersion"
   implementation "com.github.doyaaaaaken:kotlin-csv-jvm:$kotlinCsvVersion"
   implementation "com.github.tommyettinger:textratypist:$textraTypistVersion"
+  implementation "io.github.vinceglb:filekit-core:$fileKitVersion"
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
   implementation "org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion"
 
