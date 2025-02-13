@@ -2,6 +2,8 @@ package com.github.jfriemel.hybridsim
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
+import com.badlogic.gdx.utils.Os
+import com.badlogic.gdx.utils.SharedLibraryLoader
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.parameters.options.default
@@ -15,7 +17,15 @@ import com.github.ajalt.clikt.parameters.types.restrictTo
 import com.github.jfriemel.hybridsim.system.Commons
 import kotlin.random.Random
 
-fun main(args: Array<String>) = Main().main(args)
+fun main(args: Array<String>) {
+    // MacOS compatibility
+    if (SharedLibraryLoader.os == Os.MacOsX) {
+        org.lwjgl.system.Configuration.GLFW_LIBRARY_NAME
+            .set("glfw_async")
+    }
+
+    Main().main(args)
+}
 
 /** Launches either the desktop (LWJGL3) or the CLI application. */
 class Main : CliktCommand() {

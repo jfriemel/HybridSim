@@ -11,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
+import com.badlogic.gdx.utils.Os
+import com.badlogic.gdx.utils.SharedLibraryLoader
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
@@ -22,6 +24,10 @@ import com.kotcrab.vis.ui.widget.VisCheckBox
 import com.kotcrab.vis.ui.widget.VisImage
 import com.kotcrab.vis.ui.widget.VisSlider
 import com.kotcrab.vis.ui.widget.VisTextField
+import io.github.vinceglb.filekit.core.FileKit
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
+import kotlinx.coroutines.runBlocking
 import ktx.actors.onChange
 import ktx.actors.onClick
 import ktx.actors.onKeyUp
@@ -29,10 +35,6 @@ import ktx.log.logger
 import ktx.scene2d.actors
 import ktx.scene2d.vis.*
 import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.JFrame
-import javax.swing.UIManager
-import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.math.cbrt
 import kotlin.math.max
 import kotlin.math.pow
@@ -47,7 +49,9 @@ private val buttonColorDefault = Color.WHITE
 private val buttonColorToggled = Color.ROYAL
 private val buttonColorDisabled = Color(1f, 1f, 1f, 0.5f)
 
-class Menu(batch: Batch) {
+class Menu(
+    batch: Batch,
+) {
     var screen: SimScreen? = null
 
     // When active, tiles/robots/target nodes can be added/removed by mouse clicks
@@ -100,11 +104,12 @@ class Menu(batch: Batch) {
     private var redoButtonImage: VisImage
 
     // File extension filters for the files used by the simulator
-    private val jsonFilter =
-        FileNameExtensionFilter("HybridSim configuration files (.json)", "json")
-    private val algoFilter = FileNameExtensionFilter("HybridSim algorithm scripts (.kts)", "kts")
-    private val genFilter =
-        FileNameExtensionFilter("HybridSim configuration generator scripts (.kts)", "kts")
+    private val jsonFileName = "HybridSim configuration file (.json)"
+    private val jsonFileExtension = "json"
+    private val algoFileName = "HybridSim algorithm script (.kts)"
+    private val algoFileExtension = "kts"
+    private val genFileName = "HybridSim configuration generator script (.kts)"
+    private val genFileExtension = "kts"
 
     val menuStage =
         Stage(ScreenViewport(OrthographicCamera()), batch).apply {
@@ -229,13 +234,6 @@ class Menu(batch: Batch) {
     private val toggleButtons = arrayOf(buttonPutTiles, buttonPutRobots, buttonSelectTarget)
 
     init {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-        } catch (e: Exception) {
-            logger.error { "Could not set UI look to system look" }
-            logger.error { e.toString() }
-            logger.error { e.stackTraceToString() }
-        }
         buttonLoadConfig.onClick { if (active) loadConfiguration() }
         buttonSaveConfig.onClick {
             if (active) saveConfiguration(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
@@ -372,7 +370,7 @@ class Menu(batch: Batch) {
     fun loadConfiguration() {
         if (Gdx.graphics.isFullscreen) return
 
-        val configFile = getFile(jsonFilter) ?: return
+        val configFile = getFile(jsonFileName, jsonFileExtension) ?: return
         if (!configFile.exists()) {
             logger.error { "Cannot load configuration, selected file $configFile does not exist" }
             return
@@ -388,7 +386,7 @@ class Menu(batch: Batch) {
     fun saveConfiguration(prettyPrint: Boolean) {
         if (Gdx.graphics.isFullscreen) return
 
-        var configFile = getFile(jsonFilter, true) ?: return
+        var configFile = getFile(jsonFileName, jsonFileExtension, true) ?: return
         if (configFile.extension != "json") {
             configFile = File(configFile.absolutePath.plus(".json"))
         }
@@ -402,7 +400,7 @@ class Menu(batch: Batch) {
     fun loadAlgorithm() {
         if (Gdx.graphics.isFullscreen) return
 
-        val algorithmFile = getFile(algoFilter) ?: return
+        val algorithmFile = getFile(algoFileName, algoFileExtension) ?: return
         if (!algorithmFile.exists()) {
             logger.error { "Cannot load algorithm, selected file $algorithmFile does not exist" }
             return
@@ -417,7 +415,7 @@ class Menu(batch: Batch) {
     fun loadGenerator() {
         if (Gdx.graphics.isFullscreen) return
 
-        val generatorFile = getFile(genFilter) ?: return
+        val generatorFile = getFile(genFileName, genFileExtension) ?: return
         if (!generatorFile.exists()) {
             logger.error { "Cannot load generator, selected file $generatorFile does not exist" }
             return
@@ -475,37 +473,30 @@ class Menu(batch: Batch) {
     }
 
     /**
-     * Opens a file selector window, [filter] specifies which file endings are allowed. Returns the
-     * selected [File] or null if no file was selected.
+     * Opens a file selector window. [fileName] and [fileExtension] specify which file types are
+     * allowed. Returns the selected [File] or null if no file was selected.
      */
     private fun getFile(
-        filter: FileNameExtensionFilter,
+        fileName: String,
+        fileExtension: String,
         save: Boolean = false,
-    ): File? {
-        val fileChooser = JFileChooser()
-        fileChooser.fileFilter = filter
-        fileChooser.currentDirectory = File(System.getProperty("user.dir"))
-
-        // Make sure the file chooser is always visible by creating a proxy frame
-        val f = JFrame()
-        f.isVisible = true
-        f.toFront()
-        f.isAlwaysOnTop = true
-        f.isVisible = false
-
-        // Open either "Open" or "Save" dialog
-        val choice =
-            if (save) {
-                fileChooser.showSaveDialog(f)
+    ): File? =
+        runBlocking {
+            if (save && SharedLibraryLoader.os != Os.MacOsX) {
+                FileKit
+                    .saveFile(
+                        baseName = "configuration",
+                        extension = fileExtension,
+                        initialDirectory = System.getProperty("user.dir"),
+                    )
             } else {
-                fileChooser.showOpenDialog(f)
-            }
-        f.dispose()
-
-        return if (choice == JFileChooser.APPROVE_OPTION) {
-            fileChooser.selectedFile
-        } else {
-            null
+                FileKit
+                    .pickFile(
+                        type = PickerType.File(extensions = listOf(fileExtension)),
+                        mode = PickerMode.Single,
+                        title = fileName,
+                        initialDirectory = System.getProperty("user.dir"),
+                    )
+            }?.file
         }
-    }
 }

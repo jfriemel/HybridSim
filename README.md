@@ -69,8 +69,7 @@ For a list of all accepted arguments with explanations, run HybridSim with
 
 ## Known Issues
 
-- On MacOS, resizing the window or moving it to a different monitor may
-  result in a crash.
+- On some platforms, configurations can only be saved to existing file paths.
 
 
 ## References
@@ -83,8 +82,7 @@ Computing*, pages 615–681.
 https://doi.org/10.1007/978-3-030-11072-7_22.
 
 [2] Robert Gmyr, Kristian Hinnenthal, Irina Kostitsyna, Fabian Kuhn, Dorian 
-Rudolph, Christian Scheideler, Thim Strothmann (2018).
+Rudolph, Christian Scheideler, Thim Strothmann (2020).
 Forming Tile Shapes with Simple Robots.
-In: *DNA Computing and Molecular Programming, 24th International Conference 
-(DNA 24)*, pages 122–138.
-https://doi.org/10.1007/978-3-030-00030-1_8.
+In: *Natural Computing*, 19(2), pages 375–390.
+https://doi.org/10.1007/s11047-019-09774-2.
