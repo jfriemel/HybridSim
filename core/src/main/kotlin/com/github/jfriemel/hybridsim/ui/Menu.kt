@@ -11,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
+import com.badlogic.gdx.utils.Os
+import com.badlogic.gdx.utils.SharedLibraryLoader
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.github.jfriemel.hybridsim.system.AlgorithmLoader
 import com.github.jfriemel.hybridsim.system.Configuration
@@ -384,7 +386,7 @@ class Menu(
     fun saveConfiguration(prettyPrint: Boolean) {
         if (Gdx.graphics.isFullscreen) return
 
-        var configFile = getFile(jsonFileName, jsonFileExtension) ?: return
+        var configFile = getFile(jsonFileName, jsonFileExtension, true) ?: return
         if (configFile.extension != "json") {
             configFile = File(configFile.absolutePath.plus(".json"))
         }
@@ -477,14 +479,24 @@ class Menu(
     private fun getFile(
         fileName: String,
         fileExtension: String,
+        save: Boolean = false,
     ): File? =
         runBlocking {
-            FileKit
-                .pickFile(
-                    type = PickerType.File(extensions = listOf(fileExtension)),
-                    mode = PickerMode.Single,
-                    title = fileName,
-                    initialDirectory = System.getProperty("user.dir"),
-                )?.file
+            if (save && SharedLibraryLoader.os != Os.MacOsX) {
+                FileKit
+                    .saveFile(
+                        baseName = "configuration",
+                        extension = fileExtension,
+                        initialDirectory = System.getProperty("user.dir"),
+                    )
+            } else {
+                FileKit
+                    .pickFile(
+                        type = PickerType.File(extensions = listOf(fileExtension)),
+                        mode = PickerMode.Single,
+                        title = fileName,
+                        initialDirectory = System.getProperty("user.dir"),
+                    )
+            }?.file
         }
 }
