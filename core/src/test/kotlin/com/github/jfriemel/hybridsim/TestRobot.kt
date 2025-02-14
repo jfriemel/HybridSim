@@ -18,7 +18,10 @@ private val robotNode = Node(13, 27)
 private val tileRobotNode = Node(69, 46)
 
 /** Implementation of [Robot] for testing [Robot.triggerActivate]. */
-private class RobotTestImpl(node: Node, orientation: Int) : Robot(node, orientation) {
+private class RobotTestImpl(
+    node: Node,
+    orientation: Int,
+) : Robot(node, orientation) {
     override fun activate() {
         moveToLabel(3)
     }
@@ -201,7 +204,7 @@ class TestRobot {
     fun `cannot switch with non-existent robot neighbor`() {
         val robotNode = Node(744, -380)
         val robot = Robot(robotNode)
-        robot.labels.firstOrNull { label -> robot.hasTileAtLabel(label) }?.let {  } ?: println("no")
+        robot.labels.firstOrNull { label -> robot.hasTileAtLabel(label) }?.let { } ?: println("no")
         robot.labels.forEach { label ->
             Assertions.assertFalse(robot.switchWithRobotNbr(label))
             Assertions.assertEquals(robotNode, robot.node)

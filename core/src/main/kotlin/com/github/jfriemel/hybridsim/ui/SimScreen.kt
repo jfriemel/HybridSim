@@ -14,7 +14,11 @@ import com.github.jfriemel.hybridsim.system.Configuration
 import ktx.app.KtxScreen
 import ktx.graphics.use
 import ktx.log.logger
-import kotlin.math.*
+import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.round
+import kotlin.math.sqrt
 
 private val logger = logger<SimScreen>()
 

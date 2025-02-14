@@ -1,6 +1,9 @@
 package com.github.jfriemel.hybridsim.entities
 
-data class Node(val x: Int, val y: Int) {
+data class Node(
+    val x: Int,
+    val y: Int,
+) {
     /**
      * Finds and returns the [Node] in the given global direction [dir]. Directions start at N and
      * go clockwise: 0 = N, 1 = NE, 2 = SE, 3 = S, 4 = SW, 5 = NW.

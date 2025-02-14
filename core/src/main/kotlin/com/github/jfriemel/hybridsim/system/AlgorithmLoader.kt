@@ -43,8 +43,7 @@ object AlgorithmLoader {
                 "import com.github.jfriemel.hybridsim.entities.*; " +
                     "import com.github.jfriemel.hybridsim.system.Commons; " +
                     "import com.badlogic.gdx.graphics.Color",
-            )
-            .eval()
+            ).eval()
         engine.compile(script).eval()
 
         // Replace robots in the configuration with robots from the loaded script

@@ -33,7 +33,14 @@ import ktx.actors.onClick
 import ktx.actors.onKeyUp
 import ktx.log.logger
 import ktx.scene2d.actors
-import ktx.scene2d.vis.*
+import ktx.scene2d.vis.KVisTextButton
+import ktx.scene2d.vis.visCheckBox
+import ktx.scene2d.vis.visImage
+import ktx.scene2d.vis.visLabel
+import ktx.scene2d.vis.visSlider
+import ktx.scene2d.vis.visTable
+import ktx.scene2d.vis.visTextButton
+import ktx.scene2d.vis.visTextField
 import java.io.File
 import kotlin.math.cbrt
 import kotlin.math.max

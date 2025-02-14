@@ -7,8 +7,7 @@ import com.beust.klaxon.Json
 abstract class Entity(
     var node: Node,
     @Json(ignored = true) var sprite: Sprite? = null,
-) :
-    Cloneable {
+) : Cloneable {
     /** Called by the screen to draw the entity in the correct color. */
     open fun getColor(): Color = Color.WHITE
 

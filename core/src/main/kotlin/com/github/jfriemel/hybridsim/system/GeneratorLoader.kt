@@ -39,8 +39,7 @@ object GeneratorLoader {
                     "import com.github.jfriemel.hybridsim.system.Commons; " +
                     "import com.github.jfriemel.hybridsim.system.ConfigurationDescriptor; " +
                     "import com.github.jfriemel.hybridsim.system.Generator",
-            )
-            .eval()
+            ).eval()
         engine.compile(script).eval()
         Configuration.generator = (engine as Invocable).invokeFunction("getGenerator") as Generator
     }

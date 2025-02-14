@@ -7,8 +7,11 @@ import com.github.jfriemel.hybridsim.system.Configuration
 // Typically, no more than one pebble is allowed per tile; but, you know, future-proofing
 const val MAX_PEBBLES_TILE: Int = 1
 
-class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) :
-    Entity(node, sprite) {
+class Tile(
+    node: Node,
+    sprite: Sprite? = null,
+    private var numPebbles: Int = 0,
+) : Entity(node, sprite) {
     private var tileColor: Color? = null
 
     /**
@@ -16,8 +19,8 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
      * no target nodes exist, [colorDefault] is returned. If the tile is at a target node,
      * [colorTarget] is returned. If not, [colorOverhang] is returned.
      */
-    override fun getColor(): Color {
-        return if (tileColor != null) {
+    override fun getColor(): Color =
+        if (tileColor != null) {
             tileColor!!
         } else if (Configuration.targetNodes.isEmpty()) {
             colorDefault
@@ -26,7 +29,6 @@ class Tile(node: Node, sprite: Sprite? = null, private var numPebbles: Int = 0) 
         } else {
             colorOverhang
         }
-    }
 
     /** Sets [tileColor] to [color]. If [tileColor] is not null, the tile is drawn in that color. */
     fun setColor(color: Color?) {
