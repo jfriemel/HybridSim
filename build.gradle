@@ -4,7 +4,7 @@ buildscript {
   ext.cliktVersion="5.0.3"
   ext.fileKitVersion="0.8.8"
   ext.gdxVersion="1.13.1"
-  ext.jUnitPlatformVersion="1.11.4"
+  ext.jUnitPlatformVersion="1.12.2"
   ext.jUnitVersion="5.11.4"
   ext.klaxonVersion="5.6"
   ext.kotlinCsvVersion="1.10.0"
