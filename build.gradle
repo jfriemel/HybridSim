@@ -3,7 +3,7 @@ buildscript {
   ext.badassRuntimeVersion="1.13.1"
   ext.cliktVersion="5.0.3"
   ext.fileKitVersion="0.8.8"
-  ext.gdxVersion="1.13.1"
+  ext.gdxVersion="1.13.5"
   ext.jnaPlatformVersion="5.17.0"
   ext.jUnitPlatformVersion="1.13.3"
   ext.jUnitVersion="5.13.3"
