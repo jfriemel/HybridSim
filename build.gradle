@@ -12,7 +12,7 @@ buildscript {
   ext.kotlinVersion="2.2.0"
   ext.kotlinxCoroutinesVersion="1.10.2"
   ext.ktxVersion="1.13.1-rc1"
-  ext.textraTypistVersion="2.0.3"
+  ext.textraTypistVersion="2.1.0"
 
   repositories {
     mavenCentral()
