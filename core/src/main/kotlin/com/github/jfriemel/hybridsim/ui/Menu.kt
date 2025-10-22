@@ -24,9 +24,12 @@ import com.kotcrab.vis.ui.widget.VisCheckBox
 import com.kotcrab.vis.ui.widget.VisImage
 import com.kotcrab.vis.ui.widget.VisSlider
 import com.kotcrab.vis.ui.widget.VisTextField
-import io.github.vinceglb.filekit.core.FileKit
-import io.github.vinceglb.filekit.core.PickerMode
-import io.github.vinceglb.filekit.core.PickerType
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.openFilePicker
+import io.github.vinceglb.filekit.dialogs.openFileSaver
 import kotlinx.coroutines.runBlocking
 import ktx.actors.onChange
 import ktx.actors.onClick
@@ -491,19 +494,18 @@ class Menu(
         runBlocking {
             if (save && SharedLibraryLoader.os != Os.MacOsX) {
                 FileKit
-                    .saveFile(
-                        baseName = "configuration",
+                    .openFileSaver(
+                        suggestedName = "configuration",
                         extension = fileExtension,
-                        initialDirectory = System.getProperty("user.dir"),
+                        directory = PlatformFile(System.getProperty("user.dir")),
                     )
             } else {
-                FileKit
-                    .pickFile(
-                        type = PickerType.File(extensions = listOf(fileExtension)),
-                        mode = PickerMode.Single,
-                        title = fileName,
-                        initialDirectory = System.getProperty("user.dir"),
-                    )
+                FileKit.openFilePicker(
+                    FileKitType.File(extension = fileExtension),
+                    mode = FileKitMode.Single,
+                    title = fileName,
+                    directory = PlatformFile(System.getProperty("user.dir")),
+                )
             }?.file
         }
 }

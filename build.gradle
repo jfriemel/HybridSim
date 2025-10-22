@@ -2,20 +2,20 @@ buildscript {
   // Dependency versions
   ext.badassRuntimeVersion="1.13.1"
   ext.cliktVersion="5.0.3"
-  ext.fileKitVersion="0.8.8"
+  ext.fileKitVersion="0.12.0"
   ext.gdxVersion="1.13.1"
   ext.jnaPlatformVersion="5.17.0"
-  ext.jUnitPlatformVersion="1.13.3"
-  ext.jUnitVersion="5.13.3"
+  ext.jUnitVersion="6.0.0"
   ext.klaxonVersion="5.6"
   ext.kotlinCsvVersion="1.10.0"
-  ext.kotlinVersion="2.2.0"
+  ext.kotlinVersion="2.2.20"
   ext.kotlinxCoroutinesVersion="1.10.2"
   ext.ktxVersion="1.13.1-rc1"
-  ext.textraTypistVersion="2.0.3"
+  ext.textraTypistVersion="2.2.0"
 
   repositories {
     mavenCentral()
+    maven { url = 'https://maven.google.com'}
     maven { url = 'https://s01.oss.sonatype.org' }
     gradlePluginPortal()
   }
@@ -39,6 +39,7 @@ subprojects {
   ext.appName = 'HybridSim'
   repositories {
     mavenCentral()
+    maven { url = 'https://maven.google.com'}
     maven { url = 'https://s01.oss.sonatype.org' }
     gradlePluginPortal()
   }

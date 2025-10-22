@@ -15,7 +15,7 @@ dependencies {
   implementation "com.beust:klaxon:$klaxonVersion"
   implementation "com.github.doyaaaaaken:kotlin-csv-jvm:$kotlinCsvVersion"
   implementation "com.github.tommyettinger:textratypist:$textraTypistVersion"
-  implementation "io.github.vinceglb:filekit-core:$fileKitVersion"
+  implementation "io.github.vinceglb:filekit-dialogs:$fileKitVersion"
   implementation "net.java.dev.jna:jna-platform:$jnaPlatformVersion"
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
   implementation "org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion"
@@ -23,7 +23,7 @@ dependencies {
   runtimeOnly "org.jetbrains.kotlin:kotlin-scripting-jsr223:$kotlinVersion"
 
   testImplementation "org.junit.jupiter:junit-jupiter:$jUnitVersion"
-  testRuntimeOnly "org.junit.platform:junit-platform-launcher:$jUnitPlatformVersion"
+  testRuntimeOnly "org.junit.platform:junit-platform-launcher:$jUnitVersion"
 }
 
 kotlin {
